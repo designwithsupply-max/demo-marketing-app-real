@@ -10,8 +10,7 @@ export const Hero = () => {
   return (
     <section
       ref={elementRef as React.RefObject<HTMLElement>}
-      className="relative min-h-screen flex items-center pt-20 md:pt-24"
-    >
+      className="relative min-h-screen flex items-center pt-20 md:pt-24">
       <div
         className="absolute inset-0 z-0"
         style={{
@@ -31,6 +30,7 @@ export const Hero = () => {
             upload photos, custom design or videos, and book a free consultation.
           </p>
 
+          
           <div className="flex flex-col sm:flex-row gap-3 md:gap-4 mb-8 md:mb-12">
             <NavLink to="/wizard">
               <Button size="lg" variant="accent" className="text-base md:text-lg group w-full sm:w-auto">
