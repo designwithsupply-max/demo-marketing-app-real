@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,8 +12,13 @@ export const PromoPopup = () => {
     const [email, setEmail] = useState("");
     const [loading, setLoading] = useState(false);
     const [claimed, setClaimed] = useState(false);
+    const { pathname } = useLocation();
+    const isAdminRoute = pathname.startsWith("/admin");
 
     useEffect(() => {
+        // Only show the promo popup on customer-facing pages, never on admin.
+        if (isAdminRoute) return;
+
         const hasClaimed = localStorage.getItem("promo_claimed");
 
         if (!hasClaimed) {
@@ -21,7 +27,7 @@ export const PromoPopup = () => {
             }, 3000);
             return () => clearTimeout(timer);
         }
-    }, []);
+    }, [isAdminRoute]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();

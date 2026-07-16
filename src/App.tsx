@@ -54,10 +54,10 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <PromoPopup />
       <SubmissionSuccessPopup />
       <BrowserRouter>
         <ScrollToTop />
+        <PromoPopup />
         <SalesCaptain />
         <Routes>
           <Route path="/" element={<Index />} />
