@@ -30,7 +30,7 @@ export default function Contact() {
         method: "POST",
         headers: { "Content-Type": "application/json", Accept: "application/json" },
         body: JSON.stringify({
-          access_key: WEB3FORMS_KEY,
+          access_key: WEB3FORMS_KEY || "112bbef5-e6b7-4184-8c62-7bf8aed86085",
           subject: `New contact message from ${form.name}`,
           from_name: "Design & Supply Website",
           name: form.name,
