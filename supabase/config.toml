@@ -1,4 +1,10 @@
-project_id = "jhthxqgeqtflidyenxmx"
+project_id = "gsdlratvmhcqohtaihpr"
+
+# Public: the promo popup is submitted by anonymous visitors, so the OPTIONS
+# preflight arrives with no Authorization header and would be rejected before
+# the handler runs. The function validates the email itself.
+[functions.send-promo-code]
+verify_jwt = false
 
 [functions.cloudinary-images]
 verify_jwt = false

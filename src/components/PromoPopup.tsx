@@ -24,7 +24,7 @@ export const PromoPopup = () => {
         if (!hasClaimed) {
             const timer = setTimeout(() => {
                 setOpen(true);
-            }, 3000);
+            }, 10000);
             return () => clearTimeout(timer);
         }
     }, [isAdminRoute]);
@@ -35,14 +35,12 @@ export const PromoPopup = () => {
 
         setLoading(true);
         try {
-            const { error } = await supabase.auth.signInWithOtp({
-                email,
-                options: {
-                    emailRedirectTo: window.location.origin,
-                },
+            const { data, error } = await supabase.functions.invoke("send-promo-code", {
+                body: { email },
             });
 
             if (error) throw error;
+            if (data?.error) throw new Error(data.error);
 
             setClaimed(true);
             localStorage.setItem("promo_claimed", "true");
@@ -66,9 +64,9 @@ export const PromoPopup = () => {
                             Code Sent!
                         </h2>
                         <p className="text-sm text-brand-muted">
-                            We've sent a magic link and your promo code to <strong>{email}</strong>.
+                            We've sent your promo code to <strong>{email}</strong>.
                             <br />
-                            Please check your inbox to verify and claim your discount.
+                            Check your inbox to claim your free color upgrade.
                         </p>
                         <Button
                             onClick={() => setOpen(false)}
