@@ -10,14 +10,6 @@ import {
 } from "fabric";
 import { toast } from "sonner";
 import { Undo, Trash2, Pencil } from "lucide-react";
-import kSingleImg from "@/assets/layouts/kitchen-single.png";
-import kGalleyImg from "@/assets/layouts/kitchen-galley.png";
-import kLImg from "@/assets/layouts/kitchen-l.png";
-import kUImg from "@/assets/layouts/kitchen-u.png";
-import cDoubleImg from "@/assets/layouts/closet-double.png";
-import cUImg from "@/assets/layouts/closet-u.png";
-import cLImg from "@/assets/layouts/closet-l.png";
-import cReachImg from "@/assets/layouts/closet-reach.png";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 interface DrawingCanvasProps {
@@ -43,10 +35,11 @@ const MAX_WALLS = 7;
 /**
  * Predetermined layout templates, traced as simple lines from the reference
  * kitchen/closet layout diagrams. Each entry carries:
- *  - `path`: the wall outline drawn on the Fabric canvas (one wall per segment)
+ *  - `path`: the wall outline drawn on the Fabric canvas (one wall per segment).
+ *    The SAME path is rendered as the toolbar thumbnail (see LayoutThumb), so the
+ *    button always shows the exact shape that gets placed on the drawing.
  *  - `labels`: one {char,x,y} per measurable wall, positioned near its midpoint
- *  - `preview`: small line-art SVG path(s) shown on the toolbar button
- *  - `name`: shown underneath each button
+ *  - `name`: shown as the button's accessible title
  * Kitchen layouts are used for Kitchen spaces; the closet set is shared by
  * Closet AND Garage spaces.
  */
@@ -55,8 +48,28 @@ interface LayoutTemplate {
   name: string;
   path: string;
   labels: Array<{ x: number; y: number }>;
-  img: string; // exact thumbnail cropped from the reference layout sheets
 }
+
+/**
+ * Renders a layout template's wall path as an inline SVG so the toolbar button
+ * looks exactly like the shape that will be drawn on the canvas. Paths use a
+ * 0–100 coordinate space; the viewBox is padded so the stroke isn't clipped at
+ * the edges.
+ */
+const LayoutThumb = ({ path }: { path: string }) => (
+  <svg
+    viewBox="-14 -14 128 128"
+    className="w-full h-[54px]"
+    fill="none"
+    stroke="#2D241E"
+    strokeWidth={7}
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+  >
+    <path d={path} />
+  </svg>
+);
 
 const KITCHEN_LAYOUTS: LayoutTemplate[] = [
   {
@@ -64,14 +77,12 @@ const KITCHEN_LAYOUTS: LayoutTemplate[] = [
     name: "Single Wall",
     path: "M 0,40 L 100,40",
     labels: [{ x: 0, y: -22 }],
-    img: kSingleImg,
   },
   {
     id: "k-galley",
     name: "Galley",
     path: "M 0,15 L 100,15 M 0,65 L 100,65",
     labels: [{ x: 0, y: -42 }, { x: 0, y: 22 }],
-    img: kGalleyImg,
   },
   {
     // L-Shaped: just two walls (A vertical, B horizontal) meeting at a corner.
@@ -81,7 +92,6 @@ const KITCHEN_LAYOUTS: LayoutTemplate[] = [
     labels: [
       { x: -58, y: 0 }, { x: 0, y: 58 },
     ],
-    img: kLImg,
   },
   {
     // Per request, the kitchen "U-Shaped" now matches the closet Reach-In:
@@ -92,7 +102,6 @@ const KITCHEN_LAYOUTS: LayoutTemplate[] = [
     labels: [
       { x: -58, y: -20 }, { x: 0, y: -58 }, { x: 58, y: -20 },
     ],
-    img: kUImg,
   },
 ];
 
@@ -106,7 +115,6 @@ const CLOSET_LAYOUTS: LayoutTemplate[] = [
     labels: [
       { x: 0, y: -58 }, { x: -58, y: 0 }, { x: 0, y: 58 }, { x: 58, y: 27 },
     ],
-    img: cDoubleImg,
   },
   {
     id: "c-u",
@@ -116,7 +124,6 @@ const CLOSET_LAYOUTS: LayoutTemplate[] = [
       { x: -35, y: 28 }, { x: -58, y: -15 }, { x: 0, y: -58 },
       { x: 58, y: -15 }, { x: 35, y: 28 },
     ],
-    img: cUImg,
   },
   {
     // L-Shaped: just two walls (A vertical, B horizontal) meeting at a corner.
@@ -126,7 +133,6 @@ const CLOSET_LAYOUTS: LayoutTemplate[] = [
     labels: [
       { x: -58, y: 0 }, { x: 0, y: 58 },
     ],
-    img: cLImg,
   },
   {
     // Reach-In: three walls (⊓) — a back wall with two side returns.
@@ -136,7 +142,6 @@ const CLOSET_LAYOUTS: LayoutTemplate[] = [
     labels: [
       { x: -58, y: -20 }, { x: 0, y: -58 }, { x: 58, y: -20 },
     ],
-    img: cReachImg,
   },
 ];
 
@@ -149,7 +154,6 @@ const GARAGE_LAYOUTS: LayoutTemplate[] = [
     labels: [
       { x: -58, y: -20 }, { x: 0, y: -58 }, { x: 58, y: -20 },
     ],
-    img: cReachImg,
   },
 ];
 
@@ -550,8 +554,16 @@ export const DrawingCanvas = ({ spaceId, unit, spaceType, onDrawingComplete }: D
     canvas.remove(lastObj);
     setWallCount(wallLabelsRef.current.length);
 
+    // Placing a predetermined layout turns drawing mode OFF (so the shape can be
+    // moved). Once nothing is left on the canvas, turn it back ON so the user can
+    // immediately draw with their finger again — or pick another layout — without
+    // having to press Clear first.
+    if (wallLabelsRef.current.length === 0 && !canvas.isDrawingMode) {
+      canvas.isDrawingMode = true;
+    }
+
     setWallMeasurements((prev) => {
-      const next = prev.slice(0, -removedLabels);
+      const next = removedLabels > 0 ? prev.slice(0, -removedLabels) : prev;
       setTimeout(() => fireComplete(canvas, next), 0);
       return next;
     });
@@ -622,13 +634,7 @@ export const DrawingCanvas = ({ spaceId, unit, spaceType, onDrawingComplete }: D
               className="flex flex-col items-center gap-1.5 p-2.5 w-[104px] border-2 border-brand-border hover:border-brand-copper hover:bg-brand-copper/10 rounded-lg transition-all cursor-pointer"
               title={tpl.name}
             >
-              <img
-                src={tpl.img}
-                alt={tpl.name}
-                className="w-full h-[54px] object-contain"
-                loading="lazy"
-                draggable={false}
-              />
+              <LayoutThumb path={tpl.path} />
             </button>
           ))}
         </div>

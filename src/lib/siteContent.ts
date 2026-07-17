@@ -23,6 +23,7 @@ export const SITE_KEYS = {
   cta: "home_cta",
   howItWorksSteps: "howitworks_steps",
   about: "about_page",
+  promo: "promo_popup",
 } as const;
 
 export interface HeroContent {
@@ -112,6 +113,38 @@ export interface AboutContent {
   valuesHeading: string;
   values: AboutValue[];
 }
+
+/** The bottom-right promotional pop-up shown on customer-facing pages. */
+export interface PromoContent {
+  /** Master on/off switch. When false the popup never appears. */
+  enabled: boolean;
+  eyebrow: string;
+  title: string;
+  description: string;
+  /** Fine print shown under the email field. */
+  terms: string;
+  ctaLabel: string;
+  /** Optional small image shown at the top of the card. Leave blank for none. */
+  imageUrl: string;
+  /** Seconds the visitor spends on the site before the popup appears. */
+  delaySeconds: number;
+  /** Seconds the popup stays visible before it auto-dismisses itself. */
+  autoDismissSeconds: number;
+}
+
+export const DEFAULT_PROMO: PromoContent = {
+  enabled: true,
+  eyebrow: "Limited Time Offer",
+  title: "Free Color Upgrade",
+  description:
+    "Sign up now and get a promo code for a FREE color upgrade on your first design order.",
+  terms: "*Valid for orders above $3,500. Cannot be combined.",
+  ctaLabel: "Get My Code",
+  imageUrl:
+    "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?auto=format&fit=crop&q=80&w=400",
+  delaySeconds: 18,
+  autoDismissSeconds: 7,
+};
 
 export const DEFAULT_HERO: HeroContent = {
   eyebrow: "Online Design & Supply Platform",

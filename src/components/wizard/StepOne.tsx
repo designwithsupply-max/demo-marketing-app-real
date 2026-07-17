@@ -35,20 +35,42 @@ export const StepOne = ({ formData, setFormData, onNext }: StepOneProps) => {
     verifiedEmail.toLowerCase() === formData.email.trim().toLowerCase();
 
   useEffect(() => {
-    const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
-      const sessionEmail = session?.user?.email;
-      if (sessionEmail && sessionEmail.toLowerCase() === formData.email.trim().toLowerCase()) {
-        const wasVerified = localStorage.getItem("wizardVerifiedEmail")?.toLowerCase() === sessionEmail.toLowerCase();
-        localStorage.setItem("wizardVerifiedEmail", sessionEmail);
-        setVerifiedEmail(sessionEmail);
-        setModalStage("none");
-        // Only celebrate a *fresh* verification, not the initial session rehydrate.
-        if (event === "SIGNED_IN" && !wasVerified) {
-          toast.success(t("s1.toastVerified"));
-        }
+    // Recognise a verified Supabase session regardless of WHICH browser or tab
+    // completed the magic-link click. The magic link often opens in a different
+    // browser than the one the form was filled in (e.g. the default mail app on a
+    // phone), where `formData.email` is still empty — so if this browser holds a
+    // session and no email has been typed yet, adopt the session's email and mark
+    // it verified. Otherwise it must match the address the user entered.
+    const adopt = (sessionEmail?: string | null, event?: string) => {
+      if (!sessionEmail) return;
+      const typed = formData.email.trim().toLowerCase();
+      const matches = typed.length === 0 || typed === sessionEmail.toLowerCase();
+      if (!matches) return;
+
+      const wasVerified =
+        localStorage.getItem("wizardVerifiedEmail")?.toLowerCase() === sessionEmail.toLowerCase();
+      localStorage.setItem("wizardVerifiedEmail", sessionEmail);
+      setVerifiedEmail(sessionEmail);
+      // If the user hadn't typed the email in this browser yet, fill it in so the
+      // verified state lines up with the input.
+      setFormData((prev: typeof formData) =>
+        prev.email?.trim() ? prev : { ...prev, email: sessionEmail },
+      );
+      setModalStage("none");
+      // Only celebrate a *fresh* verification, not the initial session rehydrate.
+      if (event === "SIGNED_IN" && !wasVerified) {
+        toast.success(t("s1.toastVerified"));
       }
-    });
+    };
+
+    // Catch a session that already exists on load (the browser that opened the
+    // magic link) in addition to live auth-state changes.
+    supabase.auth.getSession().then(({ data }) => adopt(data.session?.user?.email));
+    const { data: listener } = supabase.auth.onAuthStateChange((event, session) =>
+      adopt(session?.user?.email, event),
+    );
     return () => listener.subscription.unsubscribe();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formData.email]);
 
   // If the page reloaded after the user clicked the magic link, auto-advance.

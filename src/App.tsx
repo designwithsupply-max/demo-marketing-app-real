@@ -35,6 +35,7 @@ import AdminContactInfo from "./pages/admin/ContactInfo";
 import AdminSiteContent from "./pages/admin/SiteContent";
 import AdminHowItWorks from "./pages/admin/HowItWorks";
 import AdminAboutUs from "./pages/admin/AboutUs";
+import AdminPromo from "./pages/admin/Promo";
 
 const queryClient = new QueryClient();
 
@@ -93,6 +94,9 @@ const App = () => (
           </ProtectedRoute>} />
           <Route path="/admin/about-us" element={<ProtectedRoute>
             <AdminAboutUs />
+          </ProtectedRoute>} />
+          <Route path="/admin/promo" element={<ProtectedRoute>
+            <AdminPromo />
           </ProtectedRoute>} />
 
           <Route path="/how-it-works" element={<HowItWorks />} />
