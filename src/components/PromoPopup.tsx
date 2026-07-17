@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Gift, X } from "lucide-react";
+import { X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useSiteContent } from "@/hooks/useSiteContent";
@@ -25,7 +25,6 @@ export const PromoPopup = () => {
     const [open, setOpen] = useState(false);
     const [email, setEmail] = useState("");
     const [loading, setLoading] = useState(false);
-    const [claimed, setClaimed] = useState(false);
     // While the visitor is engaging with the card we pause the auto-dismiss so
     // they can finish typing their email.
     const [engaged, setEngaged] = useState(false);
@@ -56,13 +55,13 @@ export const PromoPopup = () => {
     const engagedRef = useRef(engaged);
     engagedRef.current = engaged;
     useEffect(() => {
-        if (!open || engaged || claimed) return;
+        if (!open || engaged) return;
         if (autoDismissMs === 0) return;
         const timer = setTimeout(() => {
             if (!engagedRef.current) setOpen(false);
         }, autoDismissMs);
         return () => clearTimeout(timer);
-    }, [open, engaged, claimed, autoDismissMs]);
+    }, [open, engaged, autoDismissMs]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -77,11 +76,11 @@ export const PromoPopup = () => {
             if (error) throw error;
             if (data?.error) throw new Error(data.error);
 
-            setClaimed(true);
             localStorage.setItem("promo_claimed", "true");
-            // No success toast here: the "Code Sent!" confirmation card already
-            // tells the visitor their code is on the way — a toast on top of it
-            // is redundant.
+            // The toast is the only confirmation — close the card instead of
+            // swapping it for a separate "Code Sent!" panel.
+            setOpen(false);
+            toast.success("Promo code sent to your email!");
         } catch (error) {
             const message = error instanceof Error ? error.message : "";
             toast.error(message || "Something went wrong. Please try again.");
@@ -110,87 +109,60 @@ export const PromoPopup = () => {
                     <X className="w-4 h-4" />
                 </button>
 
-                {claimed ? (
-                    <div className="flex flex-col items-center justify-center px-5 py-6 text-center space-y-3">
-                        <div className="w-12 h-12 bg-brand-copper/10 rounded-full flex items-center justify-center">
-                            <Gift className="w-6 h-6 text-brand-copper" />
-                        </div>
-                        <h2
-                            className="text-xl text-brand-espresso"
-                            style={{ fontFamily: "'Cormorant Garamond', Georgia, serif" }}
-                        >
-                            Code Sent!
-                        </h2>
-                        <p className="text-sm text-brand-muted">
-                            We've sent your promo code to <strong>{email}</strong>.
-                            <br />
-                            Check your inbox to claim your free color upgrade.
-                        </p>
-                        <Button
-                            onClick={() => setOpen(false)}
-                            className="bg-brand-copper text-white text-xs tracking-[0.15em] uppercase rounded-full hover:bg-brand-copper-dark transition-all duration-300 px-6 h-9"
-                        >
-                            Got it, thanks!
-                        </Button>
+                {content.imageUrl && (
+                    <div className="relative h-24 w-full">
+                        <img
+                            src={content.imageUrl}
+                            alt=""
+                            className="w-full h-full object-cover"
+                            draggable={false}
+                        />
+                        <div className="absolute inset-0 bg-brand-espresso/20" />
                     </div>
-                ) : (
-                    <>
-                        {content.imageUrl && (
-                            <div className="relative h-24 w-full">
-                                <img
-                                    src={content.imageUrl}
-                                    alt=""
-                                    className="w-full h-full object-cover"
-                                    draggable={false}
-                                />
-                                <div className="absolute inset-0 bg-brand-espresso/20" />
-                            </div>
-                        )}
-                        <div className="p-5 space-y-3">
-                            <div className="space-y-1">
-                                {content.eyebrow && (
-                                    <span className="text-brand-copper text-[10px] tracking-[0.25em] uppercase block">
-                                        {content.eyebrow}
-                                    </span>
-                                )}
-                                <h2
-                                    className="text-brand-espresso font-light leading-tight"
-                                    style={{
-                                        fontFamily: "'Cormorant Garamond', Georgia, serif",
-                                        fontSize: "1.4rem",
-                                    }}
-                                >
-                                    {content.title}
-                                </h2>
-                                <p className="text-brand-muted text-xs leading-relaxed">
-                                    {content.description}
-                                </p>
-                            </div>
-
-                            <form onSubmit={handleSubmit} className="space-y-2">
-                                <Input
-                                    type="email"
-                                    placeholder="Enter your email address"
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
-                                    onFocus={() => setEngaged(true)}
-                                    required
-                                    className="h-10 text-sm border-brand-border focus:border-brand-copper"
-                                />
-                                {content.terms && (
-                                    <p className="text-[10px] text-brand-muted">{content.terms}</p>
-                                )}
-                                <Button
-                                    type="submit"
-                                    className="w-full bg-brand-copper text-white text-xs tracking-[0.15em] uppercase font-medium rounded-full hover:bg-brand-copper-dark transition-all duration-300 shadow h-10"
-                                    disabled={loading}
-                                >
-                                    {loading ? "Sending..." : content.ctaLabel}
-                                </Button>
-                            </form>
-                        </div>
-                    </>
                 )}
+                <div className="p-5 space-y-3">
+                    <div className="space-y-1">
+                        {content.eyebrow && (
+                            <span className="text-brand-copper text-[10px] tracking-[0.25em] uppercase block">
+                                {content.eyebrow}
+                            </span>
+                        )}
+                        <h2
+                            className="text-brand-espresso font-light leading-tight"
+                            style={{
+                                fontFamily: "'Cormorant Garamond', Georgia, serif",
+                                fontSize: "1.4rem",
+                            }}
+                        >
+                            {content.title}
+                        </h2>
+                        <p className="text-brand-muted text-xs leading-relaxed">
+                            {content.description}
+                        </p>
+                    </div>
+
+                    <form onSubmit={handleSubmit} className="space-y-2">
+                        <Input
+                            type="email"
+                            placeholder="Enter your email address"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            onFocus={() => setEngaged(true)}
+                            required
+                            className="h-10 text-sm border-brand-border focus:border-brand-copper"
+                        />
+                        {content.terms && (
+                            <p className="text-[10px] text-brand-muted">{content.terms}</p>
+                        )}
+                        <Button
+                            type="submit"
+                            className="w-full bg-brand-copper text-white text-xs tracking-[0.15em] uppercase font-medium rounded-full hover:bg-brand-copper-dark transition-all duration-300 shadow h-10"
+                            disabled={loading}
+                        >
+                            {loading ? "Sending..." : content.ctaLabel}
+                        </Button>
+                    </form>
+                </div>
             </div>
         </div>
     );

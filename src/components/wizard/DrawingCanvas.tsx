@@ -107,13 +107,14 @@ const KITCHEN_LAYOUTS: LayoutTemplate[] = [
 
 const CLOSET_LAYOUTS: LayoutTemplate[] = [
   {
-    // G-shaped: four walls — A (top), B (left), C (bottom), D (short return up
-    // the lower-right), leaving the upper-right open like the letter "G".
+    // Three walls — A (top), B (left) and C (a short return on the lower-right).
+    // The bottom is intentionally open: B hangs straight down from the top-left
+    // corner and C floats on the right, disconnected from B.
     id: "c-double",
     name: "Double-Sided",
-    path: "M 100,0 L 0,0 L 0,100 L 100,100 L 100,55",
+    path: "M 100,0 L 0,0 L 0,100 M 100,100 L 100,55",
     labels: [
-      { x: 0, y: -58 }, { x: -58, y: 0 }, { x: 0, y: 58 }, { x: 58, y: 27 },
+      { x: 0, y: -58 }, { x: -58, y: 0 }, { x: 58, y: 27 },
     ],
   },
   {

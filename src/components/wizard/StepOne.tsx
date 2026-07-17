@@ -1,4 +1,4 @@
-import { useState, Dispatch, SetStateAction, useEffect } from "react";
+import { useState, Dispatch, SetStateAction, useEffect, useRef } from "react";
 import { Space } from "@/pages/Wizard";
 import { Mail, CheckCircle } from "lucide-react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
@@ -26,8 +26,12 @@ export const StepOne = ({ formData, setFormData, onNext }: StepOneProps) => {
   const [verifiedEmail, setVerifiedEmail] = useState<string | null>(() =>
     localStorage.getItem("wizardVerifiedEmail")
   );
-  const [modalStage, setModalStage] = useState<"none" | "confirm" | "sent">("none");
+  const [modalStage, setModalStage] = useState<"none" | "confirm" | "sent" | "verified">("none");
   const [sending, setSending] = useState(false);
+  // A magic-link redirect can surface the same session through both getSession()
+  // and onAuthStateChange, and across component re-renders — this makes sure we
+  // only celebrate a fresh verification once.
+  const celebratedRef = useRef(false);
 
   const isEmailVerified =
     !!verifiedEmail &&
@@ -41,7 +45,7 @@ export const StepOne = ({ formData, setFormData, onNext }: StepOneProps) => {
     // phone), where `formData.email` is still empty — so if this browser holds a
     // session and no email has been typed yet, adopt the session's email and mark
     // it verified. Otherwise it must match the address the user entered.
-    const adopt = (sessionEmail?: string | null, event?: string) => {
+    const adopt = (sessionEmail?: string | null) => {
       if (!sessionEmail) return;
       const typed = formData.email.trim().toLowerCase();
       const matches = typed.length === 0 || typed === sessionEmail.toLowerCase();
@@ -56,9 +60,16 @@ export const StepOne = ({ formData, setFormData, onNext }: StepOneProps) => {
       setFormData((prev: typeof formData) =>
         prev.email?.trim() ? prev : { ...prev, email: sessionEmail },
       );
-      setModalStage("none");
-      // Only celebrate a *fresh* verification, not the initial session rehydrate.
-      if (event === "SIGNED_IN" && !wasVerified) {
+
+      // A *fresh* verification (not a page-load rehydrate of an already-verified
+      // email) gets an explicit confirmation the visitor can't miss, plus a
+      // button to move on to Step 2. We key off `wasVerified` rather than the
+      // auth event because a magic-link redirect can report the session via
+      // getSession() (no event) or an INITIAL_SESSION event, not only SIGNED_IN.
+      if (!wasVerified && !celebratedRef.current) {
+        celebratedRef.current = true;
+        sessionStorage.removeItem("wizardAwaitingVerification");
+        setModalStage("verified");
         toast.success(t("s1.toastVerified"));
       }
     };
@@ -66,36 +77,23 @@ export const StepOne = ({ formData, setFormData, onNext }: StepOneProps) => {
     // Catch a session that already exists on load (the browser that opened the
     // magic link) in addition to live auth-state changes.
     supabase.auth.getSession().then(({ data }) => adopt(data.session?.user?.email));
-    const { data: listener } = supabase.auth.onAuthStateChange((event, session) =>
-      adopt(session?.user?.email, event),
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) =>
+      adopt(session?.user?.email),
     );
     return () => listener.subscription.unsubscribe();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formData.email]);
-
-  // If the page reloaded after the user clicked the magic link, auto-advance.
-  // Gated on a one-time flag so navigating "Back" from Step 2 (where the email
-  // is already verified) doesn't immediately bounce forward again.
-  useEffect(() => {
-    const awaitingVerification = sessionStorage.getItem("wizardAwaitingVerification") === "1";
-    if (
-      awaitingVerification &&
-      verifiedEmail &&
-      formData.email.trim().length > 0 &&
-      verifiedEmail.toLowerCase() === formData.email.trim().toLowerCase()
-    ) {
-      sessionStorage.removeItem("wizardAwaitingVerification");
-      onNext();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   const sendVerificationEmail = async () => {
     setSending(true);
     sessionStorage.setItem("wizardAwaitingVerification", "1");
     const { error } = await supabase.auth.signInWithOtp({
       email: formData.email,
-      options: { emailRedirectTo: window.location.href },
+      // Send them back to the planner itself (a clean, stable URL that can be
+      // allow-listed in Supabase Auth → URL Configuration). window.location.href
+      // can carry transient query/hash params that fail the allow-list match,
+      // which makes Supabase silently fall back to the Site URL (the home page).
+      options: { emailRedirectTo: `${window.location.origin}/space-planner` },
     });
     setSending(false);
     if (error) {
@@ -372,6 +370,37 @@ export const StepOne = ({ formData, setFormData, onNext }: StepOneProps) => {
           <p className="text-sm text-brand-muted">
             {t("s1.sentBody3")}
           </p>
+        </DialogContent>
+      </Dialog>
+
+      {/* Shown when a magic-link click lands back here and the session is
+          detected — the explicit "you're verified, continue" confirmation. */}
+      <Dialog open={modalStage === "verified"} onOpenChange={(open) => !open && setModalStage("none")}>
+        <DialogContent className="max-w-md text-center">
+          <div className="flex justify-center mb-2">
+            <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center">
+              <CheckCircle className="w-8 h-8 text-green-600" />
+            </div>
+          </div>
+          <h3 className="text-2xl font-semibold text-brand-espresso" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
+            {t("s1.verifiedModalTitle")}
+          </h3>
+          <p className="text-brand-muted mt-2">
+            <span className="font-semibold text-brand-espresso">{formData.email}</span>{" "}
+            {t("s1.verifiedModalBody")}
+          </p>
+          <div className="flex flex-col gap-3 mt-6">
+            <button
+              type="button"
+              onClick={() => {
+                setModalStage("none");
+                onNext();
+              }}
+              className="w-full py-3 rounded-full bg-brand-copper text-white font-medium tracking-wide hover:bg-brand-copper-dark transition-colors"
+            >
+              {t("s1.verifiedModalCta")}
+            </button>
+          </div>
         </DialogContent>
       </Dialog>
     </form>
