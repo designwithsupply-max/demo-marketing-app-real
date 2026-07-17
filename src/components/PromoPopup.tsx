@@ -79,7 +79,9 @@ export const PromoPopup = () => {
 
             setClaimed(true);
             localStorage.setItem("promo_claimed", "true");
-            toast.success("Promo code sent to your email!");
+            // No success toast here: the "Code Sent!" confirmation card already
+            // tells the visitor their code is on the way — a toast on top of it
+            // is redundant.
         } catch (error) {
             const message = error instanceof Error ? error.message : "";
             toast.error(message || "Something went wrong. Please try again.");
