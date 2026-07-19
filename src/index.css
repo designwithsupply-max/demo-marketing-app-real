@@ -131,6 +131,21 @@ All colors MUST be HSL.
     @apply bg-background text-foreground;
   }
 }
+/* iOS Safari (and Android) zoom the whole page in whenever a focused form
+   control has a font-size below 16px — which is why entering an email in the
+   promo popup or the verification form kicked the viewport around on mobile.
+   Pinning form controls to 16px on touch screens removes the trigger without
+   disabling pinch-zoom (which would hurt accessibility). Desktop keeps the
+   original, more compact sizing. The !important is deliberate: it has to beat
+   Tailwind's `text-sm` utility that several inputs carry. */
+@media (pointer: coarse) {
+  input,
+  textarea,
+  select {
+    font-size: 16px !important;
+  }
+}
+
 /* Attention pulse for the floating wizard "Next" button */
 @keyframes wizardPulse {
   0%, 100% { box-shadow: 0 0 0 0 hsl(20 50% 51% / 0.55); }

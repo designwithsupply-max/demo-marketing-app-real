@@ -32,6 +32,10 @@ export const StepThree = ({ formData, spaces, files, additionalNotes, onBack, on
   const calendlyContainerRef = useRef<HTMLDivElement>(null);
   const autoSubmitRef = useRef(false);
   const calendlyInitedRef = useRef(false);
+  // The event_scheduled postMessage only carries API URIs — the actual time and
+  // Google Meet / Zoom link are fetched server-side from these in the edge
+  // function, so the confirmation email can show them.
+  const calendlyBookingRef = useRef<{ eventUri?: string; inviteeUri?: string }>({});
 
   const calendlyUrl = `https://calendly.com/designandsupply/30min?name=${encodeURIComponent(
     formData.fullName
@@ -99,6 +103,11 @@ export const StepThree = ({ formData, spaces, files, additionalNotes, onBack, on
     const handleMessage = (e: MessageEvent) => {
       if (e.data?.event && typeof e.data.event === "string" && e.data.event.indexOf("calendly") === 0) {
         if (e.data.event === "calendly.event_scheduled") {
+          const payload = e.data.payload || {};
+          calendlyBookingRef.current = {
+            eventUri: payload.event?.uri,
+            inviteeUri: payload.invitee?.uri,
+          };
           setIsScheduled(true);
         }
       }
@@ -125,12 +134,23 @@ export const StepThree = ({ formData, spaces, files, additionalNotes, onBack, on
 
       if (error) throw error;
 
-      // Invoke edge function to send emails
+      // Invoke edge function to send emails. When the user booked a Calendly
+      // slot, flag it as a booking and forward the event URIs so the function
+      // can pull the real date/time and video link into the confirmation.
+      const booked = calendlyBookingRef.current.eventUri != null;
       await supabase.functions.invoke('send-submission-emails', {
         body: {
           clientEmail: formData.email,
           clientName: formData.fullName,
-          submissionData: { ...formData, spaces, additionalNotes, filePaths }
+          emailType: booked ? 'booking' : 'submission',
+          submissionData: {
+            ...formData,
+            spaces,
+            additionalNotes,
+            filePaths,
+            calendlyEventUri: calendlyBookingRef.current.eventUri,
+            calendlyInviteeUri: calendlyBookingRef.current.inviteeUri,
+          }
         }
       });
 
