@@ -48,17 +48,17 @@ function TimelineStep({ step, index, total }: { step: TimelineStepData; index: n
       className={`grid grid-cols-1 lg:grid-cols-2 gap-12 items-center ${!isEven ? "lg:flex lg:flex-row-reverse" : ""}`}
     >
       {/* Content */}
-      <div className="flex gap-6 w-full">
+      <div className="flex gap-4 sm:gap-6 w-full">
         <div className="flex flex-col items-center shrink-0">
-          <div className="h-16 w-16 rounded-[22px] bg-[#B86B49] text-white flex items-center justify-center shrink-0 shadow-[0_10px_20px_rgba(184,107,73,0.15)]">
-            <Icon className="h-7 w-7" />
+          <div className="h-12 w-12 sm:h-16 sm:w-16 rounded-[18px] sm:rounded-[22px] bg-[#B86B49] text-white flex items-center justify-center shrink-0 shadow-[0_10px_20px_rgba(184,107,73,0.15)]">
+            <Icon className="h-6 w-6 sm:h-7 sm:w-7" />
           </div>
           {index < total - 1 && (
             <div className="w-[2px] flex-1 bg-[#E5DCD0] mt-4 min-h-[80px]" />
           )}
         </div>
-        <div className="pb-12 flex-1">
-          <div className="flex items-center gap-3 mb-3">
+        <div className="pb-8 sm:pb-12 flex-1 min-w-0">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-2 mb-3">
             <span className="text-[#B86B49] text-xs font-semibold tracking-wider uppercase">
               STEP {Number(step.number)}
             </span>
@@ -66,11 +66,11 @@ function TimelineStep({ step, index, total }: { step: TimelineStepData; index: n
               {step.duration}
             </span>
           </div>
-          <h3 className="text-[#1A1A18] text-2xl font-bold mb-3" style={{ fontFamily: "'Cormorant Garamond', Georgia, serif" }}>
+          <h3 className="text-[#1A1A18] text-xl sm:text-2xl font-bold mb-3" style={{ fontFamily: "'Cormorant Garamond', Georgia, serif" }}>
             {step.title}
           </h3>
           <p className="text-[#6F6762] text-sm leading-relaxed mb-4">{step.description}</p>
-          <p className="text-sm text-[#8A8179] leading-relaxed bg-[#F5EFE6] rounded-2xl p-5">
+          <p className="text-sm text-[#8A8179] leading-relaxed bg-[#F5EFE6] rounded-2xl p-4 sm:p-5">
             {step.detail}
           </p>
         </div>
@@ -129,7 +129,7 @@ export default function HowItWorks() {
       <Navigation />
       <div className="flex-grow">
         {/* Hero */}
-        <div className="bg-[#1A1A18] pt-32 pb-24 px-6 lg:px-10">
+        <div className="bg-[#1A1A18] pt-28 pb-16 sm:pt-32 sm:pb-24 px-6 lg:px-10">
           <div className="max-w-7xl mx-auto">
             <div className="max-w-2xl">
               <span className="text-[#C9A96E] text-xs tracking-[0.3em] uppercase block mb-4">The Process</span>
@@ -148,8 +148,8 @@ export default function HowItWorks() {
         </div>
 
         {/* Steps */}
-        <div className="bg-[#FAFAF7] py-24">
-          <div className="max-w-3xl mx-auto text-center mb-20 px-6">
+        <div className="bg-[#FAFAF7] py-16 sm:py-24">
+          <div className="max-w-3xl mx-auto text-center mb-12 sm:mb-20 px-6">
             <span className="text-[#B86B49] text-xs font-semibold tracking-[0.2em] uppercase block mb-4">
               The Journey
             </span>
@@ -165,7 +165,7 @@ export default function HowItWorks() {
           </div>
 
           <div className="max-w-7xl mx-auto px-6 lg:px-10">
-            <div className="flex flex-col gap-12">
+            <div className="flex flex-col gap-10 sm:gap-12">
               {steps.map((step, i) => (
                 <TimelineStep key={step.number} step={step} index={i} total={steps.length} />
               ))}
@@ -174,9 +174,9 @@ export default function HowItWorks() {
         </div>
 
         {/* Pricing Transparency */}
-        <div className="bg-[#F5F0E8] py-20">
+        <div className="bg-[#F5F0E8] py-14 sm:py-20">
           <div className="max-w-7xl mx-auto px-6 lg:px-10">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 sm:gap-16 items-center">
               <div>
                 <span className="text-[#C9A96E] text-xs tracking-[0.3em] uppercase block mb-4">Pricing</span>
                 <h2
@@ -203,8 +203,8 @@ export default function HowItWorks() {
               </div>
 
               {/* Included */}
-              <div className="bg-[#1A1A18] p-10">
-                <h3 className="text-white font-light text-xl mb-8" style={{ fontFamily: "'Cormorant Garamond', Georgia, serif" }}>
+              <div className="bg-[#1A1A18] p-6 sm:p-10">
+                <h3 className="text-white font-light text-xl mb-6 sm:mb-8" style={{ fontFamily: "'Cormorant Garamond', Georgia, serif" }}>
                   Every Project Includes
                 </h3>
                 <div className="flex flex-col gap-4">
