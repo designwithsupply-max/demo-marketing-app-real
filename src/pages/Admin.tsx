@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { format } from "date-fns";
 import { Search, Download, Loader2, Upload, Trash2, Copy } from "lucide-react";
 import AdminTopBar from "@/components/layout/AdminTopBar";
+import ManageAccess from "@/components/admin/ManageAccess";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -57,6 +58,7 @@ const Admin = () => {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [session, setSession] = useState<Session | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const [checkingAuth, setCheckingAuth] = useState(true);
 
   const statusBadgeClasses: Record<string, string> = {
@@ -121,26 +123,26 @@ const Admin = () => {
       const { data, error } = await supabase
         .from("user_roles")
         .select("role")
-        .eq("user_id", userId)
-        .eq("role", "admin")
-        .single();
+        .eq("user_id", userId);
 
-      if (error && error.code !== "PGRST116") {
+      if (error) {
         console.error("Error checking admin role:", error);
         toast.error("Error checking permissions");
         setIsAdmin(false);
+        setIsSuperAdmin(false);
         return;
       }
 
-      setIsAdmin(!!data);
-
-      if (!data) {
-        toast.error("Access denied. Admin privileges required.");
-        setTimeout(() => navigate("/"), 1000);
-      }
+      const roles = (data ?? []).map((r: { role: string }) => r.role);
+      const superAdmin = roles.includes("super_admin");
+      // A non-admin is NOT redirected away — the dashboard shows a clear
+      // "access pending" screen so they know approval is required.
+      setIsSuperAdmin(superAdmin);
+      setIsAdmin(superAdmin || roles.includes("admin"));
     } catch (error) {
       console.error("Error checking admin role:", error);
       setIsAdmin(false);
+      setIsSuperAdmin(false);
     } finally {
       setCheckingAuth(false);
     }
@@ -256,10 +258,13 @@ const Admin = () => {
   };
 
   const handleLogout = async (reason?: string) => {
+    // Guard against being wired directly to onClick (which would pass a React
+    // event as `reason` and crash the toast when it renders a non-string).
+    const message = typeof reason === "string" ? reason : "Logged out successfully";
     try {
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
-      toast.success(reason || "Logged out successfully");
+      toast.success(message);
       navigate("/auth");
     } catch (error) {
       console.error("Error logging out:", error);
@@ -283,9 +288,19 @@ const Admin = () => {
       <>
         <AdminTopBar />
         <div className="min-h-screen bg-brand-cream flex items-center justify-center px-6">
-          <Card className="p-8 text-center border-brand-border">
-            <h2 className="text-2xl font-semibold text-brand-espresso mb-2">Access Denied</h2>
-            <p className="text-brand-muted">You don't have admin privileges.</p>
+          <Card className="p-8 text-center border-brand-border max-w-md">
+            <h2 className="text-2xl font-semibold text-brand-espresso mb-2">Access pending</h2>
+            <p className="text-brand-muted mb-6">
+              Your account has been created but isn't approved yet. An administrator
+              must grant you access before you can use the dashboard.
+            </p>
+            <Button
+              variant="outline"
+              onClick={() => handleLogout()}
+              className="border-brand-border text-brand-espresso hover:bg-brand-sand hover:text-brand-espresso"
+            >
+              Sign out
+            </Button>
           </Card>
         </div>
       </>
@@ -306,8 +321,8 @@ const Admin = () => {
   return (
     <>
       <AdminTopBar onLogout={handleLogout} />
-      <div className="min-h-screen bg-brand-cream py-10 px-4">
-        <div className="max-w-7xl mx-auto space-y-8">
+      <div className="min-h-screen bg-brand-cream py-6 sm:py-10 px-4 sm:px-6 overflow-x-clip">
+        <div className="max-w-7xl mx-auto space-y-6 sm:space-y-8">
           <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
             <div>
               <span className="text-brand-copper text-xs tracking-[0.3em] uppercase block mb-2">Dashboard</span>
@@ -319,10 +334,10 @@ const Admin = () => {
               </h1>
               <p className="text-brand-muted">Review and manage client submissions</p>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 w-full md:w-auto">
               <Button
                 onClick={() => navigate("/file-manager")}
-                className="bg-white border border-brand-border text-brand-espresso hover:bg-brand-sand hover:text-brand-espresso"
+                className="w-full md:w-auto bg-white border border-brand-border text-brand-espresso hover:bg-brand-sand hover:text-brand-espresso"
               >
                 <Upload className="w-4 h-4 mr-2" />
                 Upload Files
@@ -343,6 +358,8 @@ const Admin = () => {
               </Card>
             ))}
           </div>
+
+          {isSuperAdmin && <ManageAccess currentUserId={session?.user?.id} />}
 
           <Card className="p-6 border-brand-border bg-white">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -387,18 +404,18 @@ const Admin = () => {
               filteredSubmissions.map((submission) => {
                 const hasSpaces = Array.isArray(submission.spaces) && submission.spaces.length > 0;
                 return (
-                  <Card key={submission.id} className="p-6 border-brand-border bg-white shadow-[0_10px_30px_-20px_rgba(45,36,30,0.25)]">
+                  <Card key={submission.id} className="p-4 sm:p-6 border-brand-border bg-white shadow-[0_10px_30px_-20px_rgba(45,36,30,0.25)]">
                     <div className="space-y-5">
                       <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
-                        <div>
-                          <h3 className="text-xl font-semibold text-brand-espresso">{submission.full_name}</h3>
-                          <p className="text-sm text-brand-muted">{submission.email}</p>
+                        <div className="min-w-0">
+                          <h3 className="text-xl font-semibold text-brand-espresso break-words">{submission.full_name}</h3>
+                          <p className="text-sm text-brand-muted break-all">{submission.email}</p>
                           {submission.phone && (
                             <p className="text-sm text-brand-muted">{submission.phone}</p>
                           )}
                           <p className="text-sm text-brand-muted">Postal: {submission.postal_code}</p>
                         </div>
-                        <div className="flex items-center gap-2">
+                        <div className="flex flex-wrap items-center gap-2">
                           <Badge variant="outline" className={`${getStatusBadgeClass(submission.status)}`}>
                             {submission.status}
                           </Badge>
@@ -441,7 +458,7 @@ const Admin = () => {
                           {hasSpaces && (
                             <Dialog>
                               <DialogTrigger asChild>
-                                <Button variant="outline" className="border-brand-border text-brand-espresso hover:bg-brand-sand hover:text-brand-espresso">
+                                <Button variant="outline" className="w-full md:w-auto border-brand-border text-brand-espresso hover:bg-brand-sand hover:text-brand-espresso">
                                   View Space Details
                                 </Button>
                               </DialogTrigger>
@@ -650,13 +667,13 @@ const Admin = () => {
                         </SelectContent>
                       </Select>
                     </div>
-                    <div className="flex items-center gap-2 text-xs text-brand-muted">
-                      <span>Submission ID:</span>
-                      <span className="font-mono text-[11px] text-brand-espresso">{submission.id}</span>
+                    <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-brand-muted">
+                      <span className="shrink-0">Submission ID:</span>
+                      <span className="font-mono text-[11px] text-brand-espresso break-all min-w-0">{submission.id}</span>
                       <Button
                         size="sm"
                         variant="ghost"
-                        className="h-6 px-2 text-brand-muted hover:text-brand-espresso"
+                        className="h-6 px-2 text-brand-muted hover:text-brand-espresso shrink-0"
                         onClick={() => navigator.clipboard.writeText(submission.id)}
                       >
                         <Copy className="w-3.5 h-3.5 mr-1" />

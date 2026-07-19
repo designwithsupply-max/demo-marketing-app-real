@@ -1,35 +1,19 @@
-import { useEffect, useState } from "react";
 import { Navigate, useLocation } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
-import { Session } from "@supabase/supabase-js";
 import { Loader2 } from "lucide-react";
+import { useAdminRole } from "@/hooks/useAdminRole";
 
 interface ProtectedRouteProps {
     children: React.ReactNode;
 }
 
+/**
+ * Gates admin-only routes. A session alone is NOT enough — the user must hold
+ * the admin (or super_admin) role. Signed-in users without a role are sent to
+ * /admin, which shows the "pending approval" screen.
+ */
 const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
-    const [session, setSession] = useState<Session | null>(null);
-    const [loading, setLoading] = useState(true);
+    const { loading, hasSession, isAdmin } = useAdminRole();
     const location = useLocation();
-
-    useEffect(() => {
-        // Check active sessions and sets the user
-        supabase.auth.getSession().then(({ data: { session } }) => {
-            setSession(session);
-            setLoading(false);
-        });
-
-        // Listen for changes on auth state (logged in, signed out, etc.)
-        const {
-            data: { subscription },
-        } = supabase.auth.onAuthStateChange((_event, session) => {
-            setSession(session);
-            setLoading(false);
-        });
-
-        return () => subscription.unsubscribe();
-    }, []);
 
     if (loading) {
         return (
@@ -39,10 +23,14 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
         );
     }
 
-    if (!session) {
-        // Redirect to the login page, but save the current location they were
-        // trying to go to when they were redirected.
+    if (!hasSession) {
+        // Not signed in — send to login, remembering where they were headed.
         return <Navigate to="/auth" state={{ from: location }} replace />;
+    }
+
+    if (!isAdmin) {
+        // Signed in but not approved — the dashboard shows the pending screen.
+        return <Navigate to="/admin" replace />;
     }
 
     return <>{children}</>;

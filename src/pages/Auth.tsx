@@ -25,29 +25,16 @@ const Auth = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
 
   useEffect(() => {
-    // Set up auth state listener FIRST
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        setSession(session);
-
-        // Redirect authenticated users to admin
-        if (session?.user) {
-          setTimeout(() => {
-            navigate("/admin");
-          }, 0);
-        }
-      }
-    );
-
-    // THEN check for existing session
+    // Only an already-established session (a returning, logged-in user) is sent
+    // to the dashboard. We deliberately do NOT navigate on every auth-state
+    // change — signing up briefly creates a session, and we don't want that to
+    // drop a brand-new, unapproved account straight into /admin.
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       if (session?.user) {
         navigate("/admin");
       }
     });
-
-    return () => subscription.unsubscribe();
   }, [navigate]);
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -123,9 +110,19 @@ const Auth = () => {
         return;
       }
 
-      toast.success("Account created! Please check your email to verify your account before logging in.");
-      // Switch to login tab
+      // Signing up must not grant access. Supabase may return an active session
+      // here (when email confirmation is off), so sign it back out — the account
+      // exists but stays locked until a super-admin grants a role.
+      await supabase.auth.signOut();
+      setSession(null);
+
+      toast.success(
+        "Account created. An administrator must approve your access before you can sign in.",
+      );
+      // Prefill the login tab with the new address.
       setLoginEmail(signupEmail);
+      setSignupPassword("");
+      setConfirmPassword("");
     } catch (error: any) {
       toast.error("An error occurred during signup");
     } finally {

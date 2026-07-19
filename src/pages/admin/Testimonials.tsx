@@ -291,8 +291,8 @@ const AdminTestimonials = () => {
   return (
     <>
       <AdminTopBar onLogout={handleLogout} />
-      <div className="min-h-screen bg-brand-cream py-10 px-4">
-        <div className="max-w-5xl mx-auto space-y-8">
+      <div className="min-h-screen bg-brand-cream py-6 sm:py-10 px-4 overflow-x-clip">
+        <div className="max-w-5xl mx-auto space-y-6 sm:space-y-8">
           <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
             <div>
               <span className="text-brand-copper text-xs tracking-[0.3em] uppercase block mb-2">Admin</span>
@@ -416,87 +416,108 @@ const AdminTestimonials = () => {
 
           <div className="space-y-3">
             {testimonials.map((t, index) => (
-              <Card key={t.id} className="p-5 border-brand-border bg-white">
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex items-start gap-4">
-                    <div className="w-14 h-14 rounded-full overflow-hidden flex-shrink-0 border border-brand-border">
-                      <img src={t.avatar} alt={t.name} className="w-full h-full object-cover" />
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-2 mb-1">
-                        <h3 className="text-lg font-semibold text-brand-espresso">{t.name}</h3>
-                        {!t.is_active && (
-                          <Badge variant="outline" className="text-red-600 border-red-200 bg-red-50 text-[10px]">
-                            Inactive
-                          </Badge>
-                        )}
-                      </div>
-                      <p className="text-sm text-brand-muted">{t.location}</p>
-                      <div className="flex gap-0.5 mt-1">
-                        {Array.from({ length: t.rating }).map((_, i) => (
-                          <Star key={i} size={12} className="fill-brand-copper text-brand-copper" />
-                        ))}
-                      </div>
-                      <p className="text-sm text-brand-espresso mt-2 italic line-clamp-2">"{t.review}"</p>
-                      <div className="flex items-center gap-2 mt-2">
-                        <Badge variant="outline" className="bg-brand-sand border-brand-border text-brand-muted text-[10px]">
-                          {t.project}
-                        </Badge>
-                        <span className="text-[10px] text-brand-muted">Order: {t.order_index}</span>
-                      </div>
-                    </div>
+              <Card
+                key={t.id}
+                className="p-4 sm:p-5 border-brand-border bg-white shadow-[0_10px_30px_-20px_rgba(45,36,30,0.25)] transition-shadow hover:shadow-[0_16px_38px_-18px_rgba(45,36,30,0.3)]"
+              >
+                <div className="flex items-start gap-3 sm:gap-4">
+                  {/* Avatar */}
+                  <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full overflow-hidden shrink-0 border border-brand-border bg-brand-sand">
+                    <img src={t.avatar} alt={t.name} className="w-full h-full object-cover" />
                   </div>
-                  <div className="flex items-center gap-1 flex-shrink-0">
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      className="h-8 w-8 text-brand-muted hover:text-brand-espresso"
-                      onClick={() => moveTestimonial(index, "up")}
-                      disabled={index === 0}
-                    >
-                      <ChevronUp className="w-4 h-4" />
-                    </Button>
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      className="h-8 w-8 text-brand-muted hover:text-brand-espresso"
-                      onClick={() => moveTestimonial(index, "down")}
-                      disabled={index === testimonials.length - 1}
-                    >
-                      <ChevronDown className="w-4 h-4" />
-                    </Button>
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      className="h-8 w-8 text-brand-muted hover:text-brand-espresso"
-                      onClick={() => openEditDialog(t)}
-                    >
-                      <Edit2 className="w-4 h-4" />
-                    </Button>
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <Button size="icon" variant="ghost" className="h-8 w-8 text-red-500 hover:text-red-600">
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>Delete Testimonial</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            This will permanently delete {t.name}'s testimonial. This action cannot be undone.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Cancel</AlertDialogCancel>
-                          <AlertDialogAction
-                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                            onClick={() => deleteTestimonial(t.id)}
+
+                  {/* Info column takes the remaining width; actions live only on
+                      the top row so the review and project chip get full width. */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <h3 className="text-base sm:text-lg font-semibold text-brand-espresso truncate">{t.name}</h3>
+                          <Badge
+                            variant="outline"
+                            className={`text-[10px] shrink-0 ${
+                              t.is_active
+                                ? "text-emerald-700 border-emerald-200 bg-emerald-50"
+                                : "text-red-600 border-red-200 bg-red-50"
+                            }`}
                           >
-                            Delete
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
+                            {t.is_active ? "Active" : "Inactive"}
+                          </Badge>
+                        </div>
+                        <p className="text-sm text-brand-muted truncate">{t.location}</p>
+                      </div>
+
+                      <div className="flex items-center gap-0.5 shrink-0">
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="h-8 w-8 text-brand-muted hover:text-brand-espresso"
+                          onClick={() => moveTestimonial(index, "up")}
+                          disabled={index === 0}
+                          aria-label="Move up"
+                        >
+                          <ChevronUp className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="h-8 w-8 text-brand-muted hover:text-brand-espresso"
+                          onClick={() => moveTestimonial(index, "down")}
+                          disabled={index === testimonials.length - 1}
+                          aria-label="Move down"
+                        >
+                          <ChevronDown className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="h-8 w-8 text-brand-muted hover:text-brand-espresso"
+                          onClick={() => openEditDialog(t)}
+                          aria-label="Edit"
+                        >
+                          <Edit2 className="w-4 h-4" />
+                        </Button>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button size="icon" variant="ghost" className="h-8 w-8 text-red-500 hover:text-red-600" aria-label="Delete">
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Delete Testimonial</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                This will permanently delete {t.name}'s testimonial. This action cannot be undone.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction
+                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                onClick={() => deleteTestimonial(t.id)}
+                              >
+                                Delete
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </div>
+                    </div>
+
+                    <div className="flex gap-0.5 mt-1.5">
+                      {Array.from({ length: t.rating }).map((_, i) => (
+                        <Star key={i} size={13} className="fill-brand-copper text-brand-copper" />
+                      ))}
+                    </div>
+
+                    <p className="text-sm text-brand-espresso mt-2 italic line-clamp-2">"{t.review}"</p>
+
+                    <div className="flex flex-wrap items-center gap-x-3 gap-y-2 mt-3">
+                      <span className="inline-block max-w-full truncate rounded-full bg-brand-sand border border-brand-border text-brand-muted text-[10px] font-medium px-2.5 py-1">
+                        {t.project}
+                      </span>
+                      <span className="text-[10px] text-brand-muted shrink-0">Order: {t.order_index}</span>
+                    </div>
                   </div>
                 </div>
               </Card>
