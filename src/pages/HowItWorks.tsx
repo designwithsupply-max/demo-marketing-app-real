@@ -121,7 +121,10 @@ export default function HowItWorks() {
   }));
 
   return (
-    <div className="min-h-screen flex flex-col justify-between">
+    // overflow-x-clip contains the timeline's slide-in animation (each step
+    // starts offset on the x-axis), which would otherwise push past the
+    // viewport and cause horizontal scrolling on mobile.
+    <div className="min-h-screen flex flex-col justify-between overflow-x-clip">
       <SeoHead
         title="How It Works | Design & Supply"
         description="See how our online process works: measure your space, meet a designer live, and get a same-day quote for fully assembled cabinets."
