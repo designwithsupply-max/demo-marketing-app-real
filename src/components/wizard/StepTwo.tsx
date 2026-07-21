@@ -3,7 +3,7 @@ import { Space, UploadedFile } from "@/pages/Wizard";
 import { DrawingCanvas } from "./DrawingCanvas";
 import { WizardNav } from "./WizardNav";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Upload, X, Loader2, CheckCircle, AlertCircle, Plus } from "lucide-react";
+import { Upload, X, Loader2, CheckCircle, AlertCircle, Plus, Pencil } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -69,10 +69,11 @@ export const StepTwo = ({ spaces, setSpaces, files, setFiles, additionalNotes, s
     setSpaces(prev => prev.map((s) => (s.id === id ? { ...s, [field]: value } : s)));
   };
 
-  // Storage priorities: 1st tap = GREEN (1st), 2nd tap = YELLOW (2nd).
-  // Anything that is not one of your top two automatically shows RED.
+  // Storage priorities, ranked in tap order: 1st tap = GREEN (1st), 2nd = YELLOW
+  // (2nd), 3rd = RED (3rd). Tapping a ranked one again removes it and the rest
+  // move up.
   const STORAGE_OPTIONS = ["Hanging", "Drawers", "Shelves"];
-  const ORDINALS = ["1st", "2nd"];
+  const ORDINALS = ["1st", "2nd", "3rd"];
 
   const togglePriority = (spaceId: string, option: string) => {
     setSpaces(prev => prev.map((s) => {
@@ -81,14 +82,13 @@ export const StepTwo = ({ spaces, setSpaces, files, setFiles, additionalNotes, s
       const idx = current.indexOf(option);
       let next: string[];
       if (idx >= 0) {
-        // deselect -> it drops back to red, remaining picks re-rank
+        // deselect -> it drops back to unranked, remaining picks re-rank
         next = current.filter((o) => o !== option);
-      } else if (current.length < 2) {
-        // 1st pick -> green, 2nd pick -> yellow
+      } else if (current.length < STORAGE_OPTIONS.length) {
+        // append at the next open rank (1st -> 2nd -> 3rd)
         next = [...current, option];
       } else {
-        // already have a 1st and 2nd: pressing a red one makes it the new 2nd (yellow)
-        next = [current[0], option];
+        next = current;
       }
       return { ...s, storagePriorities: next };
     }));
@@ -285,17 +285,28 @@ export const StepTwo = ({ spaces, setSpaces, files, setFiles, additionalNotes, s
         <p className="text-brand-muted mt-1">{t("s2.yourSpacesDesc")}</p> */}
         {spacesError && <p className="text-xs text-red-500 mt-2">{spacesError}</p>}
 
-        <div className="space-y-4 mt-4">
+        {spaces.length > 0 && (
+          <p className="mt-4 flex items-center gap-1.5 text-xs text-brand-muted">
+            <Pencil size={13} className="text-brand-copper" />
+            {t("s2.editNameHint")}
+          </p>
+        )}
+
+        <div className="space-y-4 mt-3">
           {spaces.map((space) => (
             <div key={space.id} className="flex items-center gap-2 sm:gap-3 p-3 sm:p-4 bg-brand-sand/50 rounded-lg border border-brand-border">
-              <input
-                type="text"
-                value={space.name}
-                onChange={(e) => updateSpace(space.id, "name", e.target.value)}
-                placeholder={t("s2.spaceNamePh")}
-                className={`flex-grow min-w-0 bg-transparent focus:outline-none text-brand-espresso placeholder:text-red-400 ${!space.name || space.name.trim() === "" ? "border-b border-red-400" : ""
-                  }`}
-              />
+              <Pencil size={16} className="shrink-0 text-brand-copper/70" aria-hidden="true" />
+              <div className="flex-grow min-w-0">
+                <input
+                  type="text"
+                  value={space.name}
+                  onChange={(e) => updateSpace(space.id, "name", e.target.value)}
+                  placeholder={t("s2.spaceNamePh")}
+                  aria-label={t("s2.spaceNamePh")}
+                  className={`w-full bg-white/70 rounded-md px-3 py-2 text-base font-medium text-brand-espresso border focus:outline-none focus:ring-2 focus:ring-brand-copper/30 focus:border-brand-copper transition-all placeholder:text-red-400 ${!space.name || space.name.trim() === "" ? "border-red-400" : "border-brand-border"
+                    }`}
+                />
+              </div>
               <select
                 value={space.type}
                 onChange={(e) => updateSpace(space.id, "type", e.target.value as Space["type"])}
@@ -405,7 +416,9 @@ export const StepTwo = ({ spaces, setSpaces, files, setFiles, additionalNotes, s
                         ? "bg-green-500 text-white border-green-500"
                         : rank === 1
                           ? "bg-yellow-500 text-white border-yellow-500"
-                          : "bg-red-500 text-white border-red-500";
+                          : rank === 2
+                            ? "bg-red-500 text-white border-red-500"
+                            : "bg-white text-brand-espresso border-brand-border hover:border-brand-copper";
                     return (
                       <button
                         key={option}

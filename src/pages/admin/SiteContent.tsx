@@ -87,7 +87,7 @@ const AdminSiteContent = () => {
     return (
       <>
         <AdminTopBar />
-        <div className="min-h-screen bg-brand-cream flex items-center justify-center">
+        <div className="min-h-screen bg-brand-cream lg:pl-64 flex items-center justify-center">
           <Loader2 className="w-8 h-8 animate-spin text-brand-copper" />
         </div>
       </>
@@ -97,7 +97,7 @@ const AdminSiteContent = () => {
   return (
     <>
       <AdminTopBar />
-      <div className="min-h-screen bg-brand-cream py-10 px-4">
+      <div className="min-h-screen bg-brand-cream lg:pl-64 py-10 px-4">
         <div className="max-w-4xl mx-auto space-y-8">
           <div>
             <span className="text-brand-copper text-xs tracking-[0.3em] uppercase block mb-2">Dashboard</span>

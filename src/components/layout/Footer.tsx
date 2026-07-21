@@ -87,7 +87,7 @@ export default function Footer() {
                   rel="noopener noreferrer"
                   className="text-sm hover:text-white hover:translate-x-1 inline-block transition-all duration-200"
                 >
-                  Pay Here
+                  Make a Payment
                 </a>
               </li>
             </ul>
@@ -118,8 +118,8 @@ export default function Footer() {
             © {new Date().getFullYear()} Design & Supply. All rights reserved.
           </p>
           <div className="flex gap-6">
-            <Link href="#" className="text-xs hover:text-white transition-colors">Privacy Policy</Link>
-            <Link href="#" className="text-xs hover:text-white transition-colors">Terms of Service</Link>
+            <Link href="/privacy" className="text-xs hover:text-white transition-colors">Privacy Policy</Link>
+            <Link href="/terms" className="text-xs hover:text-white transition-colors">Terms of Service</Link>
           </div>
         </div>
       </div>

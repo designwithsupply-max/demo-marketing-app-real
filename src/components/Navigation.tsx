@@ -361,7 +361,7 @@ export const Navigation = () => {
                   : "border-white/60 text-white hover:bg-white hover:text-brand-espresso"
                 }`}
             >
-              Pay Now
+              Make a Payment
             </a>
             <Link
               href="/space-planner"

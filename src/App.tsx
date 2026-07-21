@@ -38,6 +38,8 @@ import AdminAboutUs from "./pages/admin/AboutUs";
 import AdminPromo from "./pages/admin/Promo";
 import AdminMessages from "./pages/admin/Messages";
 import AdminSettings from "./pages/admin/Settings";
+import AdminLegal from "./pages/admin/Legal";
+import LegalPage from "./pages/LegalPage";
 
 const queryClient = new QueryClient();
 
@@ -106,8 +108,13 @@ const App = () => (
           <Route path="/admin/settings" element={<ProtectedRoute>
             <AdminSettings />
           </ProtectedRoute>} />
+          <Route path="/admin/legal" element={<ProtectedRoute>
+            <AdminLegal />
+          </ProtectedRoute>} />
 
           <Route path="/how-it-works" element={<HowItWorks />} />
+          <Route path="/terms" element={<LegalPage kind="terms" />} />
+          <Route path="/privacy" element={<LegalPage kind="privacy" />} />
           <Route path="/closets" element={<Closets />} />
           <Route path="/kitchens" element={<Kitchens />} />
           <Route path="/garages" element={<Garages />} />

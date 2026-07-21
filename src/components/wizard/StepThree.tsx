@@ -2,11 +2,9 @@ import { useEffect, useRef, useState } from "react";
 import { Space, UploadedFile } from "@/pages/Wizard";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Loader2, CheckCircle, Lock, ShieldCheck } from "lucide-react";
+import { Loader2, CheckCircle } from "lucide-react";
 import { WizardNav } from "@/components/wizard/WizardNav";
 import { useLanguage } from "@/contexts/LanguageContext";
-
-const PAYMENT_URL = "https://mtl-closets.myhelcim.com/hosted/?token=9f9e5d22c6d13444ef33d9";
 
 interface StepThreeProps {
   formData: any;
@@ -270,8 +268,9 @@ export const StepThree = ({ formData, spaces, files, additionalNotes, onBack, on
                   <div className="flex flex-wrap gap-2">
                     {["Hanging", "Drawers", "Shelves"].map((option) => {
                       const rank = space.storagePriorities!.indexOf(option);
-                      const color = rank === 0 ? "bg-green-500" : rank === 1 ? "bg-yellow-500" : "bg-red-500";
-                      const label = rank === 0 ? "1st" : rank === 1 ? "2nd" : "—";
+                      const color =
+                        rank === 0 ? "bg-green-500" : rank === 1 ? "bg-yellow-500" : rank === 2 ? "bg-red-500" : "bg-brand-muted";
+                      const label = rank === 0 ? "1st" : rank === 1 ? "2nd" : rank === 2 ? "3rd" : "—";
                       return (
                         <span key={option} className={`text-xs font-semibold text-white rounded-full px-3 py-1 ${color}`}>
                           {label === "—" ? t("s2." + option.toLowerCase()) : `${label} · ${t("s2." + option.toLowerCase())}`}
@@ -295,30 +294,6 @@ export const StepThree = ({ formData, spaces, files, additionalNotes, onBack, on
         <div>
           <h3 className="font-semibold text-brand-espresso">{t("s3.files")}</h3>
           <p>{files.length} {t("s3.filesCount")}</p>
-        </div>
-      </div>
-
-      {/* Secure Payment */}
-      <div className="rounded-lg border border-brand-border overflow-hidden">
-        <div className="px-4 py-3 bg-brand-sand/50 border-b border-brand-border flex items-center gap-2">
-          <ShieldCheck className="w-4 h-4 text-brand-copper" />
-          <h3 className="font-semibold text-brand-espresso">{t("s3.payTitle")}</h3>
-        </div>
-        <div className="p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <p className="text-brand-espresso font-medium">{t("s3.payLead")}</p>
-            <p className="text-sm text-brand-muted mt-1">
-              {t("s3.payDesc")}
-            </p>
-          </div>
-          <a
-            href={PAYMENT_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center justify-center gap-2 bg-brand-copper text-white text-sm tracking-[0.15em] uppercase font-medium px-6 py-3.5 rounded-full hover:bg-brand-copper-dark transition-all duration-300 shadow-lg whitespace-nowrap"
-          >
-            <Lock className="w-4 h-4" /> {t("s3.payNow")}
-          </a>
         </div>
       </div>
 

@@ -145,7 +145,7 @@ const AdminMessages = () => {
     return (
       <>
         <AdminTopBar />
-        <div className="min-h-screen bg-brand-cream flex items-center justify-center">
+        <div className="min-h-screen bg-brand-cream lg:pl-64 flex items-center justify-center">
           <Loader2 className="w-8 h-8 animate-spin text-brand-copper" />
         </div>
       </>
@@ -155,7 +155,7 @@ const AdminMessages = () => {
   return (
     <>
       <AdminTopBar />
-      <div className="min-h-screen bg-brand-cream py-6 sm:py-10 px-4 sm:px-6">
+      <div className="min-h-screen bg-brand-cream lg:pl-64 py-6 sm:py-10 px-4 sm:px-6">
         <div className="max-w-5xl mx-auto space-y-6 sm:space-y-8">
           <div>
             <span className="text-brand-copper text-xs tracking-[0.3em] uppercase block mb-2">Dashboard</span>

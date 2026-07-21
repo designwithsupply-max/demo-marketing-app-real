@@ -6,8 +6,6 @@ import garageImage from "@/assets/images/garage_service.jpg";
 import step1Image from "@/assets/images/step1.jpg";
 import step2Image from "@/assets/images/step2.jpg";
 import step3Image from "@/assets/images/step3.jpg";
-import step4Image from "@/assets/images/step4.jpg";
-import step5Image from "@/assets/images/step5.jpg";
 
 /**
  * Editable site content lives in the `site_content` table: one row per section,
@@ -25,7 +23,66 @@ export const SITE_KEYS = {
   about: "about_page",
   promo: "promo_popup",
   features: "site_features",
+  terms: "legal_terms",
+  privacy: "legal_privacy",
 } as const;
+
+/** An editable legal page (Terms of Service / Privacy Policy). Body is Markdown. */
+export interface LegalContent {
+  title: string;
+  /** Small line under the title, e.g. "Last updated July 2026". */
+  updated: string;
+  /** Page body, written in the Markdown-lite supported by renderMarkdown(). */
+  body: string;
+}
+
+export const DEFAULT_TERMS: LegalContent = {
+  title: "Terms of Service",
+  updated: "Last updated July 2026",
+  body: `Welcome to Design & Supply. By accessing or using our website, design tools, and services, you agree to these Terms of Service. Please read them carefully.
+
+## Using Our Services
+You may use our Space Planner and related services only for lawful purposes and in accordance with these terms. You are responsible for the accuracy of the measurements, photos, and details you provide.
+
+## Quotes & Pricing
+All quotes are estimates until a final design is approved. Pricing may change based on materials, finishes, and the final measured dimensions of your space.
+
+## Payments
+Deposits and payments are processed securely through our third-party payment provider. Deposits may be non-refundable once production of custom materials has begun.
+
+## Intellectual Property
+All designs, visualizations, images, and content on this site are the property of Design & Supply and may not be reproduced without permission.
+
+## Limitation of Liability
+Design & Supply is not liable for any indirect or consequential damages arising from the use of our website or services, to the fullest extent permitted by law.
+
+## Contact
+Questions about these terms? Reach us through the [contact page](/contact).`,
+};
+
+export const DEFAULT_PRIVACY: LegalContent = {
+  title: "Privacy Policy",
+  updated: "Last updated July 2026",
+  body: `Your privacy matters to us. This policy explains what information Design & Supply collects, how we use it, and the choices you have.
+
+## Information We Collect
+We collect the details you submit through our Space Planner and contact forms — such as your name, email, phone number, postal code, room measurements, and any photos or notes you share.
+
+## How We Use Your Information
+We use your information to prepare designs and quotes, schedule consultations, respond to your enquiries, and improve our services. We never sell your personal information.
+
+## Email Verification
+When email verification is enabled, we send a one-time magic link to confirm ownership of the address you enter. This helps us keep your project details secure.
+
+## Cookies & Storage
+We use browser storage to save your planner progress so you can pick up where you left off. You can clear this at any time from your browser settings.
+
+## Data Retention
+We keep submission data for as long as needed to serve you and meet legal obligations. You may request deletion of your data at any time.
+
+## Contact
+To ask about your data or request deletion, reach us through the [contact page](/contact).`,
+};
 
 /** Master on/off switches for optional site behaviour (see /admin/settings). */
 export interface FeaturesContent {
@@ -236,22 +293,6 @@ export const DEFAULT_HOWITWORKS_STEPS: HowItWorksStepsContent = {
       detail: "Typical lead time: 3–4 weeks from approval.",
       duration: "3–4 weeks lead time",
       imageUrl: step3Image,
-    },
-    {
-      title: "Expert Installation",
-      description:
-        "Our master installation team arrives on the scheduled day and completes your project with surgical precision. Most installations are done in a single day, with zero disruption to your home.",
-      detail: "All debris removed. All surfaces protected.",
-      duration: "1–3 days",
-      imageUrl: step4Image,
-    },
-    {
-      title: "The Perfect Reveal",
-      description:
-        "Walk into your transformed space and experience the Design & Supply difference. A dedicated team member conducts your final walkthrough, explains every feature, and ensures you're completely satisfied.",
-      detail: "10-year structural warranty. Lifetime design support.",
-      duration: "Handover day",
-      imageUrl: step5Image,
     },
   ],
 };

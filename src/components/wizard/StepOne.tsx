@@ -45,27 +45,22 @@ export const StepOne = ({ formData, setFormData, onNext }: StepOneProps) => {
     verifiedEmail.toLowerCase() === formData.email.trim().toLowerCase();
 
   useEffect(() => {
-    // Recognise a verified Supabase session regardless of WHICH browser or tab
-    // completed the magic-link click. The magic link often opens in a different
-    // browser than the one the form was filled in (e.g. the default mail app on a
-    // phone), where `formData.email` is still empty — so if this browser holds a
-    // session and no email has been typed yet, adopt the session's email and mark
-    // it verified. Otherwise it must match the address the user entered.
+    // Only ever mark the address the visitor actually typed in Step 1 as
+    // verified. The Supabase session that a magic-link click creates must match
+    // that exact email (case-insensitive) — we never adopt a different address,
+    // and never "borrow" a leftover session from a previously signed-in email.
+    // This holds even when the link is opened on another device: without the
+    // typed email present here, there is nothing to verify, so we do nothing.
     const adopt = (sessionEmail?: string | null) => {
       if (!sessionEmail) return;
       const typed = formData.email.trim().toLowerCase();
-      const matches = typed.length === 0 || typed === sessionEmail.toLowerCase();
-      if (!matches) return;
+      if (typed.length === 0) return; // no email entered here → verify nothing
+      if (typed !== sessionEmail.toLowerCase()) return; // only the inputted email
 
       const wasVerified =
         localStorage.getItem("wizardVerifiedEmail")?.toLowerCase() === sessionEmail.toLowerCase();
       localStorage.setItem("wizardVerifiedEmail", sessionEmail);
       setVerifiedEmail(sessionEmail);
-      // If the user hadn't typed the email in this browser yet, fill it in so the
-      // verified state lines up with the input.
-      setFormData((prev: typeof formData) =>
-        prev.email?.trim() ? prev : { ...prev, email: sessionEmail },
-      );
 
       // A *fresh* verification (not a page-load rehydrate of an already-verified
       // email) gets an explicit confirmation the visitor can't miss, plus a

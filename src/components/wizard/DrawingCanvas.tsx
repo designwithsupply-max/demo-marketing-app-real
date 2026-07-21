@@ -190,6 +190,9 @@ export const DrawingCanvas = ({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [fabricCanvas, setFabricCanvas] = useState<FabricCanvas | null>(null);
   const [wallMeasurements, setWallMeasurements] = useState<WallMeasurement[]>([]);
+  // Per-wall validation message shown under its length input (e.g. when a letter
+  // is typed). Keyed by the wall's index.
+  const [measurementErrors, setMeasurementErrors] = useState<Record<number, string>>({});
   const [wallCount, setWallCount] = useState(0);
   const [undoStack, setUndoStack] = useState<string[]>([]);
   const gridLinesRef = useRef<any[]>([]);
@@ -695,6 +698,7 @@ export const DrawingCanvas = ({
 
     setWallCount(0);
     setWallMeasurements([]);
+    setMeasurementErrors({});
     wallLabelsRef.current = [];
     setUndoStack([]);
     if (!canvas.isDrawingMode) {
@@ -705,11 +709,31 @@ export const DrawingCanvas = ({
     toast.success(t("canvas.canvasCleared"));
   };
 
-  const handleMeasurementChange = (index: number, value: string) => {
-    const newVal = value === "" ? "" : Math.max(0, parseFloat(value) || 0).toString();
+  // Keep only digits and a single decimal point, so a wall length can never be
+  // stored as "12e" or "abc".
+  const sanitizeDecimal = (raw: string) => {
+    let out = raw.replace(/[^0-9.]/g, "");
+    const firstDot = out.indexOf(".");
+    if (firstDot !== -1) {
+      out = out.slice(0, firstDot + 1) + out.slice(firstDot + 1).replace(/\./g, "");
+    }
+    return out;
+  };
+
+  const handleMeasurementChange = (index: number, raw: string) => {
+    const clean = sanitizeDecimal(raw);
+    // If anything was stripped, the visitor typed a letter (or a stray symbol) —
+    // tell them why it didn't take.
+    const hadInvalid = clean !== raw;
+    setMeasurementErrors((prev) => {
+      const next = { ...prev };
+      if (hadInvalid) next[index] = t("canvas.errNumberOnly");
+      else delete next[index];
+      return next;
+    });
     setWallMeasurements((prev) => {
       const next = [...prev];
-      next[index] = { ...next[index], length: newVal };
+      next[index] = { ...next[index], length: clean };
       if (fabricCanvas) fireComplete(fabricCanvas, next);
       return next;
     });
@@ -821,14 +845,19 @@ export const DrawingCanvas = ({
                 </label>
                 <input
                   id={`wall-${wall.label}`}
-                  type="number"
-                  min="0"
-                  step="0.1"
+                  type="text"
+                  inputMode="decimal"
                   value={wall.length}
                   onChange={(e) => handleMeasurementChange(index, e.target.value)}
-                  className="w-full p-2 border border-brand-border rounded-md focus:ring-brand-copper focus:border-brand-copper"
+                  className={`w-full p-2 border rounded-md focus:ring-brand-copper focus:border-brand-copper ${
+                    measurementErrors[index] ? "border-red-500" : "border-brand-border"
+                  }`}
                   placeholder={`${t("canvas.enterWallLengths")} (${unit})`}
+                  aria-invalid={!!measurementErrors[index]}
                 />
+                {measurementErrors[index] && (
+                  <p className="text-xs text-red-500">{measurementErrors[index]}</p>
+                )}
               </div>
             ))}
           </div>

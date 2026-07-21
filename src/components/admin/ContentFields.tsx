@@ -17,10 +17,10 @@ export const Field = ({ label, value, onChange, placeholder }: { label: string; 
   </div>
 );
 
-export const AreaField = ({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) => (
+export const AreaField = ({ label, value, onChange, rows = 3 }: { label: string; value: string; onChange: (v: string) => void; rows?: number }) => (
   <div className="space-y-1.5">
     <Label className="text-xs uppercase tracking-[0.15em] text-brand-muted">{label}</Label>
-    <Textarea value={value} onChange={(e) => onChange(e.target.value)} rows={3} className="border-brand-border" />
+    <Textarea value={value} onChange={(e) => onChange(e.target.value)} rows={rows} className="border-brand-border" />
   </div>
 );
 

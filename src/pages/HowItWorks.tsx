@@ -144,7 +144,7 @@ export default function HowItWorks() {
                 <em className="text-[#C9A96E] not-italic">Comes to Life</em>
               </h1>
               <p className="text-white/50 text-sm leading-relaxed">
-                A transparent, stress-free journey from first conversation to final reveal. Our five-step process is designed around you.
+                A transparent, stress-free journey from first conversation to final reveal. Our process is designed around you.
               </p>
             </div>
           </div>
@@ -160,7 +160,7 @@ export default function HowItWorks() {
               className="text-[#1A1A18] font-bold mb-4"
               style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: "clamp(2.5rem, 5vw, 3.5rem)" }}
             >
-              Your 5-Step Transformation
+              Your {steps.length}-Step Transformation
             </h2>
             <p className="text-[#6B6B65] text-sm leading-relaxed max-w-xl mx-auto">
               Every project follows our proven process — designed to be stress-free for you and deliver exceptional results every time.
