@@ -132,7 +132,7 @@ export default function AdminTopBar({ onLogout }: AdminTopBarProps) {
                 <Link to="/admin" onClick={() => setMenuOpen(false)} className="inline-flex">
                     <Logo tone="dark" size="sm" />
                 </Link>
-                <p className="mt-3 text-[10px] uppercase tracking-[0.25em] text-brand-muted">Admin Dashboard</p>
+                {/* <p className="mt-3 text-[10px] uppercase tracking-[0.25em] text-brand-muted">Admin Dashboard</p> */}
             </div>
 
             <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-1">
