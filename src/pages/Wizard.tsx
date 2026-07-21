@@ -157,7 +157,11 @@ const Wizard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-brand-cream">
+    // overflow-x-clip stops the drawing canvas (which can be a touch wider than
+    // its container on small screens) from pushing the whole page sideways. The
+    // canvas keeps its own internal horizontal scroll; the fixed bottom nav is
+    // unaffected since fixed elements aren't clipped by an ancestor's overflow.
+    <div className="min-h-screen bg-brand-cream overflow-x-clip">
       <SeoHead
         title="3-Step Space Planner | Design & Supply"
         description="Enter your details, draw your space, upload photos, and submit for a live online CAD design call."

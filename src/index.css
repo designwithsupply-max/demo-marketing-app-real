@@ -156,13 +156,19 @@ All colors MUST be HSL.
   .animate-wizard-pulse { animation: none; }
 }
 
-/* Nudge the SalesCaptain chat launcher slightly toward the right edge so it no
-   longer sits under the bottom-right promo card. The widget renders its own
-   fixed-position iframe/launcher; a small translate shifts it wherever it lands
-   without needing to know its exact anchor. */
-#salescaptain-webchat,
+/* The SalesCaptain mount div is a full-width, in-flow element. It must NEVER be
+   transformed — shifting a 100%-wide element sideways drags the page's right
+   edge outward and creates horizontal scrolling. */
+#salescaptain-webchat {
+  transform: none !important;
+}
+
+/* Nudge only the actual launcher iframe (a small, fixed element) slightly right
+   so it clears the bottom-right promo card. Because the launcher is small and
+   sits near the corner, a small shift stays within the viewport and can't
+   create horizontal overflow. */
 #salescaptain-webchat iframe,
 iframe[src*="salescaptain"],
 iframe[id*="salescaptain"] {
-  transform: translateX(18px) !important;
+  transform: translateX(12px);
 }
