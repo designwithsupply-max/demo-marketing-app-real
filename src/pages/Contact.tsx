@@ -5,12 +5,8 @@ import { SeoHead } from "@/components/seo/SeoHead";
 import Link from "next/link";
 import { ArrowRight, Mail, Phone, Clock, Loader2 } from "lucide-react";
 import { useContactInfo } from "@/hooks/useContactInfo";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-
-// Web3Forms access key — delivers submissions to the inbox tied to the key.
-// Overridable via VITE_WEB3FORMS_KEY in .env.
-const WEB3FORMS_KEY =
-  (import.meta.env.VITE_WEB3FORMS_KEY as string | undefined);
 
 export default function Contact() {
   const [form, setForm] = useState({ name: "", email: "", phone: "", message: "" });
@@ -26,21 +22,16 @@ export default function Contact() {
     if (sending) return;
     setSending(true);
     try {
-      const res = await fetch("https://api.web3forms.com/submit", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Accept: "application/json" },
-        body: JSON.stringify({
-          access_key: WEB3FORMS_KEY || "112bbef5-e6b7-4184-8c62-7bf8aed86085",
-          subject: `New contact message from ${form.name}`,
-          from_name: "Design & Supply Website",
-          name: form.name,
-          email: form.email,
-          phone: form.phone,
-          message: form.message,
-        }),
+      // Messages land in the `contact_messages` table and are read by the admin
+      // dashboard at /admin/messages — no email hop in between.
+      const { error } = await supabase.from("contact_messages" as any).insert({
+        name: form.name.trim(),
+        email: form.email.trim(),
+        phone: form.phone.trim() || null,
+        message: form.message.trim(),
+        status: "new",
       });
-      const data = await res.json();
-      if (!data.success) throw new Error(data.message || "Failed to send.");
+      if (error) throw error;
       toast.success("Thanks! Your message has been sent — we'll be in touch shortly.");
       setForm({ name: "", email: "", phone: "", message: "" });
     } catch (err: any) {

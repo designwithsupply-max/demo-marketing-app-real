@@ -6,7 +6,7 @@ import { X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useSiteContent } from "@/hooks/useSiteContent";
-import { SITE_KEYS, DEFAULT_PROMO } from "@/lib/siteContent";
+import { SITE_KEYS, DEFAULT_PROMO, DEFAULT_FEATURES } from "@/lib/siteContent";
 
 /**
  * Small promotional card that slides in from the BOTTOM-RIGHT of the screen so
@@ -19,8 +19,11 @@ import { SITE_KEYS, DEFAULT_PROMO } from "@/lib/siteContent";
  */
 export const PromoPopup = () => {
     const { content } = useSiteContent(SITE_KEYS.promo, DEFAULT_PROMO);
+    // Admin master switch (/admin/settings) — overrides everything below it.
+    const { content: features } = useSiteContent(SITE_KEYS.features, DEFAULT_FEATURES);
     const { pathname } = useLocation();
     const isAdminRoute = pathname.startsWith("/admin");
+    const enabled = features.promoPopup && content.enabled;
 
     const [open, setOpen] = useState(false);
     const [email, setEmail] = useState("");
@@ -37,7 +40,7 @@ export const PromoPopup = () => {
 
     // ---- Appearance timer: wait `delaySeconds`, then reveal on a customer page.
     useEffect(() => {
-        if (!content.enabled) return;
+        if (!enabled) return;
         if (isAdminRoute) return; // customer pages only
         if (localStorage.getItem("promo_claimed")) return;
         if (sessionStorage.getItem("promo_shown")) return;
@@ -49,7 +52,7 @@ export const PromoPopup = () => {
             sessionStorage.setItem("promo_shown", "1");
         }, delayMs);
         return () => clearTimeout(timer);
-    }, [content.enabled, isAdminRoute, delayMs]);
+    }, [enabled, isAdminRoute, delayMs]);
 
     // ---- Auto-dismiss timer: hide after `autoDismissSeconds` unless engaged.
     const engagedRef = useRef(engaged);
@@ -89,7 +92,8 @@ export const PromoPopup = () => {
         }
     };
 
-    if (!open) return null;
+    // Also hides a card that is already on screen when an admin flips the switch.
+    if (!open || !enabled) return null;
 
     return (
         <div

@@ -6,6 +6,8 @@ import { WizardNav } from "@/components/wizard/WizardNav";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useSiteContent } from "@/hooks/useSiteContent";
+import { SITE_KEYS, DEFAULT_FEATURES } from "@/lib/siteContent";
 
 interface StepOneProps {
   formData: {
@@ -22,6 +24,10 @@ interface StepOneProps {
 
 export const StepOne = ({ formData, setFormData, onNext }: StepOneProps) => {
   const { t } = useLanguage();
+  // Admins can switch email verification off entirely (/admin/settings). When
+  // it's off the visitor moves straight to Step 2 and never sees a magic link.
+  const { content: features } = useSiteContent(SITE_KEYS.features, DEFAULT_FEATURES);
+  const verificationRequired = features.emailVerification;
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [verifiedEmail, setVerifiedEmail] = useState<string | null>(() =>
     localStorage.getItem("wizardVerifiedEmail")
@@ -66,7 +72,7 @@ export const StepOne = ({ formData, setFormData, onNext }: StepOneProps) => {
       // button to move on to Step 2. We key off `wasVerified` rather than the
       // auth event because a magic-link redirect can report the session via
       // getSession() (no event) or an INITIAL_SESSION event, not only SIGNED_IN.
-      if (!wasVerified && !celebratedRef.current) {
+      if (!wasVerified && !celebratedRef.current && verificationRequired) {
         celebratedRef.current = true;
         sessionStorage.removeItem("wizardAwaitingVerification");
         setModalStage("verified");
@@ -82,7 +88,7 @@ export const StepOne = ({ formData, setFormData, onNext }: StepOneProps) => {
     );
     return () => listener.subscription.unsubscribe();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [formData.email]);
+  }, [formData.email, verificationRequired]);
 
   const sendVerificationEmail = async () => {
     setSending(true);
@@ -212,8 +218,11 @@ export const StepOne = ({ formData, setFormData, onNext }: StepOneProps) => {
     setErrors(newErrors);
 
     if (Object.keys(newErrors).length === 0) {
-      // Email verification is mandatory before moving to Step 2.
-      if (verifiedEmail && verifiedEmail.toLowerCase() === formData.email.trim().toLowerCase()) {
+      // Email verification is mandatory before moving to Step 2 — unless an
+      // admin has turned the requirement off.
+      if (!verificationRequired) {
+        onNext();
+      } else if (verifiedEmail && verifiedEmail.toLowerCase() === formData.email.trim().toLowerCase()) {
         onNext();
       } else {
         setModalStage("confirm");

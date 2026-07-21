@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
@@ -18,8 +18,11 @@ import {
     Newspaper,
     Gift,
     Mail,
+    MessagesSquare,
+    SlidersHorizontal,
     FolderOpen,
 } from "lucide-react";
+import Logo from "@/components/layout/Logo";
 
 interface AdminTopBarProps {
     onLogout?: () => void;
@@ -27,6 +30,8 @@ interface AdminTopBarProps {
 
 const navLinks = [
     { to: "/admin", label: "Submissions", icon: Inbox },
+    { to: "/admin/messages", label: "Contact Messages", icon: MessagesSquare },
+    { to: "/admin/settings", label: "Settings", icon: SlidersHorizontal },
     { to: "/admin/content", label: "Homepage", icon: Home },
     { to: "/admin/faqs", label: "FAQs", icon: HelpCircle },
     { to: "/admin/how-it-works", label: "How It Works", icon: ListChecks },
@@ -43,6 +48,26 @@ export default function AdminTopBar({ onLogout }: AdminTopBarProps) {
     const navigate = useNavigate();
     const location = useLocation();
     const [menuOpen, setMenuOpen] = useState(false);
+    // Unread ("new") contact messages, shown as a badge on the Contact Messages
+    // link so a fresh enquiry is visible from any admin page.
+    const [unreadCount, setUnreadCount] = useState(0);
+
+    useEffect(() => {
+        let cancelled = false;
+        (async () => {
+            const { count, error } = await supabase
+                .from("contact_messages" as any)
+                .select("id", { count: "exact", head: true })
+                .eq("status", "new");
+            // Silent on error — the badge is a nicety, and the table may not
+            // exist yet if the migration hasn't been applied.
+            if (!cancelled && !error) setUnreadCount(count ?? 0);
+        })();
+        return () => {
+            cancelled = true;
+        };
+        // Re-check on navigation so the badge clears after triaging the inbox.
+    }, [location.pathname]);
 
     const handleLogout = async () => {
         try {
@@ -64,15 +89,10 @@ export default function AdminTopBar({ onLogout }: AdminTopBarProps) {
                 {/* Top row: brand + actions */}
                 <div className="py-3 sm:py-4 flex items-center justify-between gap-2">
                     <div className="flex items-center gap-3 min-w-0">
-                        <div className="w-9 h-9 shrink-0 rounded-[10px] bg-brand-espresso text-white flex items-center justify-center font-serif font-bold">
-                            D
-                        </div>
-                        <div className="min-w-0">
-                            <p className="text-brand-espresso font-semibold leading-tight truncate">Admin Dashboard</p>
-                            <p className="hidden sm:block text-[11px] uppercase tracking-[0.2em] text-brand-muted">
-                                Design &amp; Supply
-                            </p>
-                        </div>
+                        <Logo tone="dark" size="sm" />
+                        <p className="hidden sm:block text-brand-espresso font-semibold leading-tight truncate border-l border-brand-border pl-3">
+                            Admin Dashboard
+                        </p>
                     </div>
 
                     {/* Desktop actions */}
@@ -120,6 +140,11 @@ export default function AdminTopBar({ onLogout }: AdminTopBarProps) {
                             >
                                 <Icon className="w-3.5 h-3.5" />
                                 {link.label}
+                                {link.to === "/admin/messages" && unreadCount > 0 && (
+                                    <span className="ml-0.5 min-w-[18px] h-[18px] px-1 rounded-full bg-brand-copper text-white text-[10px] font-semibold flex items-center justify-center">
+                                        {unreadCount}
+                                    </span>
+                                )}
                             </Link>
                         );
                     })}
@@ -145,6 +170,11 @@ export default function AdminTopBar({ onLogout }: AdminTopBarProps) {
                                 >
                                     <Icon className="w-4 h-4 shrink-0" />
                                     {link.label}
+                                    {link.to === "/admin/messages" && unreadCount > 0 && (
+                                        <span className="ml-auto min-w-[20px] h-5 px-1.5 rounded-full bg-brand-copper text-white text-[11px] font-semibold flex items-center justify-center">
+                                            {unreadCount}
+                                        </span>
+                                    )}
                                 </Link>
                             );
                         })}

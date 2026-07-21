@@ -17,11 +17,20 @@ interface DrawingCanvasProps {
   unit: "cm" | "in";
   /** Space type decides which predetermined layouts are offered. */
   spaceType?: "Closet" | "Kitchen" | "Garage";
+  /**
+   * Previously saved canvas contents (from `onDrawingComplete`'s `canvasJson`).
+   * Supplied when a visitor returns to a planner they didn't finish, so the
+   * walls they drew are put back on the canvas instead of starting blank.
+   */
+  initialCanvasJson?: any;
+  /** The wall lengths that were typed in alongside `initialCanvasJson`. */
+  initialWallMeasurements?: WallMeasurement[];
   onDrawingComplete: (
     dataUrl: string,
     wallMeasurements: WallMeasurement[],
     totalPerimeter: number,
     totalArea: number,
+    canvasJson: any,
   ) => void;
 }
 
@@ -29,6 +38,12 @@ interface WallMeasurement {
   label: string;
   length: string;
 }
+
+/**
+ * Extra properties serialised with the canvas so a restored drawing can be
+ * re-linked to its wall labels (which wall goes with which "A"/"B"/"C" text).
+ */
+const PERSISTED_PROPS = ["wallUid", "isWallLabel", "wallChar"];
 
 const MAX_WALLS = 7;
 
@@ -164,7 +179,14 @@ const getLayouts = (spaceType?: "Closet" | "Kitchen" | "Garage"): LayoutTemplate
   return CLOSET_LAYOUTS;
 };
 
-export const DrawingCanvas = ({ spaceId, unit, spaceType, onDrawingComplete }: DrawingCanvasProps) => {
+export const DrawingCanvas = ({
+  spaceId,
+  unit,
+  spaceType,
+  initialCanvasJson,
+  initialWallMeasurements,
+  onDrawingComplete,
+}: DrawingCanvasProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [fabricCanvas, setFabricCanvas] = useState<FabricCanvas | null>(null);
   const [wallMeasurements, setWallMeasurements] = useState<WallMeasurement[]>([]);
@@ -195,10 +217,49 @@ export const DrawingCanvas = ({ spaceId, unit, spaceType, onDrawingComplete }: D
         const sorted = [...lengths].sort((a, b) => a - b);
         area = sorted[0] * sorted[sorted.length - 1];
       }
-      onDrawingCompleteRef.current(dataUrl, measurements, perimeter, area);
+      // The vector form of the drawing, so a returning visitor gets an editable
+      // canvas back rather than just the flat PNG shown in the summary. Grid
+      // lines are flagged `excludeFromExport` and so are left out.
+      let canvasJson: any = null;
+      try {
+        canvasJson = canvas.toObject(PERSISTED_PROPS);
+      } catch {
+        canvasJson = null;
+      }
+      onDrawingCompleteRef.current(dataUrl, measurements, perimeter, area, canvasJson);
     },
     [],
   );
+
+  /** Tie a wall shape to its letter label so the pair survives serialisation. */
+  const stampWall = useCallback((shape: any, text: any, char: string) => {
+    const uid = crypto.randomUUID();
+    shape.wallUid = uid;
+    text.wallUid = uid;
+    text.isWallLabel = true;
+    text.wallChar = char;
+  }, []);
+
+  /** Keep a label centred on its wall as that wall is moved/scaled/rotated. */
+  const trackLabel = useCallback(
+    (canvas: FabricCanvas, shape: any, text: any, offsetY: number) => {
+      const sync = () => {
+        const b = shape.getBoundingRect();
+        text.set({ left: b.left + b.width / 2, top: b.top + b.height / 2 - offsetY });
+        canvas.renderAll();
+      };
+      shape.on("moving", sync);
+      shape.on("scaling", sync);
+      shape.on("rotating", sync);
+    },
+    [],
+  );
+
+  // Restore inputs are read once, when the canvas for a space is created. They
+  // live in a ref so a parent re-render can't retrigger the (expensive) canvas
+  // rebuild effect below.
+  const restoreRef = useRef({ json: initialCanvasJson, walls: initialWallMeasurements });
+  restoreRef.current = { json: initialCanvasJson, walls: initialWallMeasurements };
 
   useEffect(() => {
     if (!canvasRef.current) return;
@@ -220,6 +281,7 @@ export const DrawingCanvas = ({ spaceId, unit, spaceType, onDrawingComplete }: D
     brush.width = 3;
     canvas.freeDrawingBrush = brush;
 
+    const drawGrid = () => {
     const gridSize = 20;
     const gridLines: any[] = [];
     for (let i = 0; i < (canvas.width || 0) / gridSize; i++) {
@@ -227,6 +289,9 @@ export const DrawingCanvas = ({ spaceId, unit, spaceType, onDrawingComplete }: D
         stroke: "#f0e7dc",
         selectable: false,
         evented: false,
+        // Grid lines are redrawn on every mount, so they must never be part of
+        // the saved drawing — otherwise they'd double up on each restore.
+        excludeFromExport: true,
       });
       canvas.add(line);
       canvas.sendObjectToBack(line);
@@ -237,12 +302,17 @@ export const DrawingCanvas = ({ spaceId, unit, spaceType, onDrawingComplete }: D
         stroke: "#f0e7dc",
         selectable: false,
         evented: false,
+        // Grid lines are redrawn on every mount, so they must never be part of
+        // the saved drawing — otherwise they'd double up on each restore.
+        excludeFromExport: true,
       });
       canvas.add(line);
       canvas.sendObjectToBack(line);
       gridLines.push(line);
     }
     gridLinesRef.current = gridLines;
+    };
+    drawGrid();
 
     const handlePathCreated = (e: any) => {
       if (wallLabelsRef.current.length >= MAX_WALLS) {
@@ -296,23 +366,9 @@ export const DrawingCanvas = ({ spaceId, unit, spaceType, onDrawingComplete }: D
             originY: "center",
           });
           canvas.add(text);
+          stampWall(straightLine, text, labelChar);
           wallLabelsRef.current.push({ shape: straightLine, label: text });
-
-          straightLine.on("moving", () => {
-            const b = straightLine.getBoundingRect();
-            text.set({ left: b.left + b.width / 2, top: b.top + b.height / 2 - 10 });
-            canvas.renderAll();
-          });
-          straightLine.on("scaling", () => {
-            const b = straightLine.getBoundingRect();
-            text.set({ left: b.left + b.width / 2, top: b.top + b.height / 2 - 10 });
-            canvas.renderAll();
-          });
-          straightLine.on("rotating", () => {
-            const b = straightLine.getBoundingRect();
-            text.set({ left: b.left + b.width / 2, top: b.top + b.height / 2 - 10 });
-            canvas.renderAll();
-          });
+          trackLabel(canvas, straightLine, text, 10);
 
           setWallMeasurements((prev) => {
             const next = [...prev, { label: labelChar, length: "" }];
@@ -351,23 +407,9 @@ export const DrawingCanvas = ({ spaceId, unit, spaceType, onDrawingComplete }: D
         originY: "center",
       });
       canvas.add(text);
+      stampWall(path, text, labelChar);
       wallLabelsRef.current.push({ shape: path, label: text });
-
-      path.on("moving", () => {
-        const b = path.getBoundingRect();
-        text.set({ left: b.left + b.width / 2, top: b.top + b.height / 2 });
-        canvas.renderAll();
-      });
-      path.on("scaling", () => {
-        const b = path.getBoundingRect();
-        text.set({ left: b.left + b.width / 2, top: b.top + b.height / 2 });
-        canvas.renderAll();
-      });
-      path.on("rotating", () => {
-        const b = path.getBoundingRect();
-        text.set({ left: b.left + b.width / 2, top: b.top + b.height / 2 });
-        canvas.renderAll();
-      });
+      trackLabel(canvas, path, text, 0);
 
       setWallMeasurements((prev) => {
         const next = [...prev, { label: labelChar, length: "" }];
@@ -387,6 +429,67 @@ export const DrawingCanvas = ({ spaceId, unit, spaceType, onDrawingComplete }: D
     wallLabelsRef.current = [];
     setUndoStack([]);
 
+    // ---- Restore a drawing this visitor made earlier -------------------------
+    // Without this the canvas always came back blank on a return visit, which is
+    // why previously-entered rooms and measurements appeared to be lost.
+    let disposed = false;
+    const { json: savedJson, walls: savedWalls } = restoreRef.current;
+    if (savedJson) {
+      isRestoringRef.current = true;
+      canvas
+        .loadFromJSON(savedJson)
+        .then(() => {
+          if (disposed) return;
+          // loadFromJSON wipes the canvas, so the grid has to go back on.
+          drawGrid();
+          gridLinesRef.current.forEach((line) => canvas.sendObjectToBack(line));
+
+          // Re-link every wall shape to its letter label.
+          const restored: Array<{ shape: any; label: any }> = [];
+          const objects = canvas.getObjects().filter((o) => !gridLinesRef.current.includes(o));
+
+          objects.forEach((obj: any) => {
+            if (obj instanceof Group) {
+              // Predetermined layout: the labels travel inside the group.
+              const inner = (obj._objects || []).filter((c: any) => c.isWallLabel);
+              inner.forEach((lbl: any) => restored.push({ shape: obj, label: lbl }));
+              return;
+            }
+            if (obj.isWallLabel) return; // handled via its shape below
+            const label = objects.find((o: any) => o.isWallLabel && o.wallUid && o.wallUid === obj.wallUid);
+            if (label) {
+              restored.push({ shape: obj, label });
+              trackLabel(canvas, obj, label, obj.type === "line" ? 10 : 0);
+            }
+          });
+
+          // Keep A, B, C… in their original order so the length inputs line up
+          // with the letters drawn on the canvas.
+          restored.sort((a, b) => String(a.label.wallChar || "").localeCompare(String(b.label.wallChar || "")));
+          wallLabelsRef.current = restored;
+          setWallCount(restored.length);
+
+          if (savedWalls && savedWalls.length > 0) {
+            setWallMeasurements(savedWalls);
+          } else if (restored.length > 0) {
+            setWallMeasurements(
+              restored.map((r, i) => ({ label: String(r.label.wallChar || String.fromCharCode(65 + i)), length: "" })),
+            );
+          }
+
+          // A placed layout template is meant to be dragged, not drawn over.
+          if (objects.some((o) => o instanceof Group)) canvas.isDrawingMode = false;
+
+          canvas.renderAll();
+        })
+        .catch((err) => {
+          console.error("Could not restore the saved drawing:", err);
+        })
+        .finally(() => {
+          isRestoringRef.current = false;
+        });
+    }
+
     const handleResize = () => {
       const mobile = window.innerWidth < 768;
       const w = mobile ? Math.min(window.innerWidth - 60, 600) : 800;
@@ -397,11 +500,12 @@ export const DrawingCanvas = ({ spaceId, unit, spaceType, onDrawingComplete }: D
     window.addEventListener("resize", handleResize);
 
     return () => {
+      disposed = true;
       window.removeEventListener("resize", handleResize);
       canvas.off("path:created", handlePathCreated);
       canvas.dispose();
     };
-  }, [spaceId, fireComplete]);
+  }, [spaceId, fireComplete, stampWall, trackLabel]);
 
   useEffect(() => {
     if (!fabricCanvas) return;
@@ -444,8 +548,8 @@ export const DrawingCanvas = ({ spaceId, unit, spaceType, onDrawingComplete }: D
 
     const currentLabelIdx = wallLabelsRef.current.length;
 
-    const makeLabel = (char: string, x: number, y: number) =>
-      new FabricText(char, {
+    const makeLabel = (char: string, x: number, y: number) => {
+      const label = new FabricText(char, {
         left: x,
         top: y,
         originX: "center",
@@ -456,6 +560,11 @@ export const DrawingCanvas = ({ spaceId, unit, spaceType, onDrawingComplete }: D
         selectable: false,
         evented: false,
       });
+      // Marked so a restored group can be re-linked to its wall labels.
+      (label as any).isWallLabel = true;
+      (label as any).wallChar = char;
+      return label;
+    };
 
     const mk = (i: number, x: number, y: number) => ({
       char: String.fromCharCode(65 + currentLabelIdx + i),
@@ -592,7 +701,7 @@ export const DrawingCanvas = ({ spaceId, unit, spaceType, onDrawingComplete }: D
       canvas.isDrawingMode = true;
     }
     canvas.renderAll();
-    onDrawingComplete("", [], 0, 0);
+    onDrawingComplete("", [], 0, 0, null);
     toast.success(t("canvas.canvasCleared"));
   };
 

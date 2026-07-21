@@ -36,6 +36,8 @@ import AdminSiteContent from "./pages/admin/SiteContent";
 import AdminHowItWorks from "./pages/admin/HowItWorks";
 import AdminAboutUs from "./pages/admin/AboutUs";
 import AdminPromo from "./pages/admin/Promo";
+import AdminMessages from "./pages/admin/Messages";
+import AdminSettings from "./pages/admin/Settings";
 
 const queryClient = new QueryClient();
 
@@ -97,6 +99,12 @@ const App = () => (
           </ProtectedRoute>} />
           <Route path="/admin/promo" element={<ProtectedRoute>
             <AdminPromo />
+          </ProtectedRoute>} />
+          <Route path="/admin/messages" element={<ProtectedRoute>
+            <AdminMessages />
+          </ProtectedRoute>} />
+          <Route path="/admin/settings" element={<ProtectedRoute>
+            <AdminSettings />
           </ProtectedRoute>} />
 
           <Route path="/how-it-works" element={<HowItWorks />} />

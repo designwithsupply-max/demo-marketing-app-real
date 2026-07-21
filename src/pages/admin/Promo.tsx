@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
@@ -115,18 +115,20 @@ const AdminPromo = () => {
               saving={saving}
               onSave={save}
             >
-              {/* Enabled toggle */}
-              <label className="flex items-center gap-3 rounded-lg border border-brand-border bg-brand-sand/30 p-4 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={promo.enabled}
-                  onChange={(e) => setPromo({ ...promo, enabled: e.target.checked })}
-                  className="w-4 h-4 accent-brand-copper"
-                />
-                <span className="text-sm font-medium text-brand-espresso">
-                  Show the promo popup {promo.enabled ? "(currently ON)" : "(currently OFF)"}
-                </span>
-              </label>
+              {/* On/off lives on the Settings page so there is only one switch. */}
+              <div className="rounded-lg border border-brand-border bg-brand-sand/30 p-4 text-sm">
+                <span className="font-medium text-brand-espresso">
+                  This popup is currently{" "}
+                  <span className={promo.enabled ? "text-emerald-600" : "text-brand-muted"}>
+                    {promo.enabled ? "ON" : "OFF"}
+                  </span>
+                  .
+                </span>{" "}
+                <Link to="/admin/settings" className="text-brand-copper underline">
+                  Turn it on or off in Settings
+                </Link>
+                .
+              </div>
 
               <Field label="Eyebrow (small label)" value={promo.eyebrow} onChange={(v) => setPromo({ ...promo, eyebrow: v })} />
               <Field label="Title" value={promo.title} onChange={(v) => setPromo({ ...promo, title: v })} />

@@ -223,6 +223,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
+import Logo from "@/components/layout/Logo";
 
 // Payment link shown in the header "Pay Now" button.
 // Same secure Helcim hosted checkout used in the wizard and footer.
@@ -285,26 +286,8 @@ export const Navigation = () => {
         <nav className="max-w-7xl mx-auto px-6 lg:px-10 flex lg:grid lg:grid-cols-3 items-center justify-between h-20">
           {/* Column 1: Logo */}
           <div className="flex justify-start">
-            <Link href="/" className="flex items-center gap-3 group">
-              <div
-                className={`w-9 h-9 rounded-[10px] flex items-center justify-center font-serif font-bold text-[13px] tracking-tight transition-all duration-500 ${isLightState
-                    ? "bg-brand-espresso text-white"
-                    : "border border-white/20 text-white bg-white/5"
-                  }`}
-              >
-                D&amp;S
-              </div>
-              <div className="flex flex-col leading-none">
-                <span
-                  className={`font-serif text-[19px] font-bold tracking-tight transition-colors duration-500 ${isLightState ? "text-brand-espresso" : "text-white"
-                    }`}
-                >
-                  Design
-                </span>
-                <span className="text-brand-copper-light font-sans text-[9px] tracking-[0.18em] uppercase font-semibold mt-0.5">
-                  & Supply
-                </span>
-              </div>
+            <Link href="/" className="flex items-center group">
+              <Logo tone={isLightState ? "dark" : "light"} />
             </Link>
           </div>
 

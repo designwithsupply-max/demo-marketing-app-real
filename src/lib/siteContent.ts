@@ -24,7 +24,24 @@ export const SITE_KEYS = {
   howItWorksSteps: "howitworks_steps",
   about: "about_page",
   promo: "promo_popup",
+  features: "site_features",
 } as const;
+
+/** Master on/off switches for optional site behaviour (see /admin/settings). */
+export interface FeaturesContent {
+  /**
+   * When false, Step 1 of the Space Planner stops asking visitors to confirm
+   * their address by magic link — they continue straight to Step 2.
+   */
+  emailVerification: boolean;
+  /** When false the bottom-right promo card never appears, whatever its own settings say. */
+  promoPopup: boolean;
+}
+
+export const DEFAULT_FEATURES: FeaturesContent = {
+  emailVerification: true,
+  promoPopup: true,
+};
 
 export interface HeroContent {
   eyebrow: string;

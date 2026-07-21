@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Globe, Share2, ExternalLink, Mail, Phone, MapPin } from "lucide-react";
 import { useContactInfo } from "@/hooks/useContactInfo";
+import Logo from "@/components/layout/Logo";
 
 export default function Footer() {
   const { contactInfo } = useContactInfo();
@@ -16,14 +17,8 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
           {/* Brand */}
           <div className="lg:col-span-1">
-            <Link href="/" className="inline-flex items-center gap-3 group mb-6">
-              <div className="w-8 h-8 border border-[#C9A96E] flex items-center justify-center">
-                <span className="text-[#C9A96E] text-[11px] font-bold tracking-tight">D&amp;S</span>
-              </div>
-              <div>
-                <span className="text-white font-light tracking-[0.2em] text-sm uppercase">Design</span>
-                <span className="text-[#C9A96E] font-light tracking-[0.2em] text-sm uppercase"> & Supply</span>
-              </div>
+            <Link href="/" className="inline-flex items-center group mb-6">
+              <Logo tone="light" />
             </Link>
             <p className="text-sm leading-relaxed mb-6">
               Premium custom closet design and installation. Transforming spaces into luxury storage experiences since 2015.

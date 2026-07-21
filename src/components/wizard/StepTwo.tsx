@@ -36,7 +36,9 @@ const formatBytes = (bytes: number): string => {
 export const StepTwo = ({ spaces, setSpaces, files, setFiles, additionalNotes, setAdditionalNotes, onNext, onBack, formData }: StepTwoProps) => {
   const { t } = useLanguage();
   const [activeSpaceId, setActiveSpaceId] = useState<string | null>(spaces.length > 0 ? spaces[0].id : null);
-  const [unit, setUnit] = useState<"cm" | "in">("in");
+  // Adopt the unit the saved spaces were measured in, so a restored draft
+  // doesn't silently re-label centimetre measurements as inches.
+  const [unit, setUnit] = useState<"cm" | "in">(spaces[0]?.unit ?? "in");
   const [spacesError, setSpacesError] = useState("");
   const [uploadError, setUploadError] = useState("");
 
@@ -121,10 +123,11 @@ export const StepTwo = ({ spaces, setSpaces, files, setFiles, additionalNotes, s
     wallMeasurements: { label: string; length: string }[],
     totalPerimeter: number,
     totalArea: number,
+    canvasJson: any,
   ) => {
     setSpaces(prev => prev.map(s =>
       s.id === spaceId
-        ? { ...s, drawingData: dataUrl, wallMeasurements, totalPerimeter, totalArea }
+        ? { ...s, drawingData: dataUrl, wallMeasurements, totalPerimeter, totalArea, canvasJson }
         : s
     ));
   }, [setSpaces]);
@@ -209,7 +212,7 @@ export const StepTwo = ({ spaces, setSpaces, files, setFiles, additionalNotes, s
     if (!e.target.files) return;
     const selected = Array.from(e.target.files);
 
-    const usedBytes = files.reduce((sum, f) => sum + f.file.size, 0);
+    const usedBytes = files.reduce((sum, f) => sum + f.size, 0);
     let runningTotal = usedBytes;
     const accepted: File[] = [];
     const errors: string[] = [];
@@ -239,9 +242,12 @@ export const StepTwo = ({ spaces, setSpaces, files, setFiles, additionalNotes, s
 
     if (accepted.length === 0) return;
 
-    const newFiles = accepted.map(f => ({
+    const newFiles: UploadedFile[] = accepted.map(f => ({
       file: f,
       id: crypto.randomUUID(),
+      name: f.name,
+      size: f.size,
+      type: f.type,
       preview: URL.createObjectURL(f),
       uploadStatus: "pending" as const
     }));
@@ -251,10 +257,10 @@ export const StepTwo = ({ spaces, setSpaces, files, setFiles, additionalNotes, s
     newFiles.forEach(async (uploadedFile) => {
       setFiles(prev => prev.map(f => f.id === uploadedFile.id ? { ...f, uploadStatus: "uploading" } : f));
       try {
-        const filePath = await uploadFileToSupabase(uploadedFile.file);
+        const filePath = await uploadFileToSupabase(uploadedFile.file!);
         setFiles(prev => prev.map(f => f.id === uploadedFile.id ? { ...f, uploadStatus: "success", filePath } : f));
       } catch (error) {
-        toast.error(`${t("s2.tFailUpload")} ${uploadedFile.file.name}`);
+        toast.error(`${t("s2.tFailUpload")} ${uploadedFile.name}`);
         setFiles(prev => prev.map(f => f.id === uploadedFile.id ? { ...f, uploadStatus: "error" } : f));
       }
     });
@@ -379,8 +385,11 @@ export const StepTwo = ({ spaces, setSpaces, files, setFiles, additionalNotes, s
                 spaceId={space.id}
                 unit={unit}
                 spaceType={space.type}
-                onDrawingComplete={(dataUrl, wallMeasurements, totalPerimeter, totalArea) =>
-                  handleDrawingComplete(space.id, dataUrl, wallMeasurements, totalPerimeter, totalArea)
+                // Put back whatever this visitor drew last time they were here.
+                initialCanvasJson={space.canvasJson}
+                initialWallMeasurements={space.wallMeasurements}
+                onDrawingComplete={(dataUrl, wallMeasurements, totalPerimeter, totalArea, canvasJson) =>
+                  handleDrawingComplete(space.id, dataUrl, wallMeasurements, totalPerimeter, totalArea, canvasJson)
                 }
               />
 
@@ -444,7 +453,7 @@ export const StepTwo = ({ spaces, setSpaces, files, setFiles, additionalNotes, s
 
         {/* Capacity meter */}
         {(() => {
-          const usedBytes = files.reduce((sum, f) => sum + f.file.size, 0);
+          const usedBytes = files.reduce((sum, f) => sum + f.size, 0);
           const remaining = Math.max(0, MAX_TOTAL_SIZE - usedBytes);
           const pct = Math.min(100, (usedBytes / MAX_TOTAL_SIZE) * 100);
           const nearFull = pct >= 90;
@@ -468,10 +477,10 @@ export const StepTwo = ({ spaces, setSpaces, files, setFiles, additionalNotes, s
           {files.map(file => (
             <div key={file.id} className="flex items-center justify-between p-3 bg-brand-sand/50 rounded-lg">
               <div className="flex items-center gap-3 min-w-0">
-                {file.file.type.startsWith('image/') ? <img src={file.preview} alt="preview" className="w-10 h-10 object-cover rounded flex-shrink-0" /> : <div className="w-10 h-10 rounded bg-brand-sand flex items-center justify-center flex-shrink-0"><Upload size={20} /></div>}
+                {file.type.startsWith('image/') ? <img src={file.preview} alt="preview" className="w-10 h-10 object-cover rounded flex-shrink-0" /> : <div className="w-10 h-10 rounded bg-brand-sand flex items-center justify-center flex-shrink-0"><Upload size={20} /></div>}
                 <div className="min-w-0">
-                  <p className="text-sm font-medium text-brand-espresso truncate">{file.file.name}</p>
-                  <p className="text-xs text-brand-muted">{formatBytes(file.file.size)}</p>
+                  <p className="text-sm font-medium text-brand-espresso truncate">{file.name}</p>
+                  <p className="text-xs text-brand-muted">{formatBytes(file.size)}</p>
                 </div>
               </div>
               <div className="flex items-center gap-2 flex-shrink-0">

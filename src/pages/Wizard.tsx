@@ -6,13 +6,21 @@ import { StepOne } from "@/components/wizard/StepOne";
 import { StepTwo } from "@/components/wizard/StepTwo";
 import { StepThree } from "@/components/wizard/StepThree";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { supabase } from "@/integrations/supabase/client";
+import { RotateCcw, X } from "lucide-react";
 
 export interface UploadedFile {
-  file: File;
   id: string;
+  /** Name/size/type are kept separately from `file` so a restored draft (which
+   *  has no `File` object) still renders in the list and counts toward quota. */
+  name: string;
+  size: number;
+  type: string;
   preview: string;
   uploadStatus: "pending" | "uploading" | "success" | "error";
   filePath?: string;
+  /** Absent for entries rehydrated from a previous visit. */
+  file?: File;
 }
 
 export interface Space {
@@ -29,6 +37,12 @@ export interface Space {
   layout?: string;
   /** Storage priorities in tap order: index 0 = 1st (green), 1 = 2nd (yellow), 2 = 3rd (red). */
   storagePriorities?: string[];
+  /**
+   * The editable (vector) form of the drawing, as produced by DrawingCanvas.
+   * `drawingData` is only a flat PNG for the summary and the admin dashboard —
+   * this is what lets a returning visitor keep drawing where they left off.
+   */
+  canvasJson?: any;
 }
 
 const STORAGE_KEYS = {
@@ -36,6 +50,7 @@ const STORAGE_KEYS = {
   formData: "wizardFormData",
   spaces: "wizardSpaces",
   notes: "wizardNotes",
+  files: "wizardFiles",
 };
 
 const INITIAL_FORM = {
@@ -45,45 +60,90 @@ const INITIAL_FORM = {
   postalCode: "",
 };
 
+/** Read + parse a saved value, tolerating anything corrupt left behind. */
+const readJson = <T,>(key: string, fallback: T): T => {
+  try {
+    const saved = localStorage.getItem(key);
+    return saved ? (JSON.parse(saved) as T) : fallback;
+  } catch {
+    return fallback;
+  }
+};
+
+/**
+ * Persist, but never let a full/blocked localStorage (private browsing, quota
+ * exceeded by a large drawing) throw and take the planner down with it.
+ */
+const writeJson = (key: string, value: unknown) => {
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+  } catch (err) {
+    console.warn(`Could not save "${key}" — the draft may not survive a refresh.`, err);
+  }
+};
+
 const Wizard = () => {
   const { language, setLanguage, t } = useLanguage();
   const [currentStep, setCurrentStep] = useState(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.step);
-    return saved ? parseInt(saved) : 0;
+    const saved = parseInt(localStorage.getItem(STORAGE_KEYS.step) ?? "", 10);
+    return Number.isFinite(saved) && saved >= 0 && saved <= 2 ? saved : 0;
   });
 
-  const [formData, setFormData] = useState(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.formData);
-    return saved ? JSON.parse(saved) : INITIAL_FORM;
-  });
+  const [formData, setFormData] = useState(() => ({
+    ...INITIAL_FORM,
+    ...readJson(STORAGE_KEYS.formData, {}),
+  }));
 
-  const [spaces, setSpaces] = useState<Space[]>(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.spaces);
-    return saved ? JSON.parse(saved) : [];
-  });
+  const [spaces, setSpaces] = useState<Space[]>(() => readJson<Space[]>(STORAGE_KEYS.spaces, []));
 
-  const [files, setFiles] = useState<UploadedFile[]>([]);
+  // Only files that finished uploading are restorable: the browser can't hand a
+  // `File` object back after a reload, but the copy already in Supabase storage
+  // is all the submission actually needs.
+  const [files, setFiles] = useState<UploadedFile[]>(() =>
+    readJson<UploadedFile[]>(STORAGE_KEYS.files, []).map((f) => ({
+      ...f,
+      file: undefined,
+      preview:
+        f.filePath
+          ? supabase.storage.from("images").getPublicUrl(f.filePath).data.publicUrl
+          : f.preview,
+    })),
+  );
 
-  const [additionalNotes, setAdditionalNotes] = useState(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.notes);
-    return saved || "";
-  });
+  const [additionalNotes, setAdditionalNotes] = useState(
+    () => localStorage.getItem(STORAGE_KEYS.notes) || "",
+  );
+
+  // A draft is worth mentioning only if there's real work in it.
+  const [showResumed, setShowResumed] = useState(
+    () => readJson<Space[]>(STORAGE_KEYS.spaces, []).length > 0,
+  );
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEYS.step, currentStep.toString());
   }, [currentStep]);
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.formData, JSON.stringify(formData));
+    writeJson(STORAGE_KEYS.formData, formData);
   }, [formData]);
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.spaces, JSON.stringify(spaces));
+    writeJson(STORAGE_KEYS.spaces, spaces);
   }, [spaces]);
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEYS.notes, additionalNotes);
   }, [additionalNotes]);
+
+  useEffect(() => {
+    // `file` and blob: previews are per-session, so they're stripped on the way out.
+    writeJson(
+      STORAGE_KEYS.files,
+      files
+        .filter((f) => f.uploadStatus === "success" && f.filePath)
+        .map(({ file, preview, ...rest }) => rest),
+    );
+  }, [files]);
 
   const clearStorage = () => {
     Object.values(STORAGE_KEYS).forEach((key) => localStorage.removeItem(key));
@@ -145,6 +205,43 @@ const Wizard = () => {
               {t("wz.title")}
             </h1>
           </div>
+
+          {/* Returning visitors: make it obvious their work is still here. */}
+          {showResumed && (
+            <div className="mb-6 flex items-start gap-3 rounded-xl border border-brand-copper/40 bg-brand-copper/10 px-4 py-3">
+              <RotateCcw className="w-4 h-4 mt-0.5 text-brand-copper flex-shrink-0" />
+              <p className="flex-1 text-sm text-brand-espresso">
+                <span className="font-semibold">Welcome back.</span> We saved{" "}
+                {spaces.length === 1 ? "the space" : `all ${spaces.length} spaces`} you were working on
+                — measurements, drawings and photos included. Carry on where you left off, or{" "}
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (!window.confirm("Start over? This clears the rooms and measurements you saved.")) return;
+                    clearStorage();
+                    setSpaces([]);
+                    setFiles([]);
+                    setAdditionalNotes("");
+                    setFormData(INITIAL_FORM);
+                    setCurrentStep(0);
+                    setShowResumed(false);
+                  }}
+                  className="underline font-medium hover:text-brand-copper-dark"
+                >
+                  start over
+                </button>
+                .
+              </p>
+              <button
+                type="button"
+                onClick={() => setShowResumed(false)}
+                aria-label="Dismiss"
+                className="text-brand-muted hover:text-brand-espresso"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          )}
 
           <ProgressBar currentStep={currentStep} totalSteps={3} />
 
