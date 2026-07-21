@@ -249,7 +249,7 @@ const AdminFaqs = () => {
     return (
       <>
         <AdminTopBar />
-        <div className="min-h-screen bg-brand-cream lg:pl-64 flex items-center justify-center">
+        <div className="min-h-screen bg-brand-cream lg:pl-72 flex items-center justify-center">
           <Loader2 className="w-8 h-8 animate-spin text-brand-copper" />
         </div>
       </>
@@ -260,7 +260,7 @@ const AdminFaqs = () => {
     return (
       <>
         <AdminTopBar />
-        <div className="min-h-screen bg-brand-cream lg:pl-64 flex items-center justify-center px-6">
+        <div className="min-h-screen bg-brand-cream lg:pl-72 flex items-center justify-center px-6">
           <Card className="p-8 text-center border-brand-border">
             <h2 className="text-2xl font-semibold text-brand-espresso mb-2">Access Denied</h2>
             <p className="text-brand-muted">You don't have admin privileges.</p>
@@ -274,7 +274,7 @@ const AdminFaqs = () => {
     return (
       <>
         <AdminTopBar />
-        <div className="min-h-screen bg-brand-cream lg:pl-64 flex items-center justify-center">
+        <div className="min-h-screen bg-brand-cream lg:pl-72 flex items-center justify-center">
           <Loader2 className="w-8 h-8 animate-spin text-brand-copper" />
         </div>
       </>
@@ -284,7 +284,7 @@ const AdminFaqs = () => {
   return (
     <>
       <AdminTopBar onLogout={handleLogout} />
-      <div className="min-h-screen bg-brand-cream lg:pl-64 py-10 px-4">
+      <div className="min-h-screen bg-brand-cream lg:pl-72 py-10 px-4">
         <div className="max-w-5xl mx-auto space-y-8">
           <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
             <div>

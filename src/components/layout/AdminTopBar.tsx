@@ -95,6 +95,10 @@ export default function AdminTopBar({ onLogout }: AdminTopBarProps) {
 
     const logout = onLogout || handleLogout;
     const isActive = (path: string) => location.pathname === path;
+    // Name of the section currently open — shown in the mobile top bar so the
+    // admin always knows where they are without opening the drawer.
+    const currentTitle =
+        navLinks.find((l) => l.to === location.pathname)?.label ?? "Admin Dashboard";
 
     const NavItem = ({ to, label, Icon }: { to: string; label: string; Icon: any }) => (
         <Link
@@ -168,34 +172,34 @@ export default function AdminTopBar({ onLogout }: AdminTopBarProps) {
                 <SidebarBody />
             </aside>
 
-            {/* Mobile: top bar */}
+            {/* Mobile: top bar — hamburger (left) · current section (center) · logout (right) */}
             <div className="lg:hidden sticky top-0 z-40 border-b border-brand-border bg-white/95 backdrop-blur-sm">
-                <div className="px-4 py-3 flex items-center justify-between gap-2">
-                    <Link to="/admin" className="inline-flex">
-                        <Logo tone="dark" size="sm" />
-                    </Link>
-                    <div className="flex items-center gap-2">
-                        <Button
-                            onClick={() => logout()}
-                            className="bg-brand-copper hover:bg-brand-copper-dark text-white text-[11px] tracking-[0.15em] uppercase font-medium px-3 py-2 rounded-full h-auto"
-                        >
-                            Logout
-                        </Button>
-                        <button
-                            type="button"
-                            onClick={() => setMenuOpen((o) => !o)}
-                            aria-label={menuOpen ? "Close menu" : "Open menu"}
-                            aria-expanded={menuOpen}
-                            className="relative shrink-0 w-10 h-10 flex items-center justify-center rounded-lg border border-brand-border text-brand-espresso hover:bg-brand-sand transition-colors"
-                        >
-                            {menuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-                            {!menuOpen && unreadCount > 0 && (
-                                <span className="absolute -top-1 -right-1 min-w-[16px] h-4 px-1 rounded-full bg-brand-copper text-white text-[10px] font-semibold flex items-center justify-center">
-                                    {unreadCount}
-                                </span>
-                            )}
-                        </button>
-                    </div>
+                <div className="px-3 py-3 flex items-center gap-2">
+                    <button
+                        type="button"
+                        onClick={() => setMenuOpen((o) => !o)}
+                        aria-label={menuOpen ? "Close menu" : "Open menu"}
+                        aria-expanded={menuOpen}
+                        className="relative shrink-0 w-10 h-10 flex items-center justify-center rounded-lg border border-brand-border text-brand-espresso hover:bg-brand-sand transition-colors"
+                    >
+                        {menuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+                        {!menuOpen && unreadCount > 0 && (
+                            <span className="absolute -top-1 -right-1 min-w-[16px] h-4 px-1 rounded-full bg-brand-copper text-white text-[10px] font-semibold flex items-center justify-center">
+                                {unreadCount}
+                            </span>
+                        )}
+                    </button>
+
+                    <p className="flex-1 min-w-0 text-center font-semibold text-brand-espresso truncate">
+                        {currentTitle}
+                    </p>
+
+                    <Button
+                        onClick={() => logout()}
+                        className="shrink-0 bg-brand-copper hover:bg-brand-copper-dark text-white text-[11px] tracking-[0.15em] uppercase font-medium px-3 py-2 rounded-full h-auto"
+                    >
+                        Logout
+                    </Button>
                 </div>
             </div>
 

@@ -155,3 +155,14 @@ All colors MUST be HSL.
 @media (prefers-reduced-motion: reduce) {
   .animate-wizard-pulse { animation: none; }
 }
+
+/* Nudge the SalesCaptain chat launcher slightly toward the right edge so it no
+   longer sits under the bottom-right promo card. The widget renders its own
+   fixed-position iframe/launcher; a small translate shifts it wherever it lands
+   without needing to know its exact anchor. */
+#salescaptain-webchat,
+#salescaptain-webchat iframe,
+iframe[src*="salescaptain"],
+iframe[id*="salescaptain"] {
+  transform: translateX(18px) !important;
+}

@@ -225,7 +225,7 @@ import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
 import Logo from "@/components/layout/Logo";
 
-// Payment link shown in the header "Pay Now" button.
+// Payment link shown in the header "Make a Payment" button.
 // Same secure Helcim hosted checkout used in the wizard and footer.
 const PAY_NOW_URL = "https://mtl-closets.myhelcim.com/hosted/?token=9f9e5d22c6d13444ef33d9";
 
@@ -391,14 +391,14 @@ export const Navigation = () => {
           }`}
         style={{ paddingTop: "5rem" }}
       >
-        <div className="flex flex-col items-center justify-center flex-1 gap-8 px-6">
+        <div className="flex flex-col items-center justify-center flex-1 gap-4 px-6">
           {navLinks.map((link, i) => {
             const isActive = pathname === link.href;
             return (
               <Link
                 key={link.href}
                 href={link.href}
-                className={`text-2xl tracking-[0.2em] uppercase font-light transition-all duration-300 ${isActive ? "text-brand-copper" : "text-white/70 hover:text-white"
+                className={`text-base tracking-[0.15em] uppercase font-light transition-all duration-300 ${isActive ? "text-brand-copper" : "text-white/70 hover:text-white"
                   }`}
                 style={{ transitionDelay: mobileOpen ? `${i * 60}ms` : "0ms" }}
               >
@@ -410,7 +410,7 @@ export const Navigation = () => {
             <Link
               key={service.href}
               href={service.href}
-              className="text-2xl tracking-[0.2em] uppercase font-light transition-all duration-300 text-white/70 hover:text-white"
+              className="text-base tracking-[0.15em] uppercase font-light transition-all duration-300 text-white/70 hover:text-white"
               style={{ transitionDelay: mobileOpen ? `${(i + navLinks.length) * 60}ms` : "0ms" }}
             >
               {service.label}
@@ -418,7 +418,7 @@ export const Navigation = () => {
           ))}
           <Link
             href="/space-planner"
-            className="mt-4 inline-flex items-center justify-center bg-brand-copper hover:bg-brand-copper-dark text-white text-sm tracking-[0.2em] uppercase font-medium px-8 py-4 w-full max-w-xs rounded-full transition-colors"
+            className="mt-3 inline-flex items-center justify-center bg-brand-copper hover:bg-brand-copper-dark text-white text-xs tracking-[0.2em] uppercase font-medium px-8 py-3.5 w-full max-w-xs rounded-full transition-colors"
           >
             Start Planner
           </Link>
@@ -426,9 +426,9 @@ export const Navigation = () => {
             href={PAY_NOW_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center justify-center border border-white/60 text-white hover:bg-white hover:text-brand-espresso text-sm tracking-[0.2em] uppercase font-medium px-8 py-4 w-full max-w-xs rounded-full transition-colors"
+            className="inline-flex items-center justify-center border border-white/60 text-white hover:bg-white hover:text-brand-espresso text-xs tracking-[0.2em] uppercase font-medium px-8 py-3.5 w-full max-w-xs rounded-full transition-colors"
           >
-            Pay Now
+            Make a Payment
           </a>
         </div>
       </div>
