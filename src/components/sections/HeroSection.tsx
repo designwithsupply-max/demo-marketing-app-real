@@ -46,18 +46,18 @@ export default function HeroSection() {
           </div>
 
           {/* Headline */}
-          <h1
+          <h2
             className={`text-white font-light leading-[1.05] mb-8 transition-all duration-700 ${loaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
             style={{
               fontFamily: "'Cormorant Garamond', Georgia, serif",
-              fontSize: "clamp(2.5rem, 6vw, 5.5rem)",
+              fontSize: "clamp(1.6rem, 4.2vw, 3.75rem)",
               transitionDelay: "350ms"
             }}
           >
             {c.headingLine1}<br />
             <em className="text-brand-copper-light not-italic">{c.headingEmphasis}</em><br />
             {c.headingLine3}
-          </h1>
+          </h2>
 
           {/* Subheadline */}
           <p
