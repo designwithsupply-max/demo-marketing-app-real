@@ -346,28 +346,28 @@ export const StepTwo = ({ spaces, setSpaces, files, setFiles, additionalNotes, s
       ) : (
         <>
           {/* Space Tabs + Unit Toggle */}
-          <div className="flex items-center justify-between border-b border-brand-border">
-            <div className="flex items-center">
+          <div className="flex flex-wrap items-center justify-between gap-y-2 border-b border-brand-border">
+            <div className="flex flex-wrap items-center">
               {spaces.map(space => (
                 <button
                   key={space.id}
                   onClick={() => setActiveSpaceId(space.id)}
-                  className={`px-4 py-2 text-sm font-medium transition-colors ${activeSpaceId === space.id ? 'border-b-2 border-brand-copper text-brand-copper' : 'text-brand-muted hover:text-brand-espresso'}`}>
+                  className={`px-5 sm:px-6 py-3 sm:py-4 text-lg sm:text-xl font-semibold transition-colors ${activeSpaceId === space.id ? 'border-b-[3px] border-brand-copper text-brand-copper' : 'text-brand-muted hover:text-brand-espresso'}`}>
                   {space.name}
                 </button>
               ))}
             </div>
-            <div className="flex items-center gap-2 pr-2">
-              <span className="text-xs text-brand-muted">{t("s2.unit")}</span>
+            <div className="flex items-center gap-2.5 pr-2">
+              <span className="text-sm sm:text-base text-brand-muted">{t("s2.unit")}</span>
               <button
                 onClick={() => handleUnitChange("in")}
-                className={`px-3 py-1 text-xs rounded-full transition-colors ${unit === "in" ? 'bg-brand-copper text-white' : 'bg-brand-sand text-brand-muted hover:text-brand-espresso'}`}
+                className={`px-5 py-2.5 text-sm sm:text-base font-medium rounded-full transition-colors ${unit === "in" ? 'bg-brand-copper text-white' : 'bg-brand-sand text-brand-muted hover:text-brand-espresso'}`}
               >
                 in
               </button>
               <button
                 onClick={() => handleUnitChange("cm")}
-                className={`px-3 py-1 text-xs rounded-full transition-colors ${unit === "cm" ? 'bg-brand-copper text-white' : 'bg-brand-sand text-brand-muted hover:text-brand-espresso'}`}
+                className={`px-5 py-2.5 text-sm sm:text-base font-medium rounded-full transition-colors ${unit === "cm" ? 'bg-brand-copper text-white' : 'bg-brand-sand text-brand-muted hover:text-brand-espresso'}`}
               >
                 cm
               </button>
@@ -411,14 +411,15 @@ export const StepTwo = ({ spaces, setSpaces, files, setFiles, additionalNotes, s
                 <div className="flex flex-wrap gap-3 pt-2">
                   {STORAGE_OPTIONS.map((option) => {
                     const rank = (space.storagePriorities ?? []).indexOf(option);
+                    // Default (unranked) is red; the first two taps promote a
+                    // button to green (1st) then yellow (2nd). A 3rd pick stays
+                    // red but carries its "(3rd)" ordinal label.
                     const style =
                       rank === 0
                         ? "bg-green-500 text-white border-green-500"
                         : rank === 1
                           ? "bg-yellow-500 text-white border-yellow-500"
-                          : rank === 2
-                            ? "bg-red-500 text-white border-red-500"
-                            : "bg-white text-brand-espresso border-brand-border hover:border-brand-copper";
+                          : "bg-red-500 text-white border-red-500";
                     return (
                       <button
                         key={option}

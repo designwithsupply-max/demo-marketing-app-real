@@ -303,15 +303,19 @@ export const StepThree = ({ formData, spaces, files, additionalNotes, onBack, on
           <button onClick={onBack} disabled={isSubmitting} className="inline-flex items-center gap-1 px-2 sm:px-3 py-3 text-sm font-medium text-brand-muted hover:text-brand-espresso transition-colors disabled:opacity-50">{t("s3.back")}</button>
         }
         right={
-          <button
-            onClick={handleFinish}
-            disabled={isSubmitting || hasSubmitted}
-            className={`group inline-flex items-center justify-center gap-3 bg-brand-copper text-white text-[11px] sm:text-sm tracking-[0.1em] sm:tracking-[0.2em] uppercase font-medium px-4 sm:px-8 py-3 sm:py-4 rounded-full whitespace-nowrap hover:bg-brand-copper-dark transition-all duration-300 shadow-lg disabled:bg-brand-muted ${
-              isSubmitting || hasSubmitted ? "" : "animate-wizard-pulse"
-            }`}
-          >
-            {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : hasSubmitted ? t("s3.submitted") : t("s3.submit")}
-          </button>
+          isSubmitting ? (
+            <span className="inline-flex items-center gap-2 text-sm font-medium text-brand-copper">
+              <Loader2 className="w-4 h-4 animate-spin" /> {t("s3.submitting")}
+            </span>
+          ) : hasSubmitted ? (
+            <span className="inline-flex items-center gap-1.5 text-sm font-medium text-green-600">
+              <CheckCircle className="w-4 h-4" /> {t("s3.submitted")}
+            </span>
+          ) : (
+            <span className="text-xs sm:text-sm text-brand-muted text-right max-w-[240px] leading-snug">
+              {t("s3.bookHint")}
+            </span>
+          )
         }
       />
     </div>
