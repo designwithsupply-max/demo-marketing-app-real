@@ -50,12 +50,12 @@ export default function FileList({ files, loading, page, pageSize, onPageChange,
                 <span>{files.length} file(s) total</span>
             </div>
             {paged.map((file) => (
-                <Card key={file.id} className="p-4 flex items-center justify-between gap-4 border-brand-border bg-white">
-                    <div className="flex items-center gap-3 min-w-0">
-                        {getFileIcon(file)}
-                        <div className="min-w-0">
-                            <div className="flex items-center gap-2">
-                                <p className="text-sm font-medium truncate">{file.original_name || file.public_id}</p>
+                <Card key={file.id} className="p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-brand-border bg-white">
+                    <div className="flex items-start gap-3 min-w-0">
+                        <span className="mt-0.5 shrink-0">{getFileIcon(file)}</span>
+                        <div className="min-w-0 space-y-1">
+                            <p className="text-sm font-medium break-words sm:truncate">{file.original_name || file.public_id}</p>
+                            <div className="flex flex-wrap items-center gap-1.5">
                                 {file.folder && (
                                     <Badge variant="secondary" className="text-xs shrink-0">
                                         {FOLDER_OPTIONS.find((f) => f.value === file.folder)?.label || file.folder}
@@ -64,11 +64,11 @@ export default function FileList({ files, loading, page, pageSize, onPageChange,
                                 {file.type && file.type !== "image" && (
                                     <Badge variant="outline" className="text-[10px] shrink-0 capitalize">{file.type}</Badge>
                                 )}
+                                <span className="text-xs text-brand-muted">{new Date(file.created_at).toLocaleDateString()}</span>
                             </div>
-                            <p className="text-xs text-brand-muted">{new Date(file.created_at).toLocaleDateString()}</p>
                         </div>
                     </div>
-                    <div className="flex items-center gap-1 shrink-0">
+                    <div className="flex items-center justify-end gap-1 shrink-0 w-full sm:w-auto border-t border-brand-border/70 pt-2 sm:border-t-0 sm:pt-0">
                         {(file.resource_type === "image" || file.resource_type === "video") && (
                             <Button variant="ghost" size="icon" onClick={() => onPreview(file)} title="Preview"><Eye className="w-4 h-4" /></Button>
                         )}

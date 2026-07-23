@@ -40,15 +40,15 @@ export default function ProjectList({ projects, loading, onDelete, onAddImages, 
             </div>
             {projects.map((project) => (
                 <Card key={project.id} className="p-4 border-brand-border bg-white">
-                    <div className="flex items-center justify-between gap-4">
-                        <div className="flex items-center gap-4 min-w-0">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                        <div className="flex items-start gap-4 min-w-0">
                             {project.thumbnail && (
                                 <img src={project.thumbnail} alt={project.title} className="w-16 h-16 rounded-lg object-cover border flex-shrink-0" />
                             )}
-                            <div className="min-w-0">
-                                <p className="font-medium text-brand-espresso truncate">{project.title}</p>
-                                <p className="text-xs text-brand-muted">/{project.slug}</p>
-                                <div className="flex items-center gap-2 mt-1.5">
+                            <div className="min-w-0 space-y-1">
+                                <p className="font-medium text-brand-espresso break-words sm:truncate">{project.title}</p>
+                                <p className="text-xs text-brand-muted break-words">/{project.slug}</p>
+                                <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
                                     <Badge variant="secondary" className="text-[10px]">{project.category}</Badge>
                                     <Badge variant="outline" className="text-[10px] capitalize">{project.type}</Badge>
                                     <span className="text-xs text-brand-muted">{project.images.length} image(s)</span>
@@ -56,7 +56,7 @@ export default function ProjectList({ projects, loading, onDelete, onAddImages, 
                             </div>
                         </div>
 
-                        <div className="flex items-center gap-1 shrink-0">
+                        <div className="flex flex-wrap items-center justify-end gap-1 shrink-0 w-full sm:w-auto border-t border-brand-border/70 pt-2 sm:border-t-0 sm:pt-0">
                             <Button variant="ghost" size="icon" onClick={() => onEdit(project)} className="h-8 w-8" title="Edit project">
                                 <Pencil className="w-4 h-4" />
                             </Button>
