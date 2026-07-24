@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="300" height="60" viewBox="0 0 300 60" fill="none" role="img" aria-label="Design &amp; Supply">
+  <!-- Copper-outlined DS monogram -->
+  <rect x="1" y="8" width="44" height="44" rx="2" stroke="#C9A96E" stroke-width="1.5"/>
+  <text x="23" y="30.5" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="700"
+        letter-spacing="-0.5" fill="#C9A96E" text-anchor="middle" dominant-baseline="central">D&amp;S</text>
+  <!-- Wordmark -->
+  <text x="60" y="31" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="300"
+        letter-spacing="3.6" dominant-baseline="central">
+    <tspan fill="#2D241E">DESIGN</tspan><tspan fill="#C9A96E"> &amp; SUPPLY</tspan>
+  </text>
+</svg>

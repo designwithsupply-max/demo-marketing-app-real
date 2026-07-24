@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Design &amp; Supply — Logo PNG Export</title>
+<style>
+  :root { --copper:#C9A96E; --espresso:#2D241E; --muted:#6B5D52; --sand:#F5EFE7; --border:#E7DED3; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif; color:var(--espresso); background:#FBF8F4; padding:32px 16px; }
+  .wrap { max-width:760px; margin:0 auto; }
+  h1 { font-size:22px; margin:0 0 6px; }
+  p.lead { color:var(--muted); font-size:14px; margin:0 0 24px; line-height:1.6; }
+  .controls { display:flex; align-items:center; gap:10px; background:var(--sand); border:1px solid var(--border); border-radius:10px; padding:12px 16px; margin-bottom:24px; font-size:14px; }
+  .controls label { color:var(--muted); }
+  .controls input { width:80px; padding:6px 8px; border:1px solid var(--border); border-radius:6px; font-size:14px; }
+  .card { border:1px solid var(--border); border-radius:12px; background:#fff; padding:18px; margin-bottom:16px; }
+  .card h2 { font-size:14px; margin:0 0 4px; }
+  .card .desc { color:var(--muted); font-size:12px; margin:0 0 14px; }
+  .preview { display:flex; align-items:center; justify-content:center; min-height:96px; border-radius:8px; margin-bottom:14px; padding:16px; }
+  .preview.light { background:#FBF8F4; }
+  .preview.dark { background:#1A1A18; }
+  button { background:var(--copper); color:#fff; border:none; border-radius:999px; padding:10px 22px; font-size:13px; font-weight:600; cursor:pointer; }
+  button:hover { background:#b8965a; }
+  .filename { font-family:ui-monospace,Menlo,monospace; font-size:12px; color:var(--muted); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Design &amp; Supply — Logo PNG export</h1>
+  <p class="lead">Set the scale, then click a button to download that logo as a transparent PNG. Scale multiplies the base size (full logo = 300×60, mark = 64×64), so scale 4 gives a 1200×240 logo. Higher scale = sharper / larger file.</p>
+
+  <div class="controls">
+    <label for="scale">Scale &times;</label>
+    <input id="scale" type="number" min="1" max="20" step="1" value="4">
+    <span class="filename" id="dims"></span>
+  </div>
+
+  <div class="card">
+    <h2>Full logo (dark wordmark)</h2>
+    <p class="desc">Primary lockup, for light backgrounds. Transparent PNG.</p>
+    <div class="preview light"><div id="host-logo"></div></div>
+    <button data-target="logo" data-name="logo">Download logo.png</button>
+  </div>
+
+  <div class="card">
+    <h2>Full logo (light wordmark)</h2>
+    <p class="desc">For dark backgrounds. Transparent PNG.</p>
+    <div class="preview dark"><div id="host-light"></div></div>
+    <button data-target="light" data-name="logo-light">Download logo-light.png</button>
+  </div>
+
+  <div class="card">
+    <h2>Monogram mark</h2>
+    <p class="desc">Square “D&amp;S” only — avatars, app icons, favicons. Transparent PNG.</p>
+    <div class="preview light"><div id="host-mark"></div></div>
+    <button data-target="mark" data-name="logo-mark">Download logo-mark.png</button>
+  </div>
+</div>
+
+<script>
+// SVG sources kept in sync with public/logo.svg, logo-light.svg, logo-mark.svg.
+const SVGS = {
+  logo: `<svg xmlns="http://www.w3.org/2000/svg" width="300" height="60" viewBox="0 0 300 60" fill="none">
+    <rect x="1" y="8" width="44" height="44" rx="2" stroke="#C9A96E" stroke-width="1.5"/>
+    <text x="23" y="30.5" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="700" letter-spacing="-0.5" fill="#C9A96E" text-anchor="middle" dominant-baseline="central">D&amp;S</text>
+    <text x="60" y="31" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="300" letter-spacing="3.6" dominant-baseline="central"><tspan fill="#2D241E">DESIGN</tspan><tspan fill="#C9A96E"> &amp; SUPPLY</tspan></text>
+  </svg>`,
+  light: `<svg xmlns="http://www.w3.org/2000/svg" width="300" height="60" viewBox="0 0 300 60" fill="none">
+    <rect x="1" y="8" width="44" height="44" rx="2" stroke="#C9A96E" stroke-width="1.5"/>
+    <text x="23" y="30.5" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="700" letter-spacing="-0.5" fill="#C9A96E" text-anchor="middle" dominant-baseline="central">D&amp;S</text>
+    <text x="60" y="31" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="300" letter-spacing="3.6" dominant-baseline="central"><tspan fill="#FFFFFF">DESIGN</tspan><tspan fill="#C9A96E"> &amp; SUPPLY</tspan></text>
+  </svg>`,
+  mark: `<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" fill="none">
+    <rect x="8" y="8" width="48" height="48" rx="3" stroke="#C9A96E" stroke-width="1.75"/>
+    <text x="32" y="33.5" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="700" letter-spacing="-0.5" fill="#C9A96E" text-anchor="middle" dominant-baseline="central">D&amp;S</text>
+  </svg>`
+};
+const BASE = { logo:[300,60], light:[300,60], mark:[64,64] };
+
+// Inline previews
+document.getElementById("host-logo").innerHTML = SVGS.logo;
+document.getElementById("host-light").innerHTML = SVGS.light;
+document.getElementById("host-mark").innerHTML = SVGS.mark;
+
+const scaleInput = document.getElementById("scale");
+const dims = document.getElementById("dims");
+const updateDims = () => {
+  const s = Math.max(1, +scaleInput.value || 1);
+  dims.textContent = `logo ${300*s}×${60*s}px · mark ${64*s}×${64*s}px`;
+};
+scaleInput.addEventListener("input", updateDims);
+updateDims();
+
+function download(target, name) {
+  const s = Math.max(1, +scaleInput.value || 1);
+  const [w, h] = BASE[target];
+  const canvas = document.createElement("canvas");
+  canvas.width = w * s;
+  canvas.height = h * s;
+  const ctx = canvas.getContext("2d");
+  const img = new Image();
+  const blob = new Blob([SVGS[target]], { type: "image/svg+xml" });
+  const url = URL.createObjectURL(blob);
+  img.onload = () => {
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+    URL.revokeObjectURL(url);
+    canvas.toBlob((png) => {
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(png);
+      a.download = `${name}.png`;
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+    }, "image/png");
+  };
+  img.src = url;
+}
+
+document.querySelectorAll("button[data-target]").forEach((btn) => {
+  btn.addEventListener("click", () => download(btn.dataset.target, btn.dataset.name));
+});
+</script>
+</body>
+</html>
