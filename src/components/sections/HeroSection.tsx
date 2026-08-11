@@ -89,7 +89,7 @@ export default function HeroSection() {
 
           {/* Quick flow */}
           <div
-            className={`flex flex-wrap gap-x-6 gap-y-2 text-white/50 text-xs tracking-[0.15em] uppercase transition-all duration-700 ${loaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
+            className={`flex flex-nowrap items-center gap-x-1.5 sm:gap-x-6 overflow-x-auto text-white/50 text-[9px] sm:text-xs tracking-[0.1em] sm:tracking-[0.15em] uppercase transition-all duration-700 whitespace-nowrap [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${loaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
             style={{ transitionDelay: "800ms" }}
           >
             <span>Measure online</span>
