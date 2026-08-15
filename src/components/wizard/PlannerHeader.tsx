@@ -2,7 +2,6 @@ import Link from "next/link";
 import { ArrowLeft, MessageCircle } from "lucide-react";
 import Logo from "@/components/layout/Logo";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { useContactInfo } from "@/hooks/useContactInfo";
 
 /**
  * A stripped-down header for the Space Planner: logo, a way back to the main
@@ -12,8 +11,6 @@ import { useContactInfo } from "@/hooks/useContactInfo";
  */
 export const PlannerHeader = () => {
   const { language, setLanguage, t } = useLanguage();
-  const { contactInfo } = useContactInfo();
-  const smsPhone = (contactInfo?.phone || "+1 (800) 555-0192").replace(/[^\d+]/g, "");
 
   return (
     <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-brand-border">
@@ -30,13 +27,13 @@ export const PlannerHeader = () => {
             <ArrowLeft size={14} /> {t("wz.backToSite")}
           </Link>
 
-          <a
-            href={`sms:${smsPhone}`}
+          <Link
+            href="/contact"
             className="inline-flex items-center gap-1.5 text-xs font-medium text-brand-muted hover:text-brand-espresso transition-colors"
           >
             <MessageCircle size={14} />
             <span className="hidden sm:inline">{t("wz.help")}</span>
-          </a>
+          </Link>
 
           <div className="inline-flex items-center rounded-full border border-brand-border bg-white p-1 shadow-sm">
             <button
