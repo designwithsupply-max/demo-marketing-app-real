@@ -1,10 +1,12 @@
 import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import { Space, UploadedFile } from "@/pages/Wizard";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Loader2, CheckCircle } from "lucide-react";
+import { Loader2, CheckCircle, Home, MessageCircle, CalendarCheck } from "lucide-react";
 import { WizardNav } from "@/components/wizard/WizardNav";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useContactInfo } from "@/hooks/useContactInfo";
 
 interface StepThreeProps {
   formData: any;
@@ -23,17 +25,21 @@ declare global {
 
 export const StepThree = ({ formData, spaces, files, additionalNotes, onBack, onComplete }: StepThreeProps) => {
   const { t } = useLanguage();
+  const { contactInfo } = useContactInfo();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [hasSubmitted, setHasSubmitted] = useState(false);
   const [isScheduled, setIsScheduled] = useState(false);
   const [calendlyReady, setCalendlyReady] = useState(false);
   const calendlyContainerRef = useRef<HTMLDivElement>(null);
+  const bookingSectionRef = useRef<HTMLDivElement>(null);
   const autoSubmitRef = useRef(false);
   const calendlyInitedRef = useRef(false);
   // The event_scheduled postMessage only carries API URIs — the actual time and
   // Google Meet / Zoom link are fetched server-side from these in the edge
   // function, so the confirmation email can show them.
   const calendlyBookingRef = useRef<{ eventUri?: string; inviteeUri?: string }>({});
+
+  const smsPhone = (contactInfo?.phone || "+1 (800) 555-0192").replace(/[^\d+]/g, "");
 
   const calendlyUrl = `https://calendly.com/designandsupply/30min?name=${encodeURIComponent(
     formData.fullName
@@ -141,6 +147,7 @@ export const StepThree = ({ formData, spaces, files, additionalNotes, onBack, on
           clientEmail: formData.email,
           clientName: formData.fullName,
           emailType: booked ? 'booking' : 'submission',
+          adminEmail: contactInfo?.email || undefined,
           submissionData: {
             ...formData,
             spaces,
@@ -154,6 +161,11 @@ export const StepThree = ({ formData, spaces, files, additionalNotes, onBack, on
 
       toast.success(t("s3.toastOk"));
       setHasSubmitted(true);
+      // The project is safely stored server-side now — clear the local draft
+      // so a refresh doesn't resurrect it, but stay on this screen so the
+      // customer actually sees the confirmation (see success state below)
+      // instead of being redirected away from it.
+      onComplete();
       return true;
     } catch (error: any) {
       toast.error(error.message || t("s3.toastFail"));
@@ -164,8 +176,8 @@ export const StepThree = ({ formData, spaces, files, additionalNotes, onBack, on
   };
 
   const handleFinish = async () => {
-    const ok = await submitData();
-    if (ok) onComplete();
+    if (isSubmitting || hasSubmitted) return;
+    await submitData();
   };
 
   // When the Calendly booking succeeds, submit the planner automatically (once).
@@ -176,41 +188,67 @@ export const StepThree = ({ formData, spaces, files, additionalNotes, onBack, on
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isScheduled]);
 
+  const scrollToBooking = () => {
+    bookingSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
-      <div>
-        <h2 className="text-2xl font-semibold text-brand-espresso" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
-          {t("s3.title")}
-        </h2>
-        <p className="text-brand-muted mt-1">{t("s3.subtitle")}</p>
-      </div>
+      {hasSubmitted ? (
+        <div className="rounded-lg border border-green-200 bg-green-50 p-6 sm:p-8">
+          <div className="flex items-center gap-2 text-green-700 mb-2">
+            <CheckCircle size={22} />
+            <h2 className="text-2xl font-semibold" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
+              {t("s3.receivedTitle")}
+            </h2>
+          </div>
+          <p className="text-brand-espresso/80 mb-5">{t("s3.receivedBody")}</p>
 
-      {/* Calendly Scheduling (embedded, not an external link) */}
-      <div className="rounded-lg border border-brand-border overflow-hidden">
-        <div className="px-4 py-3 bg-brand-sand/50 border-b border-brand-border flex items-center justify-between">
-          <h3 className="font-semibold text-brand-espresso">{t("s3.schedule")}</h3>
-          {isScheduled && (
-            <span className="flex items-center gap-1.5 text-sm text-green-600 font-medium">
-              <CheckCircle size={16} /> {t("s3.scheduled")}
-            </span>
-          )}
-        </div>
-        <div className="relative bg-white" style={{ minWidth: "320px", height: "700px" }}>
-          {/* Loading overlay — a sibling, NOT a child of the Calendly container,
-              so React never touches the injected iframe. */}
-          {!calendlyReady && (
-            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-              <span className="flex items-center gap-2 text-sm text-brand-muted">
-                <Loader2 className="w-4 h-4 animate-spin text-brand-copper" /> Loading scheduler…
-              </span>
-            </div>
-          )}
-          {/* Calendly injects its iframe here. Keep this div empty (no children). */}
-          <div ref={calendlyContainerRef} className="w-full h-full" />
-        </div>
-      </div>
+          <ol className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
+            {["s3.next1", "s3.next2", "s3.next3", "s3.next4"].map((key, i) => (
+              <li key={key} className="flex items-start gap-3 bg-white rounded-md border border-brand-border px-3 py-2.5">
+                <span className="flex-shrink-0 w-5 h-5 rounded-full bg-brand-copper text-white text-xs font-semibold flex items-center justify-center mt-0.5">
+                  {i + 1}
+                </span>
+                <span className="text-sm text-brand-espresso">{t(key)}</span>
+              </li>
+            ))}
+          </ol>
 
-      {/* Summary Section — placed below the Calendly scheduler */}
+          <div className="flex flex-wrap gap-3">
+            {!isScheduled && (
+              <button
+                type="button"
+                onClick={scrollToBooking}
+                className="inline-flex items-center gap-2 bg-brand-copper hover:bg-brand-copper-dark text-white text-sm font-medium px-5 py-3 rounded-full transition-colors"
+              >
+                <CalendarCheck size={16} /> {t("s3.bookLiveDesign")}
+              </button>
+            )}
+            <Link
+              href="/"
+              className="inline-flex items-center gap-2 border border-brand-border text-brand-espresso text-sm font-medium px-5 py-3 rounded-full hover:border-brand-copper transition-colors"
+            >
+              <Home size={16} /> {t("s3.returnHome")}
+            </Link>
+            <a
+              href={`sms:${smsPhone}`}
+              className="inline-flex items-center gap-2 border border-brand-border text-brand-espresso text-sm font-medium px-5 py-3 rounded-full hover:border-brand-copper transition-colors"
+            >
+              <MessageCircle size={16} /> {t("s3.textUsMore")}
+            </a>
+          </div>
+        </div>
+      ) : (
+        <div>
+          <h2 className="text-2xl font-semibold text-brand-espresso" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
+            {t("s3.title")}
+          </h2>
+          <p className="text-brand-muted mt-1">{t("s3.subtitle")}</p>
+        </div>
+      )}
+
+      {/* Summary Section — reviewed first, before booking */}
       <div className="space-y-6 rounded-lg border border-brand-border bg-brand-sand/30 p-6">
         <h3 className="text-xl font-semibold text-brand-espresso" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
           {t("s3.summary")}
@@ -294,6 +332,56 @@ export const StepThree = ({ formData, spaces, files, additionalNotes, onBack, on
         <div>
           <h3 className="font-semibold text-brand-espresso">{t("s3.files")}</h3>
           <p>{files.length} {t("s3.filesCount")}</p>
+        </div>
+      </div>
+
+      {/* Submit — never blocked on booking a time */}
+      {!hasSubmitted && (
+        <div className="rounded-lg border border-brand-copper/30 bg-white p-6 flex flex-col sm:flex-row sm:items-center gap-4 sm:justify-between">
+          <p className="text-sm text-brand-muted">{t("s3.submitHelp")}</p>
+          <div className="flex flex-wrap gap-3">
+            <button
+              type="button"
+              onClick={handleFinish}
+              disabled={isSubmitting}
+              className="inline-flex items-center justify-center gap-2 border border-brand-copper text-brand-copper text-sm font-medium px-5 py-3 rounded-full hover:bg-brand-copper hover:text-white transition-colors disabled:opacity-50"
+            >
+              {t("s3.submit")}
+            </button>
+            <button
+              type="button"
+              onClick={scrollToBooking}
+              disabled={isSubmitting}
+              className="inline-flex items-center justify-center gap-2 bg-brand-copper hover:bg-brand-copper-dark text-white text-sm font-medium px-5 py-3 rounded-full transition-colors disabled:opacity-50"
+            >
+              {t("s3.submitBookNow")}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Calendly Scheduling (embedded, not an external link) — optional, shown after the summary */}
+      <div ref={bookingSectionRef} className="rounded-lg border border-brand-border overflow-hidden scroll-mt-24">
+        <div className="px-4 py-3 bg-brand-sand/50 border-b border-brand-border flex items-center justify-between">
+          <h3 className="font-semibold text-brand-espresso">{t("s3.schedule")}</h3>
+          {isScheduled && (
+            <span className="flex items-center gap-1.5 text-sm text-green-600 font-medium">
+              <CheckCircle size={16} /> {t("s3.scheduled")}
+            </span>
+          )}
+        </div>
+        <div className="relative bg-white" style={{ minWidth: "320px", height: "700px" }}>
+          {/* Loading overlay — a sibling, NOT a child of the Calendly container,
+              so React never touches the injected iframe. */}
+          {!calendlyReady && (
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+              <span className="flex items-center gap-2 text-sm text-brand-muted">
+                <Loader2 className="w-4 h-4 animate-spin text-brand-copper" /> {t("s3.loadingScheduler")}
+              </span>
+            </div>
+          )}
+          {/* Calendly injects its iframe here. Keep this div empty (no children). */}
+          <div ref={calendlyContainerRef} className="w-full h-full" />
         </div>
       </div>
 

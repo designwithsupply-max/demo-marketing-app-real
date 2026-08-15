@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation, Navigate } from "react-router-dom";
 import Index from "./pages/Index";
 import Wizard from "./pages/Wizard";
 import { LanguageProvider } from "@/contexts/LanguageContext";
@@ -21,11 +21,10 @@ import { SubmissionSuccessPopup } from "@/components/SubmissionSuccessPopup";
 import { SalesCaptain } from "@/components/SalesCaptain";
 import GalleryDetailPage from "./pages/GalleryDetailPage";
 import Faq from "./pages/Faq";
-import Closets from "./pages/Closets";
-import Kitchens from "./pages/Kitchens";
-import Garages from "./pages/Garages";
+import ServicePage from "./pages/ServicePage";
 import Contact from "./pages/Contact";
 import AdminFaqs from "./pages/admin/Faqs";
+import AdminServicePages from "./pages/admin/ServicePages";
 import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
 import AdminBlog from "./pages/admin/Blog";
@@ -111,13 +110,21 @@ const App = () => (
           <Route path="/admin/legal" element={<ProtectedRoute>
             <AdminLegal />
           </ProtectedRoute>} />
+          <Route path="/admin/services" element={<ProtectedRoute>
+            <AdminServicePages />
+          </ProtectedRoute>} />
 
           <Route path="/how-it-works" element={<HowItWorks />} />
           <Route path="/terms" element={<LegalPage kind="terms" />} />
           <Route path="/privacy" element={<LegalPage kind="privacy" />} />
-          <Route path="/closets" element={<Closets />} />
-          <Route path="/kitchens" element={<Kitchens />} />
-          <Route path="/garages" element={<Garages />} />
+          <Route path="/closets" element={<ServicePage slug="closets" />} />
+          <Route path="/walk-in-closets" element={<ServicePage slug="walk-in-closets" />} />
+          <Route path="/reach-in-closets" element={<ServicePage slug="reach-in-closets" />} />
+          <Route path="/wardrobes" element={<ServicePage slug="wardrobes" />} />
+          <Route path="/kitchens" element={<ServicePage slug="kitchens" />} />
+          <Route path="/garage-cabinets" element={<ServicePage slug="garage-cabinets" />} />
+          <Route path="/pantries-laundry-mudrooms" element={<ServicePage slug="pantries-laundry-mudrooms" />} />
+          <Route path="/garages" element={<Navigate to="/garage-cabinets" replace />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/about-us" element={<AboutUs />} />
           <Route path="/gallery" element={<Gallery />} />

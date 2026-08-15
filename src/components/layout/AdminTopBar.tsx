@@ -22,6 +22,7 @@ import {
     SlidersHorizontal,
     ScrollText,
     FolderOpen,
+    LayoutGrid,
 } from "lucide-react";
 import Logo from "@/components/layout/Logo";
 
@@ -34,6 +35,7 @@ const navLinks = [
     { to: "/admin/messages", label: "Contact Messages", icon: MessagesSquare },
     { to: "/admin/settings", label: "Settings", icon: SlidersHorizontal },
     { to: "/admin/content", label: "Homepage", icon: Home },
+    { to: "/admin/services", label: "Service Pages", icon: LayoutGrid },
     { to: "/admin/faqs", label: "FAQs", icon: HelpCircle },
     { to: "/admin/how-it-works", label: "How It Works", icon: ListChecks },
     { to: "/admin/about-us", label: "About Us", icon: Info },

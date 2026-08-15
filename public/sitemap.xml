@@ -21,14 +21,34 @@
     <priority>0.9</priority>
   </url>
   <url>
+    <loc>https://designandsupply.ca/walk-in-closets</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://designandsupply.ca/reach-in-closets</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://designandsupply.ca/wardrobes</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://designandsupply.ca/kitchens</loc>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://designandsupply.ca/garages</loc>
+    <loc>https://designandsupply.ca/garage-cabinets</loc>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://designandsupply.ca/pantries-laundry-mudrooms</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
   </url>
   <url>
     <loc>https://designandsupply.ca/gallery</loc>

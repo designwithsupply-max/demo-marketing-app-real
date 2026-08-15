@@ -221,13 +221,13 @@ export const DEFAULT_PROMO: PromoContent = {
 };
 
 export const DEFAULT_HERO: HeroContent = {
-  eyebrow: "Online Design & Supply Platform",
-  headingLine1: "Custom closets, kitchens & garages",
-  headingEmphasis: "designed live",
-  headingLine3: "from your home.",
+  eyebrow: "Local Installation in Greater Montréal",
+  headingLine1: "Custom Closets, Kitchens & Garage Cabinets",
+  headingEmphasis: "in Greater Montréal",
+  headingLine3: "Designed Live Online",
   subheading:
-    "Use our 3-Step Space Planner to measure your space, upload photos, and meet with a designer live. We design your project in CAD and give you a same-day quote.",
-  primaryLabel: "Start 3-Step Space Planner",
+    "Use our 3-Step Space Planner to send measurements and photos. Then meet live online with a designer, review your custom design, and receive a same-day quote when possible.",
+  primaryLabel: "Start Free Design",
   primaryLink: "/space-planner",
   secondaryLabel: "See How It Works",
   secondaryLink: "/how-it-works",
@@ -236,23 +236,23 @@ export const DEFAULT_HERO: HeroContent = {
 
 export const DEFAULT_SERVICES: ServicesContent = {
   eyebrow: "What We Design",
-  heading: "One platform for closets, kitchens & garages",
+  heading: "Custom closets, kitchen cabinets & garage cabinets",
   cards: [
     {
-      title: "Closets",
+      title: "Custom Closets",
       link: "/closets",
       imageUrl: closetImage,
       description: "Walk-ins, reach-ins, wardrobes, pantries, laundry rooms, and storage walls.",
     },
     {
-      title: "Kitchens",
+      title: "Kitchen Cabinets",
       link: "/kitchens",
       imageUrl: kitchenImage,
       description: "Custom kitchen cabinets designed live in CAD and supplied fully assembled.",
     },
     {
-      title: "Garages",
-      link: "/garages",
+      title: "Garage Cabinets",
+      link: "/garage-cabinets",
       imageUrl: garageImage,
       description: "Garage cabinets, workbenches, tall storage, and organized storage systems.",
     },
@@ -263,7 +263,7 @@ export const DEFAULT_CTA: CtaContent = {
   eyebrow: "Start From Home",
   headingLine1: "Ready to design your",
   headingEmphasis: "space from home?",
-  buttonLabel: "Start 3-Step Space Planner",
+  buttonLabel: "Start Free Design",
   buttonLink: "/space-planner",
   imageUrl: "https://images.unsplash.com/photo-1616046229478-9901c5536a45?w=1920&h=600&fit=crop",
 };
@@ -303,26 +303,25 @@ export const DEFAULT_ABOUT: AboutContent = {
   heroHeadingEmphasis: "Closet Should Be",
   heroHeadingLine3: "Beautiful",
   heroIntro:
-    "Founded in 2015, Design & Supply was born from a simple conviction: that the spaces where we store our lives should be as considered and beautiful as the lives themselves.",
+    "Design & Supply designs and supplies custom closets, kitchen cabinets and garage cabinets for Greater Montréal — with live online design and local installation, because the spaces where we store our lives should be as considered and beautiful as the lives themselves.",
   heroImageUrl: "",
-  storyEyebrow: "The Beginning",
+  storyEyebrow: "How We Work",
   timeline: [
-    { year: "2015", text: "Founded in Los Angeles by Alexandra Morse after a decade in luxury interior design." },
-    { year: "2018", text: "Expanded nationally. Over 500 projects completed across 12 states." },
-    { year: "2021", text: "Launched our proprietary 3D design visualization platform." },
-    { year: "2024", text: "Over 1,200 projects. Ranked #1 custom closet brand on Houzz for 3 consecutive years." },
+    { year: "01", text: "You send measurements and photos through our 3-Step Space Planner." },
+    { year: "02", text: "We meet live online and design your project together in real time." },
+    { year: "03", text: "You receive a quote and choose pickup, delivery or local installation in Greater Montréal." },
   ],
   storyHeadingLine1: "Design at the Intersection of",
   storyHeadingLine2: "Beauty and Function",
   storyParagraphs: [
     "Design & Supply was built on the belief that premium storage design shouldn't be reserved for those with unlimited budgets — but that quality, craftsmanship, and thoughtful design should be accessible to every discerning homeowner.",
     "Every project we undertake is treated as a unique collaboration. We don't manufacture standard closet kits and call them custom. Every panel, every shelf, every piece of hardware is selected specifically for your space, your wardrobe, and your lifestyle.",
-    "Our team of dedicated designers, project managers, and master craftsmen share one obsession: delivering a finished product that makes you feel something the moment you open the door.",
+    "Our team of designers and installers shares one obsession: delivering a finished product that makes you feel something the moment you open the door.",
   ],
   stats: [
-    { value: "1,200+", label: "Projects" },
-    { value: "98%", label: "Satisfaction Rate" },
-    { value: "10yr", label: "Warranty" },
+    { value: "3-Step", label: "Space Planner" },
+    { value: "Live", label: "Online Design" },
+    { value: "Local", label: "Install in Greater Montréal" },
   ],
   missionEyebrow: "Our Mission",
   missionText:
@@ -333,10 +332,10 @@ export const DEFAULT_ABOUT: AboutContent = {
   valuesEyebrow: "Why Choose Us",
   valuesHeading: "Our Core Values",
   values: [
-    { title: "Uncompromising Quality", description: "Only premium materials pass our selection. Every component is sourced from the world's finest suppliers." },
+    { title: "Uncompromising Quality", description: "Only premium materials pass our selection. Every component is sourced from trusted suppliers." },
     { title: "Client Partnership", description: "Your vision drives everything. We design with you, not for you — every decision is collaborative." },
     { title: "Space Intelligence", description: "We see potential where others see limitation. Every awkward corner, low ceiling, and narrow corridor is an opportunity." },
-    { title: "Lasting Excellence", description: "Our 10-year warranty isn't a promise — it's a certainty. We build to last decades, not seasons." },
+    { title: "Lasting Excellence", description: "We confirm warranty coverage for your product, material and installation scope before final approval — no guesswork, no surprises." },
   ],
 };
 

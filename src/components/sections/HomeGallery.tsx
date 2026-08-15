@@ -7,14 +7,14 @@ import { ArrowRight, Loader2 } from "lucide-react";
 import SectionWrapper from "@/components/ui/SectionWrapper";
 import { imageService, type GalleryViewItem } from "@/lib/imageService";
 
-const filters = ["All", "Closets", "Kitchens", "Garages", "Before & After"] as const;
+const filters = ["All", "Closets", "Kitchens", "Garage Cabinets", "Before & After"] as const;
 type Filter = (typeof filters)[number];
 
 // Map gallery types into the homepage filter groups.
 function groupFor(item: GalleryViewItem): Filter {
   const t = item.type.toLowerCase();
   if (t === "kitchen") return "Kitchens";
-  if (t === "garage") return "Garages";
+  if (t === "garage") return "Garage Cabinets";
   return "Closets";
 }
 

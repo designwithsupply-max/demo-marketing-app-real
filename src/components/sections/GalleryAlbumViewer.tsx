@@ -22,7 +22,7 @@ export default function GalleryAlbumViewer({ item, related }: GalleryAlbumViewer
     const from = params.get("from");
     if (from === "closet") return { href: "/closets", label: "Back to Closets" };
     if (from === "kitchen") return { href: "/kitchens", label: "Back to Kitchens" };
-    if (from === "garage") return { href: "/garages", label: "Back to Garages" };
+    if (from === "garage") return { href: "/garage-cabinets", label: "Back to Garage Cabinets" };
     return { href: "/gallery", label: "Back to Gallery" };
   }, [location.search]);
 

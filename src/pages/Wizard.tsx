@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Navigation } from "@/components/Navigation";
+import { PlannerHeader } from "@/components/wizard/PlannerHeader";
 import { ProgressBar } from "@/components/wizard/ProgressBar";
 import { SeoHead } from "@/components/seo/SeoHead";
 import { StepOne } from "@/components/wizard/StepOne";
@@ -28,6 +28,13 @@ export interface Space {
   name: string;
   type: "Closet" | "Kitchen" | "Garage";
   ceilingHeight: string;
+  /**
+   * How this space's measurements were captured. Unset until the customer
+   * picks one of the 3 Step-2 options. "upload" means they chose not to draw —
+   * wall measurements aren't required for that space, since we'll work from
+   * photos/video instead.
+   */
+  inputMethod?: "shape" | "draw" | "upload";
   drawingData?: string;
   wallMeasurements?: Array<{ label: string; length: string }>;
   unit?: "cm" | "in";
@@ -83,7 +90,7 @@ const writeJson = (key: string, value: unknown) => {
 };
 
 const Wizard = () => {
-  const { language, setLanguage, t } = useLanguage();
+  const { t } = useLanguage();
   const [currentStep, setCurrentStep] = useState(() => {
     const saved = parseInt(localStorage.getItem(STORAGE_KEYS.step) ?? "", 10);
     return Number.isFinite(saved) && saved >= 0 && saved <= 2 ? saved : 0;
@@ -119,6 +126,13 @@ const Wizard = () => {
     () => readJson<Space[]>(STORAGE_KEYS.spaces, []).length > 0,
   );
 
+  // Lets the SalesCaptain chat launcher (mounted globally, see App.tsx) know to
+  // move above the wizard's own fixed bottom action bar instead of covering it.
+  useEffect(() => {
+    document.body.classList.add("wizard-active");
+    return () => document.body.classList.remove("wizard-active");
+  }, []);
+
   useEffect(() => {
     localStorage.setItem(STORAGE_KEYS.step, currentStep.toString());
   }, [currentStep]);
@@ -150,10 +164,13 @@ const Wizard = () => {
   };
 
   const handleComplete = () => {
+    // The project is safely stored server-side now, so the local draft can go —
+    // but we deliberately do NOT navigate away. StepThree shows its own
+    // confirmation screen (title, next steps, book/home/text-us actions) and the
+    // customer decides when to leave, instead of being redirected off the page
+    // before they can read the confirmation.
     clearStorage();
-    // Flag read by <SubmissionSuccessPopup> on the home page after redirect.
     localStorage.setItem("planner_submitted", "true");
-    window.location.href = "/";
   };
 
   return (
@@ -166,35 +183,9 @@ const Wizard = () => {
         title="3-Step Space Planner | Design & Supply"
         description="Enter your details, draw your space, upload photos, and submit for a live online CAD design call."
       />
-      <Navigation />
-      <div className="pt-24 pb-8 px-4 md:px-6">
+      <PlannerHeader />
+      <div className="pt-8 pb-8 px-4 md:px-6">
         <div className="max-w-4xl mx-auto">
-          {/* Language toggle */}
-          <div className="flex justify-end mb-4">
-            <div className="inline-flex items-center rounded-full border border-brand-border bg-white p-1 shadow-sm">
-              <button
-                type="button"
-                onClick={() => setLanguage("en")}
-                aria-pressed={language === "en"}
-                className={`px-4 py-1.5 text-xs font-semibold tracking-wide rounded-full transition-colors ${
-                  language === "en" ? "bg-brand-copper text-white" : "text-brand-muted hover:text-brand-espresso"
-                }`}
-              >
-                EN
-              </button>
-              <button
-                type="button"
-                onClick={() => setLanguage("fr")}
-                aria-pressed={language === "fr"}
-                className={`px-4 py-1.5 text-xs font-semibold tracking-wide rounded-full transition-colors ${
-                  language === "fr" ? "bg-brand-copper text-white" : "text-brand-muted hover:text-brand-espresso"
-                }`}
-              >
-                FR
-              </button>
-            </div>
-          </div>
-
           <div className="text-center mb-8">
             <span className="text-brand-copper text-xs tracking-[0.3em] uppercase block mb-3">
               {t("wz.eyebrow")}
@@ -215,13 +206,15 @@ const Wizard = () => {
             <div className="mb-6 flex items-start gap-3 rounded-xl border border-brand-copper/40 bg-brand-copper/10 px-4 py-3">
               <RotateCcw className="w-4 h-4 mt-0.5 text-brand-copper flex-shrink-0" />
               <p className="flex-1 text-sm text-brand-espresso">
-                <span className="font-semibold">Welcome back.</span> We saved{" "}
-                {spaces.length === 1 ? "the space" : `all ${spaces.length} spaces`} you were working on
-                — measurements, drawings and photos included. Carry on where you left off, or{" "}
+                <span className="font-semibold">{t("wz.welcomeBack")}</span>{" "}
+                {t("wz.welcomeBackBody").replace(
+                  "{spaces}",
+                  spaces.length === 1 ? t("wz.savedSpace") : t("wz.savedSpaces").replace("{count}", String(spaces.length))
+                )}{" "}
                 <button
                   type="button"
                   onClick={() => {
-                    if (!window.confirm("Start over? This clears the rooms and measurements you saved.")) return;
+                    if (!window.confirm(t("wz.startOverConfirm"))) return;
                     clearStorage();
                     setSpaces([]);
                     setFiles([]);
@@ -232,14 +225,14 @@ const Wizard = () => {
                   }}
                   className="underline font-medium hover:text-brand-copper-dark"
                 >
-                  start over
+                  {t("wz.startOver")}
                 </button>
                 .
               </p>
               <button
                 type="button"
                 onClick={() => setShowResumed(false)}
-                aria-label="Dismiss"
+                aria-label={t("wz.dismiss")}
                 className="text-brand-muted hover:text-brand-espresso"
               >
                 <X className="w-4 h-4" />

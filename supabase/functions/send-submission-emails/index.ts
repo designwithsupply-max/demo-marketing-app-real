@@ -10,7 +10,7 @@ const CALENDLY_TOKEN = Deno.env.get("CALENDLY_API_TOKEN");
 
 // Where client replies should land. Falls back to the same inbox the contact
 // form uses so a reply always reaches a real person, not the sandbox sender.
-const REPLY_TO = Deno.env.get("CONTACT_TO_EMAIL") || "saminew3919@gmail.com";
+const REPLY_TO = Deno.env.get("CONTACT_TO_EMAIL") || "hello@designandsupply.com";
 
 const SITE_NAME = "Design & Supply";
 const SITE_URL = "https://designandsupply.ca";

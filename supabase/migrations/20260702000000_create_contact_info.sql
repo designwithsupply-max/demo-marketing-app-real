@@ -23,6 +23,5 @@ CREATE TRIGGER update_contact_info_updated_at
   FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
 
 INSERT INTO public.contact_info (email, phone, address_line1, address_line2, business_hours)
-SELECT 'hello@designandsupply.com', '+1 (800) 555-0192', '1200 Design District Blvd', 'Los Angeles, CA 90028', 'Mon–Fri: 9:00 AM to 6:00 PM'
-WHERE NOT EXISTS (SELECT 1 FROM public.contact_info);
+SELECT 'hello@designandsupply.com', '+1 (800) 555-0192', '', 'Serving Greater Montréal, QC', 'Mon–Fri: 9:00 AM to 6:00 PM'
 WHERE NOT EXISTS (SELECT 1 FROM public.contact_info);

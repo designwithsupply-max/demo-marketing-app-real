@@ -172,3 +172,15 @@ iframe[src*="salescaptain"],
 iframe[id*="salescaptain"] {
   transform: translateX(12px);
 }
+
+/* The Space Planner has its own full-width fixed action bar pinned to the
+   bottom of the screen (Back/Continue/Submit) — without this, the SalesCaptain
+   launcher sits on top of it, on mobile especially. `body.wizard-active` is
+   toggled by the Wizard page while mounted; shift the launcher up and shrink
+   it just there so it clears the bar instead of covering its buttons. */
+body.wizard-active #salescaptain-webchat iframe,
+body.wizard-active iframe[src*="salescaptain"],
+body.wizard-active iframe[id*="salescaptain"] {
+  transform: translate(12px, -76px) scale(0.85);
+  transform-origin: bottom right;
+}

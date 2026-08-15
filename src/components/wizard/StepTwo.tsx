@@ -3,7 +3,7 @@ import { Space, UploadedFile } from "@/pages/Wizard";
 import { DrawingCanvas } from "./DrawingCanvas";
 import { WizardNav } from "./WizardNav";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Upload, X, Loader2, CheckCircle, AlertCircle, Plus, Pencil } from "lucide-react";
+import { Upload, X, Loader2, CheckCircle, AlertCircle, Plus, Pencil, Camera, Video, LayoutGrid } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -67,6 +67,10 @@ export const StepTwo = ({ spaces, setSpaces, files, setFiles, additionalNotes, s
 
   const updateSpace = (id: string, field: keyof Space, value: string) => {
     setSpaces(prev => prev.map((s) => (s.id === id ? { ...s, [field]: value } : s)));
+  };
+
+  const setInputMethod = (id: string, method: Space["inputMethod"]) => {
+    setSpaces(prev => prev.map((s) => (s.id === id ? { ...s, inputMethod: method } : s)));
   };
 
   // Storage priorities, ranked in tap order: 1st tap = GREEN (1st), 2nd = YELLOW
@@ -142,6 +146,10 @@ export const StepTwo = ({ spaces, setSpaces, files, setFiles, additionalNotes, s
       const ceilingHeight = parseFloat(space.ceilingHeight);
       if (!ceilingHeight || ceilingHeight <= 0) return false;
 
+      // "Upload instead" spaces skip wall measurements entirely — we'll work
+      // from their photos/video rather than a drawing.
+      if (space.inputMethod === "upload") continue;
+
       if (space.wallMeasurements && space.wallMeasurements.length > 0) {
         for (const wall of space.wallMeasurements) {
           if (!wall.length || wall.length.trim() === "") return false;
@@ -177,6 +185,7 @@ export const StepTwo = ({ spaces, setSpaces, files, setFiles, additionalNotes, s
         toast.error(t("s2.tCeiling"));
         return;
       }
+      if (space.inputMethod === "upload") continue;
       if (!space.wallMeasurements || space.wallMeasurements.length === 0) {
         toast.error(t("s2.tDraw"));
         return;
@@ -219,11 +228,11 @@ export const StepTwo = ({ spaces, setSpaces, files, setFiles, additionalNotes, s
 
     for (const f of selected) {
       if (f.size > MAX_FILE_SIZE) {
-        errors.push(`"${f.name}" (${formatBytes(f.size)}) is over the ${MAX_FILE_SIZE_MB} MB per-file limit.`);
+        errors.push(`"${f.name}" (${formatBytes(f.size)}) ${t("s2.errOverFileLimit")} ${MAX_FILE_SIZE_MB} MB.`);
         continue;
       }
       if (runningTotal + f.size > MAX_TOTAL_SIZE) {
-        errors.push(`"${f.name}" (${formatBytes(f.size)}) would exceed the ${MAX_TOTAL_SIZE_MB} MB total upload limit.`);
+        errors.push(`"${f.name}" (${formatBytes(f.size)}) ${t("s2.errOverTotalLimit")} ${MAX_TOTAL_SIZE_MB} MB.`);
         continue;
       }
       runningTotal += f.size;
@@ -279,6 +288,10 @@ export const StepTwo = ({ spaces, setSpaces, files, setFiles, additionalNotes, s
         <p className="text-brand-muted mt-1">{t("s2.subtitle")}</p>
       </div>
 
+      <div className="rounded-lg border border-brand-copper/30 bg-brand-copper/5 px-4 py-3 text-sm text-brand-espresso">
+        {t("s2.reassurance")}
+      </div>
+
       {/* Your Spaces */}
       <div>
         {/* <h3 className="text-xl font-semibold text-brand-espresso" style={{ fontFamily: "'Cormorant Garamond', serif" }}>{t("s2.yourSpaces")}</h3>
@@ -307,15 +320,19 @@ export const StepTwo = ({ spaces, setSpaces, files, setFiles, additionalNotes, s
                     }`}
                 />
               </div>
-              <select
-                value={space.type}
-                onChange={(e) => updateSpace(space.id, "type", e.target.value as Space["type"])}
-                className="flex-shrink-0 bg-transparent focus:outline-none text-brand-muted"
-              >
-                <option value="Closet">{t("s2.closet")}</option>
-                <option value="Kitchen">{t("s2.kitchen")}</option>
-                <option value="Garage">{t("s2.garage")}</option>
-              </select>
+              <label className="flex-shrink-0 flex items-center gap-1.5">
+                <span className="hidden sm:inline text-xs text-brand-muted">{t("s2.spaceType")}</span>
+                <select
+                  value={space.type}
+                  onChange={(e) => updateSpace(space.id, "type", e.target.value as Space["type"])}
+                  aria-label={t("s2.spaceType")}
+                  className="bg-white border border-brand-border rounded-md pl-2 pr-1 py-2 text-sm text-brand-espresso focus:outline-none focus:ring-2 focus:ring-brand-copper/30 focus:border-brand-copper"
+                >
+                  <option value="Closet">{t("s2.closet")}</option>
+                  <option value="Kitchen">{t("s2.kitchen")}</option>
+                  <option value="Garage">{t("s2.garage")}</option>
+                </select>
+              </label>
               <button
                 type="button"
                 onClick={() => removeSpace(space.id)}
@@ -389,20 +406,76 @@ export const StepTwo = ({ spaces, setSpaces, files, setFiles, additionalNotes, s
                     className={`w-full p-2 border rounded-md focus:ring-brand-copper focus:border-brand-copper ${!space.ceilingHeight || parseFloat(space.ceilingHeight) <= 0 ? "border-red-400" : "border-brand-border"
                       }`}
                   />
+                  <p className="text-xs text-brand-muted">{t("s2.ceilingHelp")}</p>
                 </div>
               </div>
 
-              <DrawingCanvas
-                spaceId={space.id}
-                unit={unit}
-                spaceType={space.type}
-                // Put back whatever this visitor drew last time they were here.
-                initialCanvasJson={space.canvasJson}
-                initialWallMeasurements={space.wallMeasurements}
-                onDrawingComplete={(dataUrl, wallMeasurements, totalPerimeter, totalArea, canvasJson) =>
-                  handleDrawingComplete(space.id, dataUrl, wallMeasurements, totalPerimeter, totalArea, canvasJson)
-                }
-              />
+              {!space.inputMethod ? (
+                <div className="space-y-3">
+                  <p className="text-sm font-medium text-brand-espresso">{t("s2.chooseTitle")}</p>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setInputMethod(space.id, "shape")}
+                      className="flex flex-col items-start gap-1.5 p-4 border-2 border-brand-border hover:border-brand-copper hover:bg-brand-copper/5 rounded-lg transition-all text-left"
+                    >
+                      <LayoutGrid className="w-5 h-5 text-brand-copper" />
+                      <span className="font-medium text-brand-espresso text-sm">{t("s2.chooseShape")}</span>
+                      <span className="text-xs text-brand-muted">{t("s2.chooseShapeDesc")}</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setInputMethod(space.id, "draw")}
+                      className="flex flex-col items-start gap-1.5 p-4 border-2 border-brand-border hover:border-brand-copper hover:bg-brand-copper/5 rounded-lg transition-all text-left"
+                    >
+                      <Pencil className="w-5 h-5 text-brand-copper" />
+                      <span className="font-medium text-brand-espresso text-sm">{t("s2.chooseDraw")}</span>
+                      <span className="text-xs text-brand-muted">{t("s2.chooseDrawDesc")}</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setInputMethod(space.id, "upload")}
+                      className="flex flex-col items-start gap-1.5 p-4 border-2 border-brand-border hover:border-brand-copper hover:bg-brand-copper/5 rounded-lg transition-all text-left"
+                    >
+                      <Camera className="w-5 h-5 text-brand-copper" />
+                      <span className="font-medium text-brand-espresso text-sm">{t("s2.chooseUpload")}</span>
+                      <span className="text-xs text-brand-muted">{t("s2.chooseUploadDesc")}</span>
+                    </button>
+                  </div>
+                </div>
+              ) : space.inputMethod === "upload" ? (
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-lg border border-brand-copper/30 bg-brand-copper/5 px-4 py-4">
+                  <p className="text-sm text-brand-espresso">{t("s2.uploadInsteadNote")}</p>
+                  <button
+                    type="button"
+                    onClick={() => setInputMethod(space.id, undefined)}
+                    className="flex-shrink-0 text-xs font-medium underline text-brand-copper hover:text-brand-copper-dark whitespace-nowrap"
+                  >
+                    {t("s2.changeMethod")}
+                  </button>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <DrawingCanvas
+                    spaceId={space.id}
+                    unit={unit}
+                    spaceType={space.type}
+                    // Put back whatever this visitor drew last time they were here.
+                    initialCanvasJson={space.canvasJson}
+                    initialWallMeasurements={space.wallMeasurements}
+                    onDrawingComplete={(dataUrl, wallMeasurements, totalPerimeter, totalArea, canvasJson) =>
+                      handleDrawingComplete(space.id, dataUrl, wallMeasurements, totalPerimeter, totalArea, canvasJson)
+                    }
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setInputMethod(space.id, undefined)}
+                    className="text-xs font-medium underline text-brand-muted hover:text-brand-espresso"
+                  >
+                    {t("s2.changeMethod")}
+                  </button>
+                </div>
+              )}
 
               {/* Storage priorities */}
               <div className="mt-8 space-y-2">
@@ -450,12 +523,50 @@ export const StepTwo = ({ spaces, setSpaces, files, setFiles, additionalNotes, s
           </p>
         </div>
 
+        <div className="rounded-lg border border-brand-border bg-brand-sand/30 px-4 py-3">
+          <p className="text-sm font-medium text-brand-espresso mb-2">{t("s2.uploadChecklistTitle")}</p>
+          <div className="flex flex-wrap gap-x-4 gap-y-1.5">
+            {["s2.uc1", "s2.uc2", "s2.uc3", "s2.uc4", "s2.uc5", "s2.uc6", "s2.uc7", "s2.uc8", "s2.uc9", "s2.uc10"].map((key) => (
+              <span key={key} className="text-xs text-brand-muted">• {t(key)}</span>
+            ))}
+          </div>
+        </div>
+
+        {/* Desktop / tablet: single drag & drop zone */}
         <input type="file" multiple accept="image/*,video/*" onChange={handleFileChange} className="hidden" id="file-upload" />
-        <label htmlFor="file-upload" className="flex flex-col items-center justify-center gap-3 border-2 border-dashed border-brand-border rounded-lg p-10 cursor-pointer hover:bg-brand-sand/50 transition-colors">
+        <label htmlFor="file-upload" className="hidden sm:flex flex-col items-center justify-center gap-3 border-2 border-dashed border-brand-border rounded-lg p-10 cursor-pointer hover:bg-brand-sand/50 transition-colors">
           <Upload className="w-8 h-8 text-brand-copper" />
           <p className="font-medium text-brand-espresso">{t("s2.browse")}</p>
           <p className="text-sm text-brand-muted">{t("s2.uploadHintA")} {MAX_FILE_SIZE_MB} {t("s2.mbEach")}</p>
         </label>
+
+        {/* Mobile: explicit capture vs. gallery-picker buttons, since most visitors upload from a phone */}
+        <div className="grid grid-cols-2 gap-3 sm:hidden">
+          <input type="file" accept="image/*" capture="environment" onChange={handleFileChange} className="hidden" id="file-take-photo" />
+          <label htmlFor="file-take-photo" className="flex flex-col items-center justify-center gap-2 border-2 border-dashed border-brand-border rounded-lg py-6 cursor-pointer hover:bg-brand-sand/50 transition-colors text-center">
+            <Camera className="w-6 h-6 text-brand-copper" />
+            <span className="text-sm font-medium text-brand-espresso">{t("s2.takePhoto")}</span>
+          </label>
+
+          <input type="file" accept="image/*" multiple onChange={handleFileChange} className="hidden" id="file-upload-photo" />
+          <label htmlFor="file-upload-photo" className="flex flex-col items-center justify-center gap-2 border-2 border-dashed border-brand-border rounded-lg py-6 cursor-pointer hover:bg-brand-sand/50 transition-colors text-center">
+            <Upload className="w-6 h-6 text-brand-copper" />
+            <span className="text-sm font-medium text-brand-espresso">{t("s2.uploadPhoto")}</span>
+          </label>
+
+          <input type="file" accept="video/*" capture="environment" onChange={handleFileChange} className="hidden" id="file-record-video" />
+          <label htmlFor="file-record-video" className="flex flex-col items-center justify-center gap-2 border-2 border-dashed border-brand-border rounded-lg py-6 cursor-pointer hover:bg-brand-sand/50 transition-colors text-center">
+            <Video className="w-6 h-6 text-brand-copper" />
+            <span className="text-sm font-medium text-brand-espresso">{t("s2.recordVideo")}</span>
+          </label>
+
+          <input type="file" accept="video/*" multiple onChange={handleFileChange} className="hidden" id="file-upload-video" />
+          <label htmlFor="file-upload-video" className="flex flex-col items-center justify-center gap-2 border-2 border-dashed border-brand-border rounded-lg py-6 cursor-pointer hover:bg-brand-sand/50 transition-colors text-center">
+            <Upload className="w-6 h-6 text-brand-copper" />
+            <span className="text-sm font-medium text-brand-espresso">{t("s2.uploadVideo")}</span>
+          </label>
+        </div>
+        <p className="text-xs text-brand-muted -mt-1 sm:hidden">{t("s2.uploadHintA")} {MAX_FILE_SIZE_MB} {t("s2.mbEach")}</p>
 
         {/* Error message when a file is too large */}
         {uploadError && (

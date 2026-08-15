@@ -1,15 +1,17 @@
 import Link from "next/link";
 import { Globe, Share2, ExternalLink, Mail, Phone, MapPin } from "lucide-react";
 import { useContactInfo } from "@/hooks/useContactInfo";
+import { useServiceNavLinks } from "@/hooks/useServiceNavLinks";
 import Logo from "@/components/layout/Logo";
 
 export default function Footer() {
   const { contactInfo } = useContactInfo();
+  const serviceLinks = useServiceNavLinks();
 
   const email = contactInfo?.email || "hello@designandsupply.com";
   const phone = contactInfo?.phone || "+1 (800) 555-0192";
-  const addressLine1 = contactInfo?.address_line1 || "1200 Design District Blvd";
-  const addressLine2 = contactInfo?.address_line2 || "Los Angeles, CA 90028";
+  const addressLine1 = contactInfo?.address_line1 || "";
+  const addressLine2 = contactInfo?.address_line2 || "Serving Greater Montréal, QC";
 
   return (
     <footer className="bg-[#1A1A18] text-white/60">
@@ -21,7 +23,7 @@ export default function Footer() {
               <Logo tone="light" />
             </Link>
             <p className="text-sm leading-relaxed mb-6">
-              Premium custom closet design and installation. Transforming spaces into luxury storage experiences since 2015.
+              Design &amp; Supply offers custom closets, wardrobes, garage cabinets, kitchen cabinets and storage solutions designed live online. Local installation is available in Greater Montréal, with pickup, curbside delivery and supply-only shipping options where available.
             </p>
             {/* <div className="flex gap-4">
               {[Globe, Share2, ExternalLink].map((Icon, i) => (
@@ -36,12 +38,7 @@ export default function Footer() {
           <div>
             <h4 className="text-white text-xs tracking-[0.2em] uppercase font-medium mb-6">Services</h4>
             <ul className="space-y-3">
-              {[
-                ["Closets", "/closets"],
-                ["Kitchen Cabinets", "/kitchens"],
-                ["Luxury Dressing Rooms", "/closets"],
-                ["Garage Storage", "/garages"],
-              ].map(([label, href]) => (
+              {serviceLinks.map(({ label, href }) => (
                 <li key={label}>
                   <Link href={href} className="text-sm hover:text-white hover:translate-x-1 inline-block transition-all duration-200">
                     {label}

@@ -130,7 +130,7 @@ const AdminSiteContent = () => {
               </SectionCard>
 
               {/* SERVICES */}
-              <SectionCard title="Homepage — Services" description="The three service cards (Closets / Kitchens / Garages)." saving={savingKey === SITE_KEYS.services} onSave={() => save(SITE_KEYS.services, services)}>
+              <SectionCard title="Homepage — Services" description="The three service cards (Custom Closets / Kitchen Cabinets / Garage Cabinets)." saving={savingKey === SITE_KEYS.services} onSave={() => save(SITE_KEYS.services, services)}>
                 <Field label="Eyebrow" value={services.eyebrow} onChange={(v) => setServices({ ...services, eyebrow: v })} />
                 <Field label="Heading" value={services.heading} onChange={(v) => setServices({ ...services, heading: v })} />
                 {services.cards.map((card, i) => (

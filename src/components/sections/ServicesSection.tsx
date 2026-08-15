@@ -59,7 +59,7 @@ export default function ServicesSection() {
                   {service.description}
                 </p>
                 <div className="mt-4 flex items-center gap-2 text-brand-copper text-xs tracking-[0.15em] uppercase">
-                  <span>Explore</span>
+                  <span>Explore {service.title}</span>
                   <span className="w-6 h-px bg-brand-copper group-hover:w-10 transition-all duration-300" />
                 </div>
               </div>

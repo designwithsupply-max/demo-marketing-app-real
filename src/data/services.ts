@@ -10,7 +10,7 @@ export const services: Service[] = [
     image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&h=600&fit=crop",
     heroImage: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=1400&h=800&fit=crop",
     features: ["Custom shelving & hanging", "Integrated LED lighting", "Island with drawers", "Full-length mirrors", "Shoe display systems", "Jewelry organizers"],
-    benefits: ["Maximize space utilization", "Tailored to your wardrobe", "Premium hardware & finishes", "10-year structural warranty"],
+    benefits: ["Maximize space utilization", "Tailored to your wardrobe", "Premium hardware & finishes", "Warranty details confirmed before final approval"],
     gallery: [
       "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&h=400&fit=crop",
       "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=600&h=400&fit=crop",

@@ -25,11 +25,15 @@ export default function WhyDifferent() {
         <div className="text-center mb-16">
           <span className="text-brand-copper text-xs tracking-[0.3em] uppercase block mb-4">The Difference</span>
           <h2
-            className="text-brand-espresso font-light leading-tight"
+            className="text-brand-espresso font-light leading-tight mb-6"
             style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: "clamp(2rem, 4vw, 3.2rem)" }}
           >
             Why Design &amp; Supply is different
           </h2>
+          <p className="text-brand-muted text-sm leading-relaxed max-w-2xl mx-auto">
+            <span className="text-brand-espresso font-medium">Why our prices are lower: </span>
+            Traditional custom cabinet companies often include showroom costs, multiple in-home visits, high sales commissions and large markups. Design &amp; Supply uses an online-first process, live remote design and efficient production to reduce overhead and offer custom cabinets at very competitive prices.
+          </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

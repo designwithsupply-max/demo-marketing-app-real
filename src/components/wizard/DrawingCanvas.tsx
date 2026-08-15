@@ -758,7 +758,7 @@ export const DrawingCanvas = ({
 
       <div className="p-3 bg-brand-sand/30 border border-brand-border rounded-lg">
         <p className="text-xs font-medium text-brand-muted mb-3">
-          {spaceType === "Kitchen" ? "Kitchen layouts" : "Closet & garage layouts"} — tap one to place it
+          {spaceType === "Kitchen" ? t("canvas.layoutsKitchen") : t("canvas.layoutsOther")} — {t("canvas.layoutsTapHint")}
         </p>
         <div className="flex flex-wrap gap-3">
           {getLayouts(spaceType).map((tpl) => (
@@ -778,8 +778,7 @@ export const DrawingCanvas = ({
       <div className="flex items-start gap-2 rounded-lg border border-brand-copper/40 bg-brand-copper/10 px-4 py-3">
         <Pencil className="w-4 h-4 mt-0.5 text-brand-copper flex-shrink-0" />
         <p className="text-sm text-brand-espresso">
-          <span className="font-semibold">How to draw:</span> Click or tap, drag, and release to draw each wall.
-          Continue until your room shape is complete.
+          <span className="font-semibold">{t("canvas.howToDrawLabel")}</span> {t("canvas.howToDraw")}
         </p>
       </div>
 

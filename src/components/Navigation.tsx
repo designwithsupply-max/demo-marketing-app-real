@@ -154,7 +154,7 @@
 //               href="/space-planner"
 //               className="inline-flex items-center justify-center bg-brand-copper hover:bg-brand-copper-dark text-white text-[11px] tracking-[0.1em] uppercase font-sans font-medium px-5 py-2.5 rounded-full transition-all duration-300 shadow-sm whitespace-nowrap"
 //             >
-//               Start Planner
+//               Start Free Design
 //             </Link>
 //           </div>
 
@@ -224,6 +224,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
 import Logo from "@/components/layout/Logo";
+import { useServiceNavLinks } from "@/hooks/useServiceNavLinks";
 
 // Payment link shown in the header "Make a Payment" button.
 // Same secure Helcim hosted checkout used in the wizard and footer.
@@ -236,12 +237,6 @@ const navLinks = [
   { href: "/blog", label: "Blog" },
   { href: "/faq", label: "FAQ" },
   // { href: "/contact", label: "Contact" },
-];
-
-const servicesLinks = [
-  { href: "/closets", label: "Closets" },
-  { href: "/kitchens", label: "Kitchens" },
-  { href: "/garages", label: "Garages" },
 ];
 
 const desktopLinks = [
@@ -258,6 +253,7 @@ export const Navigation = () => {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const pathname = usePathname();
+  const servicesLinks = useServiceNavLinks();
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 30);
@@ -283,16 +279,19 @@ export const Navigation = () => {
             : "bg-transparent border-transparent"
           }`}
       >
-        <nav className="max-w-7xl mx-auto px-6 lg:px-10 flex lg:grid lg:grid-cols-3 items-center justify-between h-20">
-          {/* Column 1: Logo */}
-          <div className="flex justify-start">
+        <nav className="max-w-7xl mx-auto px-6 xl:px-10 flex items-center justify-between gap-4 h-20">
+          {/* Logo */}
+          <div className="flex justify-start flex-shrink-0">
             <Link href="/" className="flex items-center group">
               <Logo tone={isLightState ? "dark" : "light"} />
             </Link>
           </div>
 
-          {/* Column 2: Center Navigation Links (desktop) */}
-          <div className="hidden lg:flex justify-center items-center gap-6 min-w-max">
+          {/* Center Navigation Links (desktop) — its own flex item (not a fixed
+              grid column) so it sizes to its content instead of being forced
+              into an equal third alongside the logo and action buttons, which
+              was crowding everything together at smaller desktop widths. */}
+          <div className="hidden xl:flex flex-1 justify-center items-center gap-6 2xl:gap-8 min-w-0">
             {desktopLinks.map((link) => {
               if (link.type === "dropdown") {
                 return (
@@ -309,11 +308,11 @@ export const Navigation = () => {
                     </button>
                     {/* Invisible hover bridge fills the gap so cursor doesn't leave the group */}
                     <div className="absolute left-0 top-full w-full h-3" />
-                    <div className="absolute left-1/2 top-[calc(100%+12px)] w-44 -translate-x-1/2 rounded-xl border border-brand-border bg-white shadow-lg opacity-0 translate-y-2 pointer-events-none transition-all duration-200 group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto">
+                    <div className="absolute left-1/2 top-[calc(100%+12px)] w-64 -translate-x-1/2 rounded-xl border border-brand-border bg-white shadow-lg opacity-0 translate-y-2 pointer-events-none transition-all duration-200 group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto">
                       <div className="py-2">
                         {servicesLinks.map((service) => (
                           <Link
-                            key={service.href}
+                            key={service.label}
                             href={service.href}
                             className="block px-4 py-2 text-xs uppercase tracking-[0.15em] text-brand-espresso/80 hover:text-brand-espresso hover:bg-brand-sand transition-colors"
                           >
@@ -350,13 +349,13 @@ export const Navigation = () => {
             })}
           </div>
 
-          {/* Column 3: Right Action Buttons (desktop) */}
-          <div className="hidden lg:flex justify-end items-center gap-3">
+          {/* Right Action Buttons (desktop) */}
+          <div className="hidden xl:flex justify-end items-center gap-2.5 2xl:gap-3 flex-shrink-0">
             <a
               href={PAY_NOW_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className={`inline-flex items-center justify-center border text-[11px] tracking-[0.1em] uppercase font-sans font-medium px-5 py-2.5 rounded-full transition-all duration-300 whitespace-nowrap ${isLightState
+              className={`inline-flex items-center justify-center border text-[11px] tracking-[0.1em] uppercase font-sans font-medium px-4 2xl:px-5 py-2.5 rounded-full transition-all duration-300 whitespace-nowrap ${isLightState
                   ? "border-brand-copper text-brand-copper hover:bg-brand-copper hover:text-white"
                   : "border-white/60 text-white hover:bg-white hover:text-brand-espresso"
                 }`}
@@ -365,14 +364,15 @@ export const Navigation = () => {
             </a>
             <Link
               href="/space-planner"
-              className="inline-flex items-center justify-center bg-brand-copper hover:bg-brand-copper-dark text-white text-[11px] tracking-[0.1em] uppercase font-sans font-medium px-5 py-2.5 rounded-full transition-all duration-300 shadow-sm whitespace-nowrap"
+              className="inline-flex items-center justify-center bg-brand-copper hover:bg-brand-copper-dark text-white text-[11px] tracking-[0.1em] uppercase font-sans font-medium px-4 2xl:px-5 py-2.5 rounded-full transition-all duration-300 shadow-sm whitespace-nowrap"
             >
-              Start Planner
+              Start Free Design
             </Link>
           </div>
 
-          {/* Mobile Menu Button */}
-          <div className="lg:hidden flex items-center">
+          {/* Mobile / tablet Menu Button — covers everything below xl, where
+              the full desktop row no longer has room to breathe. */}
+          <div className="xl:hidden flex items-center flex-shrink-0">
             <button
               className={`p-2 transition-colors duration-300 ${isLightState ? "text-brand-espresso" : "text-white"
                 }`}
@@ -385,9 +385,9 @@ export const Navigation = () => {
         </nav>
       </header>
 
-      {/* Mobile Menu */}
+      {/* Mobile / tablet Menu */}
       <div
-        className={`fixed inset-0 z-40 bg-brand-ink transition-all duration-500 lg:hidden flex flex-col ${mobileOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+        className={`fixed inset-0 z-40 bg-brand-ink transition-all duration-500 xl:hidden flex flex-col ${mobileOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
           }`}
         style={{ paddingTop: "5rem" }}
       >
@@ -408,7 +408,7 @@ export const Navigation = () => {
           })}
           {servicesLinks.map((service, i) => (
             <Link
-              key={service.href}
+              key={service.label}
               href={service.href}
               className="text-base tracking-[0.15em] uppercase font-light transition-all duration-300 text-white/70 hover:text-white"
               style={{ transitionDelay: mobileOpen ? `${(i + navLinks.length) * 60}ms` : "0ms" }}

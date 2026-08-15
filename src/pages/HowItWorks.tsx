@@ -25,14 +25,14 @@ interface TimelineStepData {
 }
 
 const includes = [
-  "Free in-home or video consultation",
+  "Free live online consultation",
   "Full 3D design visualization",
-  "Itemized transparent pricing",
+  "Itemized quote before any commitment",
   "Premium material samples",
-  "Expert installation team",
-  "10-year structural warranty",
+  "Local installation team in Greater Montréal",
+  "Warranty details confirmed before final approval",
   "Post-install support",
-  "Lifetime design consultation access"
+  "Design support throughout your project"
 ];
 
 function TimelineStep({ step, index, total }: { step: TimelineStepData; index: number; total: number }) {
@@ -188,8 +188,11 @@ export default function HowItWorks() {
                 >
                   Transparent Pricing.<br />No Surprises.
                 </h2>
-                <p className="text-[#6B6B65] text-sm leading-relaxed mb-6">
-                  Every project includes a fully itemized quote before any commitment. Our pricing is transparent, comprehensive, and guaranteed. What we quote is what you pay.
+                <p className="text-[#6B6B65] text-sm leading-relaxed mb-2">
+                  Every project includes a fully itemized quote before any commitment. Your final quote is based on the approved design, measurements, finishes, accessories, delivery method and installation option.
+                </p>
+                <p className="text-[#6B6B65] text-xs leading-relaxed mb-6">
+                  Final pricing may change if measurements, finishes, site conditions or project scope change before production.
                 </p>
                 <div className="grid grid-cols-2 gap-4 mb-8">
                   {pricingTiers.map((tier) => (

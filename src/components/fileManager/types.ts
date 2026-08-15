@@ -28,7 +28,7 @@ export const FOLDER_OPTIONS = [
 export const TYPE_OPTIONS = [
     { value: "closet", label: "Closets" },
     { value: "kitchen", label: "Kitchens" },
-    { value: "garage", label: "Garages" },
+    { value: "garage", label: "Garage Cabinets" },
     { value: "other", label: "Others" },
 ];
 

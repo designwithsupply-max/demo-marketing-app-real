@@ -5,20 +5,20 @@ const steps = [
   {
     number: "01",
     icon: Ruler,
-    title: "Measure",
-    description: "Use the 3-Step Space Planner to draw your space, enter wall measurements, and upload photos and videos.",
+    title: "Send Your Space",
+    description: "Use the 3-Step Space Planner to send measurements, photos and videos.",
   },
   {
     number: "02",
     icon: MonitorPlay,
-    title: "Design Live",
-    description: "Meet online with a designer. We share our CAD screen and design your closet, kitchen, or garage live with you.",
+    title: "Design Live Online",
+    description: "Meet with a designer by screen share and review your custom design.",
   },
   {
     number: "03",
     icon: FileCheck,
-    title: "Quote & Supply",
-    description: "Get your same-day quote. Cabinets are supplied fully assembled and ready for delivery or install.",
+    title: "Quote & Order",
+    description: "Receive your quote, approve your design, and choose pickup, delivery or installation.",
   },
 ];
 
