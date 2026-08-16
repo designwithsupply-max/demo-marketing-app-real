@@ -33,6 +33,10 @@ export interface GalleryProject {
     type: 'closet' | 'kitchen' | 'garage' | 'other';
     description: string | null;
     tags: string[];
+    city: string | null;
+    client_needed: string | null;
+    what_we_designed: string | null;
+    main_features: string[];
     created_at: string;
     updated_at: string;
 }

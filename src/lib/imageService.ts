@@ -46,6 +46,10 @@ export interface GalleryViewItem {
   }[];
   description: string;
   tags: string[];
+  city: string | null;
+  clientNeeded: string | null;
+  whatWeDesigned: string | null;
+  mainFeatures: string[];
 }
 
 function projectToViewItem(
@@ -70,6 +74,10 @@ function projectToViewItem(
       })),
     description: project.description ?? "",
     tags: project.tags ?? [],
+    city: project.city ?? null,
+    clientNeeded: project.client_needed ?? null,
+    whatWeDesigned: project.what_we_designed ?? null,
+    mainFeatures: project.main_features ?? [],
   };
 }
 
@@ -172,6 +180,10 @@ export const imageService = {
       type: "closet" | "kitchen" | "garage" | "other";
       description?: string;
       tags?: string[];
+      city?: string;
+      clientNeeded?: string;
+      whatWeDesigned?: string;
+      mainFeatures?: string[];
     },
     files: Array<{
       file: File;
@@ -190,6 +202,10 @@ export const imageService = {
         type: projectData.type,
         description: projectData.description || null,
         tags: projectData.tags || [],
+        city: projectData.city || null,
+        client_needed: projectData.clientNeeded || null,
+        what_we_designed: projectData.whatWeDesigned || null,
+        main_features: projectData.mainFeatures || [],
       })
       .select()
       .single();
@@ -277,11 +293,21 @@ export const imageService = {
       type?: string;
       description?: string;
       tags?: string[];
+      city?: string;
+      clientNeeded?: string;
+      whatWeDesigned?: string;
+      mainFeatures?: string[];
     },
   ): Promise<void> {
+    const { clientNeeded, whatWeDesigned, mainFeatures, ...rest } = data;
     const { error } = await supabase
       .from("gallery_projects")
-      .update(data as any)
+      .update({
+        ...rest,
+        ...(clientNeeded !== undefined ? { client_needed: clientNeeded || null } : {}),
+        ...(whatWeDesigned !== undefined ? { what_we_designed: whatWeDesigned || null } : {}),
+        ...(mainFeatures !== undefined ? { main_features: mainFeatures } : {}),
+      } as any)
       .eq("id", projectId);
     if (error) throw error;
   },

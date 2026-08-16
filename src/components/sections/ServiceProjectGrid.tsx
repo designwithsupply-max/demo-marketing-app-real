@@ -12,7 +12,7 @@ interface ServiceProjectGridProps {
 }
 
 export default function ServiceProjectGrid({ projects, loading, type }: ServiceProjectGridProps) {
-  const typeLabel = type === "closet" ? "Closet" : type === "kitchen" ? "Kitchen" : "Garage";
+  const typeLabel = type === "closet" ? "Closet" : type === "kitchen" ? "Kitchen" : "Garage Cabinets";
 
   return (
     <section className="bg-brand-cream px-6 lg:px-10 py-14">

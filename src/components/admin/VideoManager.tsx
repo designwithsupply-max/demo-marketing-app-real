@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Loader2, Trash2, Film } from "lucide-react";
@@ -19,6 +20,8 @@ export const VideoManager = () => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [type, setType] = useState<ProjectVideoType>("closet");
+  const [city, setCity] = useState("");
+  const [transcript, setTranscript] = useState("");
   const [videoFile, setVideoFile] = useState<File | null>(null);
   const [thumbFile, setThumbFile] = useState<File | null>(null);
   const videoRef = useRef<HTMLInputElement>(null);
@@ -38,6 +41,7 @@ export const VideoManager = () => {
 
   const reset = () => {
     setTitle(""); setDescription(""); setType("closet");
+    setCity(""); setTranscript("");
     setVideoFile(null); setThumbFile(null);
     if (videoRef.current) videoRef.current.value = "";
     if (thumbRef.current) thumbRef.current.value = "";
@@ -50,7 +54,7 @@ export const VideoManager = () => {
       return toast.error(`Video is over the ${MAX_VIDEO_MB} MB limit`);
     setUploading(true);
     try {
-      await videoService.uploadProjectVideo(videoFile, thumbFile, { title: title.trim(), description, type });
+      await videoService.uploadProjectVideo(videoFile, thumbFile, { title: title.trim(), description, type, city, transcript });
       toast.success("Video added");
       reset();
       await load();
@@ -76,8 +80,11 @@ export const VideoManager = () => {
     <div className="space-y-6">
       <Card className="p-6 border-brand-border bg-white">
         <h3 className="text-lg font-semibold text-brand-espresso mb-1">Add a project video</h3>
-        <p className="text-sm text-brand-muted mb-5">
+        <p className="text-sm text-brand-muted mb-2">
           Videos appear in the “Project Videos” section on the Gallery page. A poster image is optional but recommended. Max {MAX_VIDEO_MB} MB per video.
+        </p>
+        <p className="text-xs text-brand-muted mb-5 bg-brand-sand/50 border border-brand-border rounded-md px-3 py-2">
+          Compress before uploading so the site stays fast — H.264 MP4, roughly 1080p, aiming well under the {MAX_VIDEO_MB} MB limit. Free tools: HandBrake or CloudConvert.
         </p>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -102,9 +109,17 @@ export const VideoManager = () => {
               </SelectContent>
             </Select>
           </div>
-          <div className="space-y-2 md:col-span-2">
+          <div className="space-y-2">
+            <Label>City / Location (optional)</Label>
+            <Input value={city} onChange={(e) => setCity(e.target.value)} placeholder="e.g. Laval, QC" />
+          </div>
+          <div className="space-y-2">
             <Label>Description (optional)</Label>
             <Input value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Short caption" />
+          </div>
+          <div className="space-y-2 md:col-span-2">
+            <Label>Transcript (optional)</Label>
+            <Textarea value={transcript} onChange={(e) => setTranscript(e.target.value)} placeholder="Short transcript of what's said in the video, for accessibility." rows={3} />
           </div>
         </div>
 

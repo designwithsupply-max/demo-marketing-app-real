@@ -87,6 +87,10 @@ const FileManager = () => {
   const [uploadSlug, setUploadSlug] = useState("");
   const [uploadCategory, setUploadCategory] = useState("Walk-in Closets");
   const [uploadTags, setUploadTags] = useState("");
+  const [uploadCity, setUploadCity] = useState("");
+  const [uploadClientNeeded, setUploadClientNeeded] = useState("");
+  const [uploadWhatWeDesigned, setUploadWhatWeDesigned] = useState("");
+  const [uploadMainFeatures, setUploadMainFeatures] = useState("");
   const [thumbnailIndex, setThumbnailIndex] = useState(0);
   const [perImageSpecs, setPerImageSpecs] = useState<string[]>([]);
   const [projects, setProjects] = useState<GalleryViewItem[]>([]);
@@ -347,6 +351,12 @@ const FileManager = () => {
                 .map((t) => t.trim())
                 .filter(Boolean)
             : [];
+          const mainFeatures = uploadMainFeatures
+            ? uploadMainFeatures
+                .split(",")
+                .map((t) => t.trim())
+                .filter(Boolean)
+            : [];
           const filesForProject = pendingFilesArray.map((file, i) => ({
             file,
             title: perImageSpecs[i] || file.name.replace(/\.[^/.]+$/, ""),
@@ -361,6 +371,10 @@ const FileManager = () => {
               type: uploadType as any,
               description: uploadDescription || undefined,
               tags,
+              city: uploadCity.trim() || undefined,
+              clientNeeded: uploadClientNeeded.trim() || undefined,
+              whatWeDesigned: uploadWhatWeDesigned.trim() || undefined,
+              mainFeatures,
             },
             filesForProject,
           );
@@ -487,6 +501,10 @@ const FileManager = () => {
     setUploadCategory(project.category);
     setUploadTags(project.tags.join(", "));
     setUploadDescription(project.description || "");
+    setUploadCity(project.city || "");
+    setUploadClientNeeded(project.clientNeeded || "");
+    setUploadWhatWeDesigned(project.whatWeDesigned || "");
+    setUploadMainFeatures(project.mainFeatures.join(", "));
     setThumbnailIndex(0);
     setPerImageSpecs([]);
     setPendingFilesArray([]);
@@ -504,6 +522,10 @@ const FileManager = () => {
     setUploadCategory(project.category);
     setUploadTags(project.tags.join(", "));
     setUploadDescription(project.description || "");
+    setUploadCity(project.city || "");
+    setUploadClientNeeded(project.clientNeeded || "");
+    setUploadWhatWeDesigned(project.whatWeDesigned || "");
+    setUploadMainFeatures(project.mainFeatures.join(", "));
     setThumbnailIndex(0);
     setPerImageSpecs([]);
     setPendingFilesArray([]);
@@ -521,6 +543,12 @@ const FileManager = () => {
             .map((t) => t.trim())
             .filter(Boolean)
         : [];
+      const mainFeatures = uploadMainFeatures
+        ? uploadMainFeatures
+            .split(",")
+            .map((t) => t.trim())
+            .filter(Boolean)
+        : [];
       await imageService.updateProject(targetProject.id, {
         title: uploadTitle.trim(),
         slug: uploadSlug.trim(),
@@ -528,6 +556,10 @@ const FileManager = () => {
         type: uploadType,
         description: uploadDescription || undefined,
         tags,
+        city: uploadCity.trim() || undefined,
+        clientNeeded: uploadClientNeeded.trim() || undefined,
+        whatWeDesigned: uploadWhatWeDesigned.trim() || undefined,
+        mainFeatures,
       });
       toast.success(`Project "${uploadTitle}" updated`);
       setShowFolderDialog(false);
@@ -864,6 +896,14 @@ const FileManager = () => {
         onCategoryChange={setUploadCategory}
         uploadTags={uploadTags}
         onTagsChange={setUploadTags}
+        uploadCity={uploadCity}
+        onCityChange={setUploadCity}
+        uploadClientNeeded={uploadClientNeeded}
+        onClientNeededChange={setUploadClientNeeded}
+        uploadWhatWeDesigned={uploadWhatWeDesigned}
+        onWhatWeDesignedChange={setUploadWhatWeDesigned}
+        uploadMainFeatures={uploadMainFeatures}
+        onMainFeaturesChange={setUploadMainFeatures}
         thumbnailIndex={thumbnailIndex}
         onThumbChange={setThumbnailIndex}
         perImageSpecs={perImageSpecs}

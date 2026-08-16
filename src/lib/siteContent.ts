@@ -118,6 +118,7 @@ export interface ServiceCard {
   description: string;
   imageUrl: string;
   link: string;
+  buttonLabel: string;
 }
 
 export interface ServicesContent {
@@ -243,18 +244,21 @@ export const DEFAULT_SERVICES: ServicesContent = {
       link: "/closets",
       imageUrl: closetImage,
       description: "Walk-ins, reach-ins, wardrobes, pantries, laundry rooms, and storage walls.",
+      buttonLabel: "Explore Closets",
     },
     {
       title: "Kitchen Cabinets",
       link: "/kitchens",
       imageUrl: kitchenImage,
       description: "Custom kitchen cabinets designed live in CAD and supplied fully assembled.",
+      buttonLabel: "Explore Kitchen Cabinets",
     },
     {
       title: "Garage Cabinets",
       link: "/garage-cabinets",
       imageUrl: garageImage,
       description: "Garage cabinets, workbenches, tall storage, and organized storage systems.",
+      buttonLabel: "Explore Garage Cabinets",
     },
   ],
 };

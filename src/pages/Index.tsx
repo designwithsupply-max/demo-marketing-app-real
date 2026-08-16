@@ -1,6 +1,7 @@
 import { SeoHead } from "@/components/seo/SeoHead";
 import { Navigation } from "@/components/Navigation";
 import HeroSection from "@/components/sections/HeroSection";
+import HeroFeatures from "@/components/sections/HeroFeatures";
 import ProcessSteps from "@/components/sections/ProcessSteps";
 import ServicesSection from "@/components/sections/ServicesSection";
 import WhyDifferent from "@/components/sections/WhyDifferent";
@@ -39,6 +40,7 @@ const Index = () => {
       <div className="min-h-screen">
         <Navigation />
         <HeroSection />
+        <HeroFeatures />
         <ProcessSteps />
         <ServicesSection />
         <WhyDifferent />

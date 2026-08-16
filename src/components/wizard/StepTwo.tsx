@@ -45,7 +45,7 @@ export const StepTwo = ({ spaces, setSpaces, files, setFiles, additionalNotes, s
   const addSpace = () => {
     const newSpace: Space = {
       id: crypto.randomUUID(),
-      name: `New Space ${spaces.length + 1}`,
+      name: `Space ${spaces.length + 1}`,
       type: "Closet",
       ceilingHeight: unit === "in" ? "96" : "244",
       unit,
@@ -147,8 +147,12 @@ export const StepTwo = ({ spaces, setSpaces, files, setFiles, additionalNotes, s
       if (!ceilingHeight || ceilingHeight <= 0) return false;
 
       // "Upload instead" spaces skip wall measurements entirely — we'll work
-      // from their photos/video rather than a drawing.
-      if (space.inputMethod === "upload") continue;
+      // from their photos/video rather than a drawing. But we do need at
+      // least one successfully uploaded file to work from.
+      if (space.inputMethod === "upload") {
+        if (!files.some(f => f.uploadStatus === "success")) return false;
+        continue;
+      }
 
       if (space.wallMeasurements && space.wallMeasurements.length > 0) {
         for (const wall of space.wallMeasurements) {
@@ -185,7 +189,13 @@ export const StepTwo = ({ spaces, setSpaces, files, setFiles, additionalNotes, s
         toast.error(t("s2.tCeiling"));
         return;
       }
-      if (space.inputMethod === "upload") continue;
+      if (space.inputMethod === "upload") {
+        if (!files.some(f => f.uploadStatus === "success")) {
+          toast.error(t("s2.tUploadPhoto"));
+          return;
+        }
+        continue;
+      }
       if (!space.wallMeasurements || space.wallMeasurements.length === 0) {
         toast.error(t("s2.tDraw"));
         return;

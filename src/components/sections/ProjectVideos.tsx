@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { Loader2, Play } from "lucide-react";
+import Link from "next/link";
+import { Loader2, Play, ArrowRight } from "lucide-react";
 import { videoService, type ProjectVideo } from "@/lib/videoService";
 
 export const ProjectVideos = () => {
@@ -33,6 +34,13 @@ export const ProjectVideos = () => {
           <p className="text-white/60 max-w-2xl mx-auto mt-3 leading-relaxed">
             Walkthroughs and reveals from real closet, kitchen, and garage projects.
           </p>
+          <Link
+            href="/space-planner"
+            className="group inline-flex items-center gap-2 mt-6 text-[#C9A96E] text-xs tracking-[0.2em] uppercase hover:gap-3 transition-all duration-300"
+          >
+            Start Your Free Design
+            <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
+          </Link>
         </div>
 
         {loading ? (
@@ -69,9 +77,25 @@ export const ProjectVideos = () => {
                   {v.description && (
                     <p className="text-white/55 text-sm mt-1 line-clamp-2">{v.description}</p>
                   )}
-                  <span className="inline-block mt-3 text-[10px] tracking-[0.18em] uppercase text-[#C9A96E]">
-                    {v.type}
-                  </span>
+                  <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mt-3">
+                    <span className="text-[10px] tracking-[0.18em] uppercase text-[#C9A96E]">
+                      {v.type}
+                    </span>
+                    {v.city && (
+                      <>
+                        <span className="text-white/30 text-[10px]">·</span>
+                        <span className="text-[10px] tracking-[0.1em] uppercase text-white/50">{v.city}</span>
+                      </>
+                    )}
+                  </div>
+                  {v.transcript && (
+                    <details className="mt-3 group/transcript">
+                      <summary className="text-xs text-white/50 hover:text-white/80 cursor-pointer transition-colors">
+                        Transcript
+                      </summary>
+                      <p className="text-white/55 text-xs leading-relaxed mt-2 whitespace-pre-line">{v.transcript}</p>
+                    </details>
+                  )}
                 </figcaption>
               </figure>
             ))}

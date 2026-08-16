@@ -13,9 +13,23 @@ interface GalleryAlbumViewerProps {
   related: GalleryItem[];
 }
 
+const SERVICE_LINKS: Record<string, string> = {
+  closet: "/closets",
+  kitchen: "/kitchens",
+  garage: "/garage-cabinets",
+};
+
+const TYPE_LABELS: Record<string, string> = {
+  closet: "Custom Closet",
+  kitchen: "Kitchen Cabinets",
+  garage: "Garage Cabinets",
+  other: "Custom Storage",
+};
+
 export default function GalleryAlbumViewer({ item, related }: GalleryAlbumViewerProps) {
   const [activeIndex, setActiveIndex] = useState(0);
   const location = useLocation();
+  const similarDesignLink = (item.type && SERVICE_LINKS[item.type]) ?? "/space-planner";
 
   const backLink = useMemo(() => {
     const params = new URLSearchParams(location.search);
@@ -196,15 +210,81 @@ export default function GalleryAlbumViewer({ item, related }: GalleryAlbumViewer
             {/* CTA action buttons */}
             <div className="mt-8 border-t border-[#EBEBDF] pt-6">
               <Link
-                href="/space-planner"
+                href={similarDesignLink}
                 className="group flex items-center justify-between bg-[#C9A96E] text-[#1A1A18] text-xs tracking-[0.2em] uppercase font-medium px-6 py-4 hover:bg-[#E8D5B0] transition-colors duration-300 w-full"
               >
-                Get This Design
+                Start a Similar Design
                 <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
               </Link>
             </div>
           </div>
         </div>
+
+        {/* Project Details (type, location, brief & features) */}
+        {(item.type || item.city || item.clientNeeded || item.whatWeDesigned || (item.mainFeatures && item.mainFeatures.length > 0)) && (
+          <div className="border-t border-[#EBEBDF] pt-16">
+            <h3
+              className="text-[#1A1A18] font-light text-3xl mb-8"
+              style={{ fontFamily: "'Cormorant Garamond', Georgia, serif" }}
+            >
+              Project Details
+            </h3>
+
+            {(item.type || item.city) && (
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 mb-10">
+                {item.type && (
+                  <div>
+                    <span className="text-[#8B7355] text-[10px] uppercase tracking-wider font-semibold block mb-1.5">
+                      Project Type
+                    </span>
+                    <p className="text-[#1A1A18] text-sm">{TYPE_LABELS[item.type] ?? item.type}</p>
+                  </div>
+                )}
+                {item.city && (
+                  <div>
+                    <span className="text-[#8B7355] text-[10px] uppercase tracking-wider font-semibold block mb-1.5">
+                      City
+                    </span>
+                    <p className="text-[#1A1A18] text-sm">{item.city}</p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+              <div className="lg:col-span-2 space-y-8">
+                {item.clientNeeded && (
+                  <div>
+                    <h4 className="text-[#1A1A18] text-xs tracking-[0.2em] uppercase mb-3">What the Client Needed</h4>
+                    <p className="text-[#6B6B65] leading-relaxed text-sm">{item.clientNeeded}</p>
+                  </div>
+                )}
+                {item.whatWeDesigned && (
+                  <div>
+                    <h4 className="text-[#1A1A18] text-xs tracking-[0.2em] uppercase mb-3">What We Designed</h4>
+                    <p className="text-[#6B6B65] leading-relaxed text-sm">{item.whatWeDesigned}</p>
+                  </div>
+                )}
+              </div>
+
+              {item.mainFeatures && item.mainFeatures.length > 0 && (
+                <div className="lg:col-span-1">
+                  <h4 className="text-[#1A1A18] text-xs tracking-[0.2em] uppercase mb-4">Main Features</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {item.mainFeatures.map((feature) => (
+                      <span
+                        key={feature}
+                        className="bg-[#F5F0E8] text-[#8B7355] text-[11px] tracking-wider px-3.5 py-2 font-medium"
+                      >
+                        {feature}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Project Context & Details Below Album */}
         <div className="border-t border-[#EBEBDF] pt-16">

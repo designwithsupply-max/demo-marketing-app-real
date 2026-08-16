@@ -293,7 +293,7 @@ const AdminServicePages = () => {
                   <SelectContent>
                     <SelectItem value="closet">Closet</SelectItem>
                     <SelectItem value="kitchen">Kitchen</SelectItem>
-                    <SelectItem value="garage">Garage</SelectItem>
+                    <SelectItem value="garage">Garage Cabinets</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

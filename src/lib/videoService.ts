@@ -17,6 +17,8 @@ export interface ProjectVideo {
   title: string;
   description: string | null;
   type: ProjectVideoType;
+  city: string | null;
+  transcript: string | null;
   video_url: string;
   video_public_id: string;
   thumbnail_url: string | null;
@@ -56,7 +58,7 @@ export const videoService = {
   async uploadProjectVideo(
     videoFile: File,
     thumbFile: File | null,
-    data: { title: string; description?: string; type: ProjectVideoType },
+    data: { title: string; description?: string; type: ProjectVideoType; city?: string; transcript?: string },
   ): Promise<void> {
     const ts = Date.now();
     const videoPath = `projects/${ts}-${sanitize(videoFile.name)}`;
@@ -84,6 +86,8 @@ export const videoService = {
       title: data.title,
       description: data.description || null,
       type: data.type,
+      city: data.city || null,
+      transcript: data.transcript || null,
       video_url: videoUrl,
       video_public_id: videoId,
       thumbnail_url: thumbUrl,

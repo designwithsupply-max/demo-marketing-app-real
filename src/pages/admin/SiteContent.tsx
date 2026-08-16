@@ -138,7 +138,7 @@ const AdminSiteContent = () => {
                     <p className="text-xs font-semibold uppercase tracking-[0.15em] text-brand-copper">Card {i + 1}</p>
                     <div className="grid md:grid-cols-2 gap-4">
                       <Field label="Title" value={card.title} onChange={(v) => updateCard(i, { title: v })} />
-                      {/* <Field label="Link" value={card.link} onChange={(v) => updateCard(i, { link: v })} /> */}
+                      <Field label="Button label" value={card.buttonLabel} onChange={(v) => updateCard(i, { buttonLabel: v })} />
                     </div>
                     <AreaField label="Description" value={card.description} onChange={(v) => updateCard(i, { description: v })} />
                     <ImageField label="Image" value={card.imageUrl} onChange={(v) => updateCard(i, { imageUrl: v })} />

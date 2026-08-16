@@ -46,10 +46,15 @@ export interface GalleryItem {
   title: string;
   slug: string;
   category: string;
+  type?: "closet" | "kitchen" | "garage" | "other";
   thumbnail: string;
   images: GalleryImage[];
   description: string;
   tags: string[];
+  city?: string | null;
+  clientNeeded?: string | null;
+  whatWeDesigned?: string | null;
+  mainFeatures?: string[];
 }
 
 export interface Service {

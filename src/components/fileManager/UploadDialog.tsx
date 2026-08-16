@@ -30,6 +30,10 @@ interface UploadDialogProps {
     uploadSlug: string; onSlugChange: (v: string) => void;
     uploadCategory: string; onCategoryChange: (v: string) => void;
     uploadTags: string; onTagsChange: (v: string) => void;
+    uploadCity: string; onCityChange: (v: string) => void;
+    uploadClientNeeded: string; onClientNeededChange: (v: string) => void;
+    uploadWhatWeDesigned: string; onWhatWeDesignedChange: (v: string) => void;
+    uploadMainFeatures: string; onMainFeaturesChange: (v: string) => void;
     thumbnailIndex: number; onThumbChange: (i: number) => void;
     perImageSpecs: string[]; onSpecChange: (idx: number, v: string) => void;
     existingImages?: GalleryViewItem["images"];
@@ -51,6 +55,8 @@ export default function UploadDialog(props: UploadDialogProps) {
         uploadTitle, onTitleChange, uploadType, onTypeChange, uploadDescription, onDescChange,
         pendingBeforeFile, onBeforeChange, pendingAfterFile, onAfterChange,
         uploadSlug, onSlugChange, uploadCategory, onCategoryChange, uploadTags, onTagsChange,
+        uploadCity, onCityChange, uploadClientNeeded, onClientNeededChange,
+        uploadWhatWeDesigned, onWhatWeDesignedChange, uploadMainFeatures, onMainFeaturesChange,
         thumbnailIndex, onThumbChange, perImageSpecs, onSpecChange,
         existingImages, onReorderImage,
     } = props;
@@ -151,6 +157,12 @@ export default function UploadDialog(props: UploadDialogProps) {
                                 <Label htmlFor="upload-description">Project Description</Label>
                                 <Textarea id="upload-description" placeholder="e.g. A stunning walk-in closet..." value={uploadDescription} onChange={(e) => onDescChange(e.target.value)} rows={3} />
                             </div>
+                            <ProjectDetailFields
+                                uploadCity={uploadCity} onCityChange={onCityChange}
+                                uploadClientNeeded={uploadClientNeeded} onClientNeededChange={onClientNeededChange}
+                                uploadWhatWeDesigned={uploadWhatWeDesigned} onWhatWeDesignedChange={onWhatWeDesignedChange}
+                                uploadMainFeatures={uploadMainFeatures} onMainFeaturesChange={onMainFeaturesChange}
+                            />
                         </>
                     )}
 
@@ -186,6 +198,12 @@ export default function UploadDialog(props: UploadDialogProps) {
                                 <Label htmlFor="upload-description">Project Description</Label>
                                 <Textarea id="upload-description" placeholder="e.g. A stunning walk-in closet..." value={uploadDescription} onChange={(e) => onDescChange(e.target.value)} rows={3} />
                             </div>
+                            <ProjectDetailFields
+                                uploadCity={uploadCity} onCityChange={onCityChange}
+                                uploadClientNeeded={uploadClientNeeded} onClientNeededChange={onClientNeededChange}
+                                uploadWhatWeDesigned={uploadWhatWeDesigned} onWhatWeDesignedChange={onWhatWeDesignedChange}
+                                uploadMainFeatures={uploadMainFeatures} onMainFeaturesChange={onMainFeaturesChange}
+                            />
                             {pendingFilesArray.length > 0 && <ImagePreviewList pendingFilesArray={pendingFilesArray} perImageSpecs={perImageSpecs} onSpecChange={onSpecChange} thumbnailIndex={thumbnailIndex} onThumbChange={onThumbChange} />}
                         </>
                     )}
@@ -288,6 +306,37 @@ export default function UploadDialog(props: UploadDialogProps) {
                 </div>
             </DialogContent>
         </Dialog>
+    );
+}
+
+function ProjectDetailFields({
+    uploadCity, onCityChange, uploadClientNeeded, onClientNeededChange,
+    uploadWhatWeDesigned, onWhatWeDesignedChange, uploadMainFeatures, onMainFeaturesChange,
+}: {
+    uploadCity: string; onCityChange: (v: string) => void;
+    uploadClientNeeded: string; onClientNeededChange: (v: string) => void;
+    uploadWhatWeDesigned: string; onWhatWeDesignedChange: (v: string) => void;
+    uploadMainFeatures: string; onMainFeaturesChange: (v: string) => void;
+}) {
+    return (
+        <>
+            <div className="space-y-2">
+                <Label htmlFor="upload-city">City / Location</Label>
+                <Input id="upload-city" placeholder="e.g. Laval, QC" value={uploadCity} onChange={(e) => onCityChange(e.target.value)} />
+            </div>
+            <div className="space-y-2">
+                <Label htmlFor="upload-client-needed">What the Client Needed</Label>
+                <Textarea id="upload-client-needed" placeholder="e.g. More hanging space and better shoe storage in a small walk-in." value={uploadClientNeeded} onChange={(e) => onClientNeededChange(e.target.value)} rows={2} />
+            </div>
+            <div className="space-y-2">
+                <Label htmlFor="upload-what-designed">What We Designed</Label>
+                <Textarea id="upload-what-designed" placeholder="e.g. A floor-to-ceiling oak system with a dedicated shoe wall and LED shelving." value={uploadWhatWeDesigned} onChange={(e) => onWhatWeDesignedChange(e.target.value)} rows={2} />
+            </div>
+            <div className="space-y-2">
+                <Label htmlFor="upload-main-features">Main Features (comma separated)</Label>
+                <Input id="upload-main-features" placeholder="e.g. LED Shelving, Soft-Close Drawers, Custom Shoe Wall" value={uploadMainFeatures} onChange={(e) => onMainFeaturesChange(e.target.value)} />
+            </div>
+        </>
     );
 }
 

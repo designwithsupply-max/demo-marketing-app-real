@@ -57,6 +57,7 @@ export default function GalleryDetailPage() {
             title: item.title,
             slug: item.slug,
             category: item.category,
+            type: item.type,
             thumbnail: item.thumbnail,
             images: item.images.map(img => ({
               src: img.src,
@@ -66,6 +67,10 @@ export default function GalleryDetailPage() {
             })),
             description: item.description,
             tags: item.tags,
+            city: item.city,
+            clientNeeded: item.clientNeeded,
+            whatWeDesigned: item.whatWeDesigned,
+            mainFeatures: item.mainFeatures,
           }}
           related={relatedItems}
         />
