@@ -4,43 +4,56 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useLocation, Navigate } from "react-router-dom";
 import Index from "./pages/Index";
-import Wizard from "./pages/Wizard";
 import { LanguageProvider } from "@/contexts/LanguageContext";
-import Admin from "./pages/Admin";
-import Auth from "./pages/Auth";
-import NotFound from "./pages/NotFound";
-import HowItWorks from "./pages/HowItWorks";
-import AboutUs from "./pages/AboutUs";
-import Gallery from "./pages/Gallery";
-// import ServiceDetail from "./pages/ServiceDetail";
-import { useEffect } from "react";
-import FileManager from "./pages/FileManager";
+import { Loader2 } from "lucide-react";
+import { lazy, Suspense, useEffect } from "react";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { PromoPopup } from "@/components/PromoPopup";
 import { SubmissionSuccessPopup } from "@/components/SubmissionSuccessPopup";
 import { SalesCaptain } from "@/components/SalesCaptain";
-import GalleryDetailPage from "./pages/GalleryDetailPage";
-import Faq from "./pages/Faq";
-import ServicePage from "./pages/ServicePage";
-import Contact from "./pages/Contact";
-import AdminFaqs from "./pages/admin/Faqs";
-import AdminServicePages from "./pages/admin/ServicePages";
-import Blog from "./pages/Blog";
-import BlogPost from "./pages/BlogPost";
-import AdminBlog from "./pages/admin/Blog";
-import AdminTestimonials from "./pages/admin/Testimonials";
-import AdminPricing from "./pages/admin/Pricing";
-import AdminContactInfo from "./pages/admin/ContactInfo";
-import AdminSiteContent from "./pages/admin/SiteContent";
-import AdminHowItWorks from "./pages/admin/HowItWorks";
-import AdminAboutUs from "./pages/admin/AboutUs";
-import AdminPromo from "./pages/admin/Promo";
-import AdminMessages from "./pages/admin/Messages";
-import AdminSettings from "./pages/admin/Settings";
-import AdminLegal from "./pages/admin/Legal";
-import LegalPage from "./pages/LegalPage";
+
+// Everything but the homepage is code-split so a visit to any one route
+// (e.g. /admin on a mobile connection) only downloads that route's chunk
+// instead of the entire app bundle — Wizard's canvas library alone is
+// heavy, and previously every admin page shipped in that same bundle.
+const Wizard = lazy(() => import("./pages/Wizard"));
+const Admin = lazy(() => import("./pages/Admin"));
+const Auth = lazy(() => import("./pages/Auth"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+const HowItWorks = lazy(() => import("./pages/HowItWorks"));
+const AboutUs = lazy(() => import("./pages/AboutUs"));
+const Gallery = lazy(() => import("./pages/Gallery"));
+const FileManager = lazy(() => import("./pages/FileManager"));
+const GalleryDetailPage = lazy(() => import("./pages/GalleryDetailPage"));
+const Faq = lazy(() => import("./pages/Faq"));
+const ServicePage = lazy(() => import("./pages/ServicePage"));
+const Contact = lazy(() => import("./pages/Contact"));
+const AdminFaqs = lazy(() => import("./pages/admin/Faqs"));
+const AdminServicePages = lazy(() => import("./pages/admin/ServicePages"));
+const Blog = lazy(() => import("./pages/Blog"));
+const BlogPost = lazy(() => import("./pages/BlogPost"));
+const AdminBlog = lazy(() => import("./pages/admin/Blog"));
+const AdminTestimonials = lazy(() => import("./pages/admin/Testimonials"));
+const AdminPricing = lazy(() => import("./pages/admin/Pricing"));
+const AdminContactInfo = lazy(() => import("./pages/admin/ContactInfo"));
+const AdminSiteContent = lazy(() => import("./pages/admin/SiteContent"));
+const AdminHowItWorks = lazy(() => import("./pages/admin/HowItWorks"));
+const AdminAboutUs = lazy(() => import("./pages/admin/AboutUs"));
+const AdminPromo = lazy(() => import("./pages/admin/Promo"));
+const AdminMessages = lazy(() => import("./pages/admin/Messages"));
+const AdminSettings = lazy(() => import("./pages/admin/Settings"));
+const AdminLegal = lazy(() => import("./pages/admin/Legal"));
+const LegalPage = lazy(() => import("./pages/LegalPage"));
 
 const queryClient = new QueryClient();
+
+function RouteFallback() {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-brand-cream">
+      <Loader2 className="w-8 h-8 animate-spin text-brand-copper" />
+    </div>
+  );
+}
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -63,6 +76,7 @@ const App = () => (
         <ScrollToTop />
         <PromoPopup />
         <SalesCaptain />
+        <Suspense fallback={<RouteFallback />}>
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/space-planner" element={<LanguageProvider><Wizard /></LanguageProvider>} />
@@ -133,8 +147,7 @@ const App = () => (
           <Route path="/blog/:slug" element={<BlogPost />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
-
-        
+        </Suspense>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>

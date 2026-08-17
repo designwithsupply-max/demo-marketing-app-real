@@ -4,6 +4,7 @@ import { ArrowRight, CheckCircle, CalendarCheck, Ruler, Palette, Hammer } from "
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import CTABanner from "@/components/sections/CTABanner";
+import ProjectVideos from "@/components/sections/ProjectVideos";
 import { Navigation } from "@/components/Navigation";
 import Footer from "@/components/layout/Footer";
 import { SeoHead } from "@/components/seo/SeoHead";
@@ -175,6 +176,8 @@ export default function HowItWorks() {
             </div>
           </div>
         </div>
+
+        <ProjectVideos />
 
         {/* Pricing Transparency */}
         <div className="bg-[#F5F0E8] py-14 sm:py-20">

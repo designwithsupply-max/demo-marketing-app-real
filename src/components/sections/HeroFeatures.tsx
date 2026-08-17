@@ -15,9 +15,9 @@ export default function HeroFeatures() {
   return (
     <SectionWrapper className="bg-white border-b border-brand-border">
       <div className="max-w-7xl mx-auto px-6 lg:px-10 py-6">
-        <div className="flex flex-wrap items-start justify-center gap-x-10 gap-y-5 sm:justify-between">
+        <div className="flex flex-col gap-5 sm:flex-row sm:flex-wrap sm:items-start sm:justify-center sm:gap-x-10 sm:gap-y-5">
           {FEATURES.map(({ icon: Icon, label }) => (
-            <div key={label} className="flex items-center gap-3 max-w-[220px]">
+            <div key={label} className="flex items-center gap-3 sm:max-w-[220px]">
               <span className="flex-shrink-0 w-9 h-9 rounded-full bg-brand-copper/10 flex items-center justify-center">
                 <Icon size={16} className="text-brand-copper" />
               </span>
