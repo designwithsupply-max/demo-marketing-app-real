@@ -14,6 +14,11 @@ export interface BlogPost {
   cover_image_url: string | null;
   cover_public_id: string | null;
   author: string | null;
+  category: string | null;
+  seo_title: string | null;
+  seo_description: string | null;
+  image_alt: string | null;
+  is_featured: boolean;
   is_published: boolean;
   published_at: string | null;
   created_at: string;

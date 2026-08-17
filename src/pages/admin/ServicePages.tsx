@@ -15,7 +15,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import AdminTopBar from "@/components/layout/AdminTopBar";
 import { Field, AreaField, ImageField } from "@/components/admin/ContentFields";
-import { Loader2, Plus, Trash2, Edit2, ChevronUp, ChevronDown, ExternalLink } from "lucide-react";
+import { Loader2, Plus, Trash2, Edit2, ChevronUp, ChevronDown, ExternalLink, Copy } from "lucide-react";
 import type { Session } from "@supabase/supabase-js";
 import { servicePagesService, slugifyServicePage, type ServicePage, type ServiceCategory } from "@/lib/servicePagesService";
 
@@ -28,6 +28,8 @@ const emptyForm = {
   hero_heading: "",
   hero_description: "",
   hero_image_url: "",
+  additionalImagesText: "",
+  video_url: "",
   primary_button_label: "Start Free Design",
   primary_button_link: "/space-planner",
   stepsText: "",
@@ -106,6 +108,8 @@ const AdminServicePages = () => {
       hero_heading: p.hero_heading,
       hero_description: p.hero_description,
       hero_image_url: p.hero_image_url,
+      additionalImagesText: (p.additional_image_urls ?? []).join("\n"),
+      video_url: p.video_url ?? "",
       primary_button_label: p.primary_button_label,
       primary_button_link: p.primary_button_link,
       stepsText: (p.steps ?? []).join("\n"),
@@ -138,6 +142,8 @@ const AdminServicePages = () => {
         hero_heading: form.hero_heading.trim(),
         hero_description: form.hero_description.trim(),
         hero_image_url: form.hero_image_url,
+        additional_image_urls: linesToArray(form.additionalImagesText),
+        video_url: form.video_url.trim() || null,
         primary_button_label: form.primary_button_label.trim() || "Start Free Design",
         primary_button_link: form.primary_button_link.trim() || "/space-planner",
         steps: linesToArray(form.stepsText),
@@ -170,6 +176,39 @@ const AdminServicePages = () => {
       await servicePagesService.update(p.id, { [field]: !p[field] } as Partial<ServicePage>);
       await fetchPages();
     } catch { toast.error("Could not update"); }
+  };
+
+  const duplicate = async (p: ServicePage) => {
+    try {
+      await servicePagesService.create({
+        slug: slugifyServicePage(`${p.slug}-copy`),
+        nav_label: `${p.nav_label} (copy)`,
+        category: p.category,
+        hero_eyebrow: p.hero_eyebrow,
+        hero_heading: p.hero_heading,
+        hero_description: p.hero_description,
+        hero_image_url: p.hero_image_url,
+        additional_image_urls: p.additional_image_urls,
+        video_url: p.video_url,
+        primary_button_label: p.primary_button_label,
+        primary_button_link: p.primary_button_link,
+        steps: p.steps,
+        features: p.features,
+        pricing_note: p.pricing_note,
+        delivery_note: p.delivery_note,
+        seo_title: p.seo_title,
+        seo_description: p.seo_description,
+        is_active: false,
+        show_in_nav: false,
+        display_order: pages.length,
+      });
+      toast.success("Duplicated — the copy is inactive and hidden from nav until you review it.");
+      await fetchPages();
+    } catch (e: any) {
+      if (String(e?.message || "").includes("duplicate") || e?.code === "23505")
+        toast.error("A page with that slug already exists — edit the original's slug first, then try again.");
+      else toast.error(e?.message || "Duplicate failed");
+    }
   };
 
   const remove = async (p: ServicePage) => {
@@ -245,6 +284,9 @@ const AdminServicePages = () => {
                       <Button size="icon" variant="ghost" className="h-8 w-8 text-brand-muted hover:text-brand-espresso" onClick={() => openEdit(p)}>
                         <Edit2 className="w-4 h-4" />
                       </Button>
+                      <Button size="icon" variant="ghost" className="h-8 w-8 text-brand-muted hover:text-brand-espresso" onClick={() => duplicate(p)} title="Duplicate">
+                        <Copy className="w-4 h-4" />
+                      </Button>
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
                           <Button size="icon" variant="ghost" className="h-8 w-8 text-red-500 hover:text-red-600"><Trash2 className="w-4 h-4" /></Button>
@@ -314,6 +356,19 @@ const AdminServicePages = () => {
             <Field label="Hero heading (H1)" value={form.hero_heading} onChange={(v) => setForm((f) => ({ ...f, hero_heading: v }))} placeholder="Walk-In Closets in Greater Montréal, Designed Live Online" />
             <AreaField label="Hero description" value={form.hero_description} onChange={(v) => setForm((f) => ({ ...f, hero_description: v }))} rows={3} />
             <ImageField label="Hero image" value={form.hero_image_url} onChange={(v) => setForm((f) => ({ ...f, hero_image_url: v }))} folder="service-pages" />
+
+            <div className="space-y-1.5">
+              <Label className="text-xs uppercase tracking-[0.15em] text-brand-muted">Additional photo URLs (one per line, optional)</Label>
+              <textarea
+                value={form.additionalImagesText}
+                onChange={(e) => setForm((f) => ({ ...f, additionalImagesText: e.target.value }))}
+                rows={3}
+                className="w-full rounded-md border border-brand-border bg-white px-3 py-2 text-sm"
+                placeholder={"https://…/photo-2.jpg\nhttps://…/photo-3.jpg"}
+              />
+              <p className="text-[11px] text-brand-muted">Shown as a photo strip below the hero. Upload images via the Gallery / File Manager first, then paste their URLs here.</p>
+            </div>
+            <Field label="Video URL (optional)" value={form.video_url} onChange={(v) => setForm((f) => ({ ...f, video_url: v }))} placeholder="A video file URL from the Gallery video manager" />
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <Field label="Primary button label" value={form.primary_button_label} onChange={(v) => setForm((f) => ({ ...f, primary_button_label: v }))} placeholder="Start Free Design" />

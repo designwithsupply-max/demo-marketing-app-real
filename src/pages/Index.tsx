@@ -15,8 +15,13 @@ import FAQSection from "@/components/sections/FAQSection";
 import TestimonialsSection from "@/components/sections/TestimonialsSection";
 import LatestPosts from "@/components/sections/LatestPosts";
 import Footer from "@/components/layout/Footer";
+import { useSiteContent } from "@/hooks/useSiteContent";
+import { SITE_KEYS, DEFAULT_PAGE_SEO } from "@/lib/siteContent";
 
 const Index = () => {
+  const { content: pageSeo } = useSiteContent(SITE_KEYS.pageSeo, DEFAULT_PAGE_SEO);
+  const seo = pageSeo.home;
+
   const localBusinessSchema = {
     "@context": "https://schema.org",
     "@type": "LocalBusiness",
@@ -34,8 +39,10 @@ const Index = () => {
   return (
     <>
       <SeoHead
-        title="Custom Closets, Kitchens & Garage Cabinets in Greater Montréal | Design & Supply"
-        description="Custom closets, kitchen cabinets and garage cabinets designed live online. Local installation in Greater Montréal, with same-day quotes when possible."
+        title={seo.title}
+        description={seo.description}
+        image={seo.ogImage}
+        noindex={seo.noindex}
         jsonLd={localBusinessSchema}
       />
       <div className="min-h-screen">

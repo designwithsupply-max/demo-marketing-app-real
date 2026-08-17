@@ -2,13 +2,17 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import {
     Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Upload, Loader2, ChevronUp, ChevronDown, Save } from "lucide-react";
 import { type GalleryViewItem } from "@/lib/imageService";
+import type { ServicePage } from "@/lib/servicePagesService";
 import { FOLDER_OPTIONS, TYPE_OPTIONS } from "./types";
+
+const NO_SERVICE_PAGE = "none";
 
 interface UploadDialogProps {
     targetProject?: GalleryViewItem | null;
@@ -34,8 +38,13 @@ interface UploadDialogProps {
     uploadClientNeeded: string; onClientNeededChange: (v: string) => void;
     uploadWhatWeDesigned: string; onWhatWeDesignedChange: (v: string) => void;
     uploadMainFeatures: string; onMainFeaturesChange: (v: string) => void;
+    uploadIsFeatured: boolean; onIsFeaturedChange: (v: boolean) => void;
+    uploadIsActive: boolean; onIsActiveChange: (v: boolean) => void;
+    uploadServicePageSlug: string; onServicePageSlugChange: (v: string) => void;
+    servicePages: ServicePage[];
     thumbnailIndex: number; onThumbChange: (i: number) => void;
     perImageSpecs: string[]; onSpecChange: (idx: number, v: string) => void;
+    perImageAlts: string[]; onAltChange: (idx: number, v: string) => void;
     existingImages?: GalleryViewItem["images"];
     onReorderImage?: (fromIndex: number, toIndex: number) => void;
 }
@@ -57,7 +66,9 @@ export default function UploadDialog(props: UploadDialogProps) {
         uploadSlug, onSlugChange, uploadCategory, onCategoryChange, uploadTags, onTagsChange,
         uploadCity, onCityChange, uploadClientNeeded, onClientNeededChange,
         uploadWhatWeDesigned, onWhatWeDesignedChange, uploadMainFeatures, onMainFeaturesChange,
-        thumbnailIndex, onThumbChange, perImageSpecs, onSpecChange,
+        uploadIsFeatured, onIsFeaturedChange, uploadIsActive, onIsActiveChange,
+        uploadServicePageSlug, onServicePageSlugChange, servicePages,
+        thumbnailIndex, onThumbChange, perImageSpecs, onSpecChange, perImageAlts, onAltChange,
         existingImages, onReorderImage,
     } = props;
 
@@ -163,6 +174,12 @@ export default function UploadDialog(props: UploadDialogProps) {
                                 uploadWhatWeDesigned={uploadWhatWeDesigned} onWhatWeDesignedChange={onWhatWeDesignedChange}
                                 uploadMainFeatures={uploadMainFeatures} onMainFeaturesChange={onMainFeaturesChange}
                             />
+                            <ProjectVisibilityFields
+                                uploadIsFeatured={uploadIsFeatured} onIsFeaturedChange={onIsFeaturedChange}
+                                uploadIsActive={uploadIsActive} onIsActiveChange={onIsActiveChange}
+                                uploadServicePageSlug={uploadServicePageSlug} onServicePageSlugChange={onServicePageSlugChange}
+                                servicePages={servicePages}
+                            />
                         </>
                     )}
 
@@ -204,12 +221,18 @@ export default function UploadDialog(props: UploadDialogProps) {
                                 uploadWhatWeDesigned={uploadWhatWeDesigned} onWhatWeDesignedChange={onWhatWeDesignedChange}
                                 uploadMainFeatures={uploadMainFeatures} onMainFeaturesChange={onMainFeaturesChange}
                             />
-                            {pendingFilesArray.length > 0 && <ImagePreviewList pendingFilesArray={pendingFilesArray} perImageSpecs={perImageSpecs} onSpecChange={onSpecChange} thumbnailIndex={thumbnailIndex} onThumbChange={onThumbChange} />}
+                            <ProjectVisibilityFields
+                                uploadIsFeatured={uploadIsFeatured} onIsFeaturedChange={onIsFeaturedChange}
+                                uploadIsActive={uploadIsActive} onIsActiveChange={onIsActiveChange}
+                                uploadServicePageSlug={uploadServicePageSlug} onServicePageSlugChange={onServicePageSlugChange}
+                                servicePages={servicePages}
+                            />
+                            {pendingFilesArray.length > 0 && <ImagePreviewList pendingFilesArray={pendingFilesArray} perImageSpecs={perImageSpecs} onSpecChange={onSpecChange} perImageAlts={perImageAlts} onAltChange={onAltChange} thumbnailIndex={thumbnailIndex} onThumbChange={onThumbChange} />}
                         </>
                     )}
 
                     {/* Add-images mode — show image upload section */}
-                    {isAddImages && pendingFilesArray.length > 0 && <ImagePreviewList pendingFilesArray={pendingFilesArray} perImageSpecs={perImageSpecs} onSpecChange={onSpecChange} thumbnailIndex={thumbnailIndex} onThumbChange={onThumbChange} />}
+                    {isAddImages && pendingFilesArray.length > 0 && <ImagePreviewList pendingFilesArray={pendingFilesArray} perImageSpecs={perImageSpecs} onSpecChange={onSpecChange} perImageAlts={perImageAlts} onAltChange={onAltChange} thumbnailIndex={thumbnailIndex} onThumbChange={onThumbChange} />}
 
                     {/* Normal service mode */}
                     {isNormal && selectedFolder === "service" && (
@@ -340,7 +363,43 @@ function ProjectDetailFields({
     );
 }
 
-function ImagePreviewList({ pendingFilesArray, perImageSpecs, onSpecChange, thumbnailIndex, onThumbChange }: { pendingFilesArray: File[]; perImageSpecs: string[]; onSpecChange: (idx: number, v: string) => void; thumbnailIndex: number; onThumbChange: (i: number) => void; }) {
+function ProjectVisibilityFields({
+    uploadIsFeatured, onIsFeaturedChange, uploadIsActive, onIsActiveChange,
+    uploadServicePageSlug, onServicePageSlugChange, servicePages,
+}: {
+    uploadIsFeatured: boolean; onIsFeaturedChange: (v: boolean) => void;
+    uploadIsActive: boolean; onIsActiveChange: (v: boolean) => void;
+    uploadServicePageSlug: string; onServicePageSlugChange: (v: string) => void;
+    servicePages: ServicePage[];
+}) {
+    return (
+        <>
+            <div className="space-y-2">
+                <Label>Related service page (optional)</Label>
+                <Select value={uploadServicePageSlug || NO_SERVICE_PAGE} onValueChange={(v) => onServicePageSlugChange(v === NO_SERVICE_PAGE ? "" : v)}>
+                    <SelectTrigger><SelectValue placeholder="None" /></SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value={NO_SERVICE_PAGE}>None</SelectItem>
+                        {servicePages.map((p) => <SelectItem key={p.id} value={p.slug}>{p.nav_label}</SelectItem>)}
+                    </SelectContent>
+                </Select>
+                <p className="text-[11px] text-brand-muted">Shows this project under "Related Projects" on that service page.</p>
+            </div>
+            <div className="flex items-center gap-6 pt-1">
+                <label className="flex items-center gap-2 text-sm">
+                    <Switch checked={uploadIsFeatured} onCheckedChange={onIsFeaturedChange} />
+                    Featured
+                </label>
+                <label className="flex items-center gap-2 text-sm">
+                    <Switch checked={uploadIsActive} onCheckedChange={onIsActiveChange} />
+                    Active (visible on site)
+                </label>
+            </div>
+        </>
+    );
+}
+
+function ImagePreviewList({ pendingFilesArray, perImageSpecs, onSpecChange, perImageAlts, onAltChange, thumbnailIndex, onThumbChange }: { pendingFilesArray: File[]; perImageSpecs: string[]; onSpecChange: (idx: number, v: string) => void; perImageAlts: string[]; onAltChange: (idx: number, v: string) => void; thumbnailIndex: number; onThumbChange: (i: number) => void; }) {
     return (
         <div className="space-y-2">
             <Label>Images ({pendingFilesArray.length})</Label>
@@ -351,6 +410,7 @@ function ImagePreviewList({ pendingFilesArray, perImageSpecs, onSpecChange, thum
                         <div className="flex-1 min-w-0 space-y-1">
                             <p className="text-xs font-medium truncate">{file.name}</p>
                             <Input placeholder="Image title" className="h-7 text-xs" value={perImageSpecs[idx] || ''} onChange={(e) => onSpecChange(idx, e.target.value)} />
+                            <Input placeholder="Alt text (for accessibility & SEO)" className="h-7 text-xs" value={perImageAlts[idx] || ''} onChange={(e) => onAltChange(idx, e.target.value)} />
                             <label className="flex items-center gap-2 text-xs text-brand-muted"><input type="radio" name="thumbnail-index" checked={thumbnailIndex === idx} onChange={() => onThumbChange(idx)} />Set as project thumbnail</label>
                         </div>
                     </div>

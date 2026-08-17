@@ -35,22 +35,27 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import AdminTopBar from "@/components/layout/AdminTopBar";
-import { Loader2, Plus, Trash2, ChevronUp, ChevronDown, Edit2, X, Check } from "lucide-react";
+import { Loader2, Plus, Trash2, ChevronUp, ChevronDown, Edit2, X, Check, Search } from "lucide-react";
 import type { Session } from "@supabase/supabase-js";
 import type { FAQ } from "@/types";
+import { servicePagesService, type ServicePage } from "@/lib/servicePagesService";
+
+const NO_SERVICE_PAGE = "none";
 
 const AdminFaqs = () => {
   const navigate = useNavigate();
   const [faqs, setFaqs] = useState<FAQ[]>([]);
+  const [servicePages, setServicePages] = useState<ServicePage[]>([]);
   const [loading, setLoading] = useState(true);
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
+  const [searchTerm, setSearchTerm] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [editData, setEditData] = useState<{ question: string; answer: string; category: string }>({ question: "", answer: "", category: "" });
+  const [editData, setEditData] = useState<{ question: string; answer: string; category: string; service_page_id: string }>({ question: "", answer: "", category: "", service_page_id: NO_SERVICE_PAGE });
   const [session, setSession] = useState<Session | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [checkingAuth, setCheckingAuth] = useState(true);
   const [addDialogOpen, setAddDialogOpen] = useState(false);
-  const [addFormData, setAddFormData] = useState({ question: "", answer: "", category: "", is_active: true });
+  const [addFormData, setAddFormData] = useState({ question: "", answer: "", category: "", is_active: true, service_page_id: NO_SERVICE_PAGE });
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -107,6 +112,7 @@ const AdminFaqs = () => {
   useEffect(() => {
     if (isAdmin && session) {
       fetchFaqs();
+      servicePagesService.fetchAll().then(setServicePages).catch(() => {});
     }
   }, [isAdmin, session]);
 
@@ -135,12 +141,12 @@ const AdminFaqs = () => {
 
   const startEdit = (faq: FAQ) => {
     setEditingId(faq.id);
-    setEditData({ question: faq.question, answer: faq.answer, category: faq.category });
+    setEditData({ question: faq.question, answer: faq.answer, category: faq.category, service_page_id: faq.service_page_id ?? NO_SERVICE_PAGE });
   };
 
   const cancelEdit = () => {
     setEditingId(null);
-    setEditData({ question: "", answer: "", category: "" });
+    setEditData({ question: "", answer: "", category: "", service_page_id: NO_SERVICE_PAGE });
   };
 
   const saveEdit = async (id: string) => {
@@ -151,8 +157,9 @@ const AdminFaqs = () => {
           question: editData.question,
           answer: editData.answer,
           category: editData.category,
+          service_page_id: editData.service_page_id === NO_SERVICE_PAGE ? null : editData.service_page_id,
           updated_at: new Date().toISOString(),
-        })
+        } as any)
         .eq("id", id);
 
       if (error) throw error;
@@ -182,12 +189,13 @@ const AdminFaqs = () => {
           category: addFormData.category,
           order_index: nextIndex,
           is_active: addFormData.is_active,
-        });
+          service_page_id: addFormData.service_page_id === NO_SERVICE_PAGE ? null : addFormData.service_page_id,
+        } as any);
 
       if (error) throw error;
       toast.success("FAQ added");
       setAddDialogOpen(false);
-      setAddFormData({ question: "", answer: "", category: "", is_active: true });
+      setAddFormData({ question: "", answer: "", category: "", is_active: true, service_page_id: NO_SERVICE_PAGE });
       fetchFaqs();
     } catch (error) {
       console.error("Error adding FAQ:", error);
@@ -196,7 +204,7 @@ const AdminFaqs = () => {
   };
 
   const openAddDialog = () => {
-    setAddFormData({ question: "", answer: "", category: "", is_active: true });
+    setAddFormData({ question: "", answer: "", category: "", is_active: true, service_page_id: NO_SERVICE_PAGE });
     setAddDialogOpen(true);
   };
 
@@ -243,7 +251,15 @@ const AdminFaqs = () => {
 
   const categories = Array.from(new Set(faqs.map((f) => f.category)));
 
-  const filteredFaqs = categoryFilter === "all" ? faqs : faqs.filter((f) => f.category === categoryFilter);
+  const filteredFaqs = faqs
+    .filter((f) => categoryFilter === "all" || f.category === categoryFilter)
+    .filter((f) => {
+      const q = searchTerm.trim().toLowerCase();
+      if (!q) return true;
+      return f.question.toLowerCase().includes(q) || f.answer.toLowerCase().includes(q);
+    });
+
+  const servicePageLabel = (id?: string | null) => servicePages.find((p) => p.id === id)?.nav_label;
 
   if (checkingAuth || !session) {
     return (
@@ -339,6 +355,18 @@ const AdminFaqs = () => {
                       placeholder="e.g. Process, Delivery, Design"
                     />
                   </div>
+                  <div>
+                    <Label className="text-brand-espresso">Show on service page (optional)</Label>
+                    <Select value={addFormData.service_page_id} onValueChange={(v) => setAddFormData({ ...addFormData, service_page_id: v })}>
+                      <SelectTrigger className="border-brand-border"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value={NO_SERVICE_PAGE}>General FAQ page only</SelectItem>
+                        {servicePages.map((p) => (
+                          <SelectItem key={p.id} value={p.id}>{p.nav_label}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                   <div className="flex items-center gap-2">
                     <Switch
                       checked={addFormData.is_active}
@@ -359,7 +387,16 @@ const AdminFaqs = () => {
             </Dialog>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex flex-wrap items-center gap-4">
+            <div className="relative w-full sm:w-64">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-brand-muted" />
+              <Input
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Search questions & answers…"
+                className="pl-9 border-brand-border"
+              />
+            </div>
             <Select value={categoryFilter} onValueChange={setCategoryFilter}>
               <SelectTrigger className="w-[200px] border-brand-border">
                 <SelectValue placeholder="Filter by category" />
@@ -391,12 +428,23 @@ const AdminFaqs = () => {
                       className="border-brand-border min-h-[100px]"
                       placeholder="Answer"
                     />
-                    <Input
-                      value={editData.category}
-                      onChange={(e) => setEditData({ ...editData, category: e.target.value })}
-                      className="border-brand-border w-[200px]"
-                      placeholder="Category"
-                    />
+                    <div className="flex flex-wrap gap-3">
+                      <Input
+                        value={editData.category}
+                        onChange={(e) => setEditData({ ...editData, category: e.target.value })}
+                        className="border-brand-border w-[200px]"
+                        placeholder="Category"
+                      />
+                      <Select value={editData.service_page_id} onValueChange={(v) => setEditData({ ...editData, service_page_id: v })}>
+                        <SelectTrigger className="w-[240px] border-brand-border"><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value={NO_SERVICE_PAGE}>General FAQ page only</SelectItem>
+                          {servicePages.map((p) => (
+                            <SelectItem key={p.id} value={p.id}>{p.nav_label}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
                     <div className="flex gap-2">
                       <Button
                         size="sm"
@@ -427,6 +475,11 @@ const AdminFaqs = () => {
                           <Badge variant="outline" className="bg-brand-sand border-brand-border text-brand-muted text-[10px]">
                             {faq.category}
                           </Badge>
+                          {servicePageLabel(faq.service_page_id) && (
+                            <Badge variant="outline" className="text-brand-copper border-brand-copper/30 bg-brand-copper/10 text-[10px]">
+                              {servicePageLabel(faq.service_page_id)}
+                            </Badge>
+                          )}
                           <span className="text-[10px] text-brand-muted">Order: {faq.order_index}</span>
                         </div>
                       </div>

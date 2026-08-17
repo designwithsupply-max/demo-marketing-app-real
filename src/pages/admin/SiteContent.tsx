@@ -2,8 +2,9 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
+import { Loader2, Plus, Trash2, ArrowUp, ArrowDown } from "lucide-react";
 import AdminTopBar from "@/components/layout/AdminTopBar";
+import { Button } from "@/components/ui/button";
 import { Field, AreaField, ImageField, SectionCard } from "@/components/admin/ContentFields";
 import {
   SITE_KEYS,
@@ -16,6 +17,8 @@ import {
   type ServicesContent,
   type CtaContent,
 } from "@/lib/siteContent";
+
+const emptyServiceCard = { title: "New Card", description: "", imageUrl: "", link: "/", buttonLabel: "Learn More" };
 
 const AdminSiteContent = () => {
   const navigate = useNavigate();
@@ -83,6 +86,20 @@ const AdminSiteContent = () => {
   const updateCard = (idx: number, patch: Partial<ServicesContent["cards"][number]>) =>
     setServices((s) => ({ ...s, cards: s.cards.map((c, i) => (i === idx ? { ...c, ...patch } : c)) }));
 
+  const addCard = () => setServices((s) => ({ ...s, cards: [...s.cards, { ...emptyServiceCard }] }));
+
+  const removeCard = (idx: number) =>
+    setServices((s) => ({ ...s, cards: s.cards.filter((_, i) => i !== idx) }));
+
+  const moveCard = (idx: number, dir: -1 | 1) =>
+    setServices((s) => {
+      const target = idx + dir;
+      if (target < 0 || target >= s.cards.length) return s;
+      const cards = [...s.cards];
+      [cards[idx], cards[target]] = [cards[target], cards[idx]];
+      return { ...s, cards };
+    });
+
   if (checkingAuth || !isAdmin) {
     return (
       <>
@@ -122,28 +139,45 @@ const AdminSiteContent = () => {
                 <AreaField label="Subheading" value={hero.subheading} onChange={(v) => setHero({ ...hero, subheading: v })} />
                 <div className="grid md:grid-cols-2 gap-4">
                   <Field label="Primary button label" value={hero.primaryLabel} onChange={(v) => setHero({ ...hero, primaryLabel: v })} />
-                  {/* <Field label="Primary button link" value={hero.primaryLink} onChange={(v) => setHero({ ...hero, primaryLink: v })} /> */}
+                  <Field label="Primary button link" value={hero.primaryLink} onChange={(v) => setHero({ ...hero, primaryLink: v })} placeholder="e.g. /space-planner" />
                   <Field label="Secondary button label" value={hero.secondaryLabel} onChange={(v) => setHero({ ...hero, secondaryLabel: v })} />
-                  {/* <Field label="Secondary button link" value={hero.secondaryLink} onChange={(v) => setHero({ ...hero, secondaryLink: v })} /> */}
+                  <Field label="Secondary button link" value={hero.secondaryLink} onChange={(v) => setHero({ ...hero, secondaryLink: v })} placeholder="e.g. /how-it-works" />
                 </div>
                 <ImageField label="Background image" value={hero.imageUrl} onChange={(v) => setHero({ ...hero, imageUrl: v })} />
               </SectionCard>
 
               {/* SERVICES */}
-              <SectionCard title="Homepage — Services" description="The three service cards (Custom Closets / Kitchen Cabinets / Garage Cabinets)." saving={savingKey === SITE_KEYS.services} onSave={() => save(SITE_KEYS.services, services)}>
+              <SectionCard title="Homepage — Services" description="The service cards shown on the homepage. Add, remove, or reorder as needed." saving={savingKey === SITE_KEYS.services} onSave={() => save(SITE_KEYS.services, services)}>
                 <Field label="Eyebrow" value={services.eyebrow} onChange={(v) => setServices({ ...services, eyebrow: v })} />
                 <Field label="Heading" value={services.heading} onChange={(v) => setServices({ ...services, heading: v })} />
                 {services.cards.map((card, i) => (
                   <div key={i} className="rounded-lg border border-brand-border bg-brand-sand/30 p-4 space-y-3">
-                    <p className="text-xs font-semibold uppercase tracking-[0.15em] text-brand-copper">Card {i + 1}</p>
+                    <div className="flex items-center justify-between">
+                      <p className="text-xs font-semibold uppercase tracking-[0.15em] text-brand-copper">Card {i + 1}</p>
+                      <div className="flex items-center gap-1">
+                        <Button type="button" size="icon" variant="ghost" disabled={i === 0} onClick={() => moveCard(i, -1)} className="h-7 w-7 text-brand-muted hover:text-brand-espresso">
+                          <ArrowUp className="w-3.5 h-3.5" />
+                        </Button>
+                        <Button type="button" size="icon" variant="ghost" disabled={i === services.cards.length - 1} onClick={() => moveCard(i, 1)} className="h-7 w-7 text-brand-muted hover:text-brand-espresso">
+                          <ArrowDown className="w-3.5 h-3.5" />
+                        </Button>
+                        <Button type="button" size="icon" variant="ghost" onClick={() => removeCard(i)} className="h-7 w-7 text-red-500 hover:text-red-600">
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </Button>
+                      </div>
+                    </div>
                     <div className="grid md:grid-cols-2 gap-4">
                       <Field label="Title" value={card.title} onChange={(v) => updateCard(i, { title: v })} />
                       <Field label="Button label" value={card.buttonLabel} onChange={(v) => updateCard(i, { buttonLabel: v })} />
                     </div>
+                    <Field label="Link" value={card.link} onChange={(v) => updateCard(i, { link: v })} placeholder="e.g. /closets" />
                     <AreaField label="Description" value={card.description} onChange={(v) => updateCard(i, { description: v })} />
                     <ImageField label="Image" value={card.imageUrl} onChange={(v) => updateCard(i, { imageUrl: v })} />
                   </div>
                 ))}
+                <Button type="button" variant="outline" onClick={addCard} className="w-full border-dashed border-brand-border text-brand-espresso hover:bg-brand-sand">
+                  <Plus className="w-4 h-4 mr-2" /> Add card
+                </Button>
               </SectionCard>
 
               {/* CTA */}

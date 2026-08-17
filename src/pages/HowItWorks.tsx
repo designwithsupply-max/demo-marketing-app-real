@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowRight, CheckCircle, CalendarCheck, Ruler, Palette, Hammer } from "lucide-react";
+import { ArrowRight, CheckCircle, CalendarCheck, Ruler, Palette, Hammer, Star } from "lucide-react";
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import CTABanner from "@/components/sections/CTABanner";
@@ -8,9 +8,9 @@ import ProjectVideos from "@/components/sections/ProjectVideos";
 import { Navigation } from "@/components/Navigation";
 import Footer from "@/components/layout/Footer";
 import { SeoHead } from "@/components/seo/SeoHead";
-import { supabase } from "@/integrations/supabase/client";
 import { useSiteContent } from "@/hooks/useSiteContent";
-import { SITE_KEYS, DEFAULT_HOWITWORKS_STEPS } from "@/lib/siteContent";
+import { SITE_KEYS, DEFAULT_HOWITWORKS_STEPS, DEFAULT_PAGE_SEO } from "@/lib/siteContent";
+import { pricingService, type PricingTier } from "@/lib/pricingService";
 
 // Icons stay fixed per step position; the text and images come from the CMS.
 const STEP_ICONS = [CalendarCheck, Ruler, Palette, Hammer, CheckCircle];
@@ -91,26 +91,30 @@ function TimelineStep({ step, index, total }: { step: TimelineStepData; index: n
   );
 }
 
+const FALLBACK_PRICING_TIERS: Pick<PricingTier, "id" | "price" | "label" | "price_range" | "is_featured">[] = [
+  { id: "sliding-wardrobes", price: "$2,500+", label: "Sliding Wardrobes", price_range: null, is_featured: false },
+  { id: "walk-in-closets", price: "$4,500+", label: "Walk-in Closets", price_range: null, is_featured: false },
+  { id: "dressing-rooms", price: "$8,000+", label: "Dressing Rooms", price_range: null, is_featured: false },
+  { id: "luxury-suites", price: "Custom", label: "Luxury Suites", price_range: null, is_featured: false },
+];
+
 export default function HowItWorks() {
-  const [pricingTiers, setPricingTiers] = useState<Array<{ price: string; label: string }>>([
-    ["$2,500+", "Sliding Wardrobes"],
-    ["$4,500+", "Walk-in Closets"],
-    ["$8,000+", "Dressing Rooms"],
-    ["Custom", "Luxury Suites"],
-  ].map(([price, label]) => ({ price, label })));
+  const [pricingTiers, setPricingTiers] = useState<Pick<PricingTier, "id" | "price" | "label" | "price_range" | "is_featured">[]>(FALLBACK_PRICING_TIERS);
 
   useEffect(() => {
-    supabase
-      .from("pricing_tiers")
-      .select("price, label")
-      .eq("is_active", true)
-      .order("order_index")
-      .then(({ data }) => {
-        if (data && data.length > 0) setPricingTiers(data);
+    pricingService
+      .fetchActive()
+      .then((tiers) => {
+        if (tiers.length > 0) setPricingTiers(tiers.slice(0, 4));
+      })
+      .catch(() => {
+        // Table/migration not applied yet — keep the fallback tiles above.
       });
   }, []);
 
   const { content: hiw } = useSiteContent(SITE_KEYS.howItWorksSteps, DEFAULT_HOWITWORKS_STEPS);
+  const { content: pageSeo } = useSiteContent(SITE_KEYS.pageSeo, DEFAULT_PAGE_SEO);
+  const seo = pageSeo["how-it-works"];
   const steps: TimelineStepData[] = hiw.steps.map((s, i) => ({
     number: String(i + 1).padStart(2, "0"),
     title: s.title,
@@ -126,10 +130,7 @@ export default function HowItWorks() {
     // starts offset on the x-axis), which would otherwise push past the
     // viewport and cause horizontal scrolling on mobile.
     <div className="min-h-screen flex flex-col justify-between overflow-x-clip">
-      <SeoHead
-        title="How It Works | Design & Supply"
-        description="See how our online process works: measure your space, meet a designer live, and get a same-day quote for fully assembled cabinets."
-      />
+      <SeoHead title={seo.title} description={seo.description} image={seo.ogImage} noindex={seo.noindex} />
       <Navigation />
       <div className="flex-grow">
         {/* Hero */}
@@ -141,8 +142,12 @@ export default function HowItWorks() {
                 className="text-white font-light leading-tight mb-6"
                 style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: "clamp(2.5rem, 5vw, 4.5rem)" }}
               >
-                How Your Dream Closet<br />
-                <em className="text-[#C9A96E] not-italic">Comes to Life</em>
+                {seo.h1 ? seo.h1 : (
+                  <>
+                    How Your Dream Closet<br />
+                    <em className="text-[#C9A96E] not-italic">Comes to Life</em>
+                  </>
+                )}
               </h1>
               <p className="text-white/50 text-sm leading-relaxed">
                 A transparent, stress-free journey from first conversation to final reveal. Our process is designed around you.
@@ -199,9 +204,15 @@ export default function HowItWorks() {
                 </p>
                 <div className="grid grid-cols-2 gap-4 mb-8">
                   {pricingTiers.map((tier) => (
-                    <div key={tier.label} className="bg-white p-5 border-l-2 border-[#C9A96E]">
+                    <div key={tier.id} className="relative bg-white p-5 border-l-2 border-[#C9A96E]">
+                      {tier.is_featured && (
+                        <span className="absolute top-2 right-2 text-[#C9A96E]" title="Featured">
+                          <Star size={12} fill="currentColor" />
+                        </span>
+                      )}
                       <span className="text-[#1A1A18] text-2xl font-light block" style={{ fontFamily: "'Cormorant Garamond', Georgia, serif" }}>{tier.price}</span>
                       <span className="text-[#6B6B65] text-xs tracking-wider">{tier.label}</span>
+                      {tier.price_range && <span className="text-[#8A8179] text-[11px] tracking-wider block mt-0.5">{tier.price_range}</span>}
                     </div>
                   ))}
                 </div>

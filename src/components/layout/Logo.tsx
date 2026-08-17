@@ -18,13 +18,21 @@ interface LogoProps {
   /** `sm` is used in tight chrome (admin bar); `md` everywhere else. */
   size?: "sm" | "md";
   className?: string;
+  /** Optional image override from Global Settings. When set, this image
+   * replaces the built-in "D&S / Design & Supply" mark entirely. */
+  imageUrl?: string;
 }
 
 const COPPER = "#C9A96E";
 
-export default function Logo({ tone = "dark", size = "md", className = "" }: LogoProps) {
+export default function Logo({ tone = "dark", size = "md", className = "", imageUrl }: LogoProps) {
   const box = size === "sm" ? "w-7 h-7 text-[10px]" : "w-8 h-8 text-[11px]";
   const word = size === "sm" ? "text-xs" : "text-sm";
+
+  if (imageUrl) {
+    const height = size === "sm" ? "h-7" : "h-9";
+    return <img src={imageUrl} alt="Design & Supply" className={`${height} w-auto ${className}`} />;
+  }
 
   return (
     <span className={`inline-flex items-center gap-3 ${className}`}>

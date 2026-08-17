@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { Loader2, ArrowLeft, Calendar } from "lucide-react";
 import { Navigation } from "@/components/Navigation";
-import { Seo } from "@/components/Seo";
+import { SeoHead } from "@/components/seo/SeoHead";
 import Footer from "@/components/layout/Footer";
 import { blogService, type BlogPost as BlogPostType } from "@/lib/blogService";
 import { renderMarkdown } from "@/lib/renderMarkdown";
@@ -34,7 +34,10 @@ const BlogPost = () => {
 
   return (
     <>
-      <Seo title={post ? `${post.title} — Design & Supply` : "Blog — Design & Supply"} description={post?.excerpt ?? undefined} />
+      <SeoHead
+        title={post ? (post.seo_title || `${post.title} — Design & Supply`) : "Blog — Design & Supply"}
+        description={(post?.seo_description || post?.excerpt) ?? undefined}
+      />
       <Navigation />
       <main className="min-h-screen bg-brand-cream">
         {loading ? (
@@ -66,7 +69,7 @@ const BlogPost = () => {
                 <div className="lg:sticky lg:top-28">
                   <img
                     src={post.cover_image_url}
-                    alt={post.title}
+                    alt={post.image_alt || post.title}
                     className="w-full max-h-[520px] object-cover rounded-xl border border-brand-border"
                   />
                 </div>

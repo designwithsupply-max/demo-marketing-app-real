@@ -1,9 +1,12 @@
 import SectionWrapper from "@/components/ui/SectionWrapper";
 import { MapPin } from "lucide-react";
-
-const areas = ["Montréal", "Laval", "West Island", "South Shore", "North Shore"];
+import { useSiteContent } from "@/hooks/useSiteContent";
+import { SITE_KEYS, DEFAULT_GLOBAL_SETTINGS } from "@/lib/siteContent";
 
 export default function ServiceArea() {
+  const { content: settings } = useSiteContent(SITE_KEYS.globalSettings, DEFAULT_GLOBAL_SETTINGS);
+  const areas = settings.serviceAreas;
+
   return (
     <SectionWrapper className="bg-white py-24 lg:py-32">
       <div className="max-w-5xl mx-auto px-6 lg:px-10 text-center">

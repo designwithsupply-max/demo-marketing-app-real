@@ -4,6 +4,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Loader2, Trash2, ImagePlus } from "lucide-react";
 import { toast } from "sonner";
 import { imageService, type BeforeAfterItem } from "@/lib/imageService";
@@ -79,7 +83,6 @@ export const BeforeAfterManager = () => {
   };
 
   const handleDelete = async (item: BeforeAfterItem) => {
-    if (!confirm(`Delete "${item.title}"? This cannot be undone.`)) return;
     try {
       await imageService.deleteItem(item.id, "before_after", [item.before_public_id, item.after_public_id]);
       toast.success("Deleted");
@@ -138,7 +141,7 @@ export const BeforeAfterManager = () => {
           </div>
           <div className="space-y-2">
             <Label>Location (optional)</Label>
-            <Input value={location} onChange={(e) => setLocation(e.target.value)} placeholder="e.g. Kazanchis, Addis Ababa" />
+            <Input value={location} onChange={(e) => setLocation(e.target.value)} placeholder="e.g. Laval, QC" />
           </div>
           <div className="space-y-2">
             <Label>Date (optional)</Label>
@@ -187,9 +190,23 @@ export const BeforeAfterManager = () => {
                     <p className="text-sm font-medium text-brand-espresso truncate">{item.title}</p>
                     <p className="text-xs text-brand-muted capitalize">{item.type}</p>
                   </div>
-                  <Button variant="ghost" size="sm" className="text-red-500 hover:text-red-700" onClick={() => handleDelete(item)}>
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button variant="ghost" size="sm" className="text-red-500 hover:text-red-700">
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Delete before/after pair</AlertDialogTitle>
+                        <AlertDialogDescription>This permanently deletes "{item.title}". This cannot be undone.</AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction className="bg-destructive text-destructive-foreground hover:bg-destructive/90" onClick={() => handleDelete(item)}>Delete</AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 </div>
               </div>
             ))}

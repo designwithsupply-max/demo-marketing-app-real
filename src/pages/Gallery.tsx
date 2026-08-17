@@ -7,8 +7,12 @@ import Footer from "@/components/layout/Footer";
 import { SeoHead } from "@/components/seo/SeoHead";
 import { imageService, type GalleryViewItem } from "@/lib/imageService";
 import { ProjectVideos } from "@/components/sections/ProjectVideos";
+import { useSiteContent } from "@/hooks/useSiteContent";
+import { SITE_KEYS, DEFAULT_PAGE_SEO } from "@/lib/siteContent";
 
 export default function Gallery() {
+  const { content: pageSeo } = useSiteContent(SITE_KEYS.pageSeo, DEFAULT_PAGE_SEO);
+  const seo = pageSeo.gallery;
   const [items, setItems] = useState<GalleryViewItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -20,7 +24,7 @@ export default function Gallery() {
   useEffect(() => {
     imageService.fetchGalleryProjects()
       .then(data => {
-        setItems(data);
+        setItems(data.filter(item => item.isActive));
         setLoading(false);
       })
       .catch(err => {
@@ -42,10 +46,7 @@ export default function Gallery() {
   if (loading) {
     return (
       <div className="min-h-screen flex flex-col justify-between">
-        <SeoHead
-          title="Project Gallery | Design & Supply"
-          description="Browse real Design & Supply project photos for closets, kitchens, and garages."
-        />
+        <SeoHead title={seo.title} description={seo.description} image={seo.ogImage} noindex={seo.noindex} />
         <Navigation />
         <div className="flex-grow flex items-center justify-center bg-[#FAFAF7]">
           <Loader2 className="w-8 h-8 animate-spin text-[#C9A96E]" />
@@ -58,10 +59,7 @@ export default function Gallery() {
   if (error) {
     return (
       <div className="min-h-screen flex flex-col justify-between">
-        <SeoHead
-          title="Project Gallery | Design & Supply"
-          description="Browse real Design & Supply project photos for closets, kitchens, and garages."
-        />
+        <SeoHead title={seo.title} description={seo.description} image={seo.ogImage} noindex={seo.noindex} />
         <Navigation />
         <div className="flex-grow flex items-center justify-center bg-[#FAFAF7]">
           <p className="text-[#6B6B65]">{error}</p>
@@ -73,10 +71,7 @@ export default function Gallery() {
 
   return (
     <div className="min-h-screen flex flex-col justify-between">
-      <SeoHead
-        title="Project Gallery | Design & Supply"
-        description="Browse real Design & Supply project photos for closets, kitchens, and garages."
-      />
+      <SeoHead title={seo.title} description={seo.description} image={seo.ogImage} noindex={seo.noindex} />
       <Navigation />
       <div className="flex-grow">
         {/* Hero */}
@@ -87,7 +82,7 @@ export default function Gallery() {
               className="text-white font-light"
               style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: "clamp(2.5rem, 5vw, 4.5rem)" }}
             >
-              Closet Inspirations
+              {seo.h1 || "Closet Inspirations"}
             </h1>
             <p className="text-white/50 mt-4 max-w-xl text-sm">
               Browse our portfolio of custom closet transformations. Each project is a unique collaboration between our designers and clients.
@@ -132,7 +127,7 @@ export default function Gallery() {
                       
                       <Image
                         src={item.thumbnail}
-                        alt={item.title}
+                        alt={item.images.find(i => i.src === item.thumbnail)?.alt || item.title}
                         width={600}
                         height={700}
                         className="w-full object-cover transition-transform duration-700 group-hover:scale-105"
@@ -203,7 +198,7 @@ export default function Gallery() {
 
                 <Image
                   src={activeAlbum.images[activeImageIndex].src}
-                  alt={activeAlbum.images[activeImageIndex].title}
+                  alt={activeAlbum.images[activeImageIndex].alt || activeAlbum.images[activeImageIndex].title}
                   fill
                   className="object-contain"
                   sizes="(max-width: 1024px) 100vw, 80vw"

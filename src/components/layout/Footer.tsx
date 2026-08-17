@@ -1,17 +1,25 @@
 import Link from "next/link";
-import { Globe, Share2, ExternalLink, Mail, Phone, MapPin } from "lucide-react";
+import { Globe, Facebook, Instagram, Mail, Phone, MapPin } from "lucide-react";
 import { useContactInfo } from "@/hooks/useContactInfo";
 import { useServiceNavLinks } from "@/hooks/useServiceNavLinks";
 import Logo from "@/components/layout/Logo";
+import { useSiteContent } from "@/hooks/useSiteContent";
+import { SITE_KEYS, DEFAULT_GLOBAL_SETTINGS } from "@/lib/siteContent";
 
 export default function Footer() {
   const { contactInfo } = useContactInfo();
   const serviceLinks = useServiceNavLinks();
+  const { content: settings } = useSiteContent(SITE_KEYS.globalSettings, DEFAULT_GLOBAL_SETTINGS);
 
   const email = contactInfo?.email || "hello@designandsupply.com";
   const phone = contactInfo?.phone || "+1 (800) 555-0192";
   const addressLine1 = contactInfo?.address_line1 || "";
   const addressLine2 = contactInfo?.address_line2 || "Serving Greater Montréal, QC";
+  const socialLinks = [
+    { url: settings.facebookUrl, Icon: Facebook, label: "Facebook" },
+    { url: settings.instagramUrl, Icon: Instagram, label: "Instagram" },
+    { url: settings.googleBusinessUrl, Icon: Globe, label: "Google Business" },
+  ].filter((s) => s.url);
 
   return (
     <footer className="bg-[#1A1A18] text-white/60">
@@ -20,18 +28,27 @@ export default function Footer() {
           {/* Brand */}
           <div className="lg:col-span-1">
             <Link href="/" className="inline-flex items-center group mb-6">
-              <Logo tone="light" />
+              <Logo tone="light" imageUrl={settings.logoUrl} />
             </Link>
             <p className="text-sm leading-relaxed mb-6">
-              Design &amp; Supply offers custom closets, wardrobes, garage cabinets, kitchen cabinets and storage solutions designed live online. Local installation is available in Greater Montréal, with pickup, curbside delivery and supply-only shipping options where available.
+              {settings.footerText}
             </p>
-            {/* <div className="flex gap-4">
-              {[Globe, Share2, ExternalLink].map((Icon, i) => (
-                <a key={i} href="#" className="w-9 h-9 border border-white/20 flex items-center justify-center hover:border-[#C9A96E] hover:text-[#C9A96E] transition-all duration-300">
-                  <Icon size={15} />
-                </a>
-              ))}
-            </div> */}
+            {socialLinks.length > 0 && (
+              <div className="flex gap-4">
+                {socialLinks.map(({ url, Icon, label }) => (
+                  <a
+                    key={label}
+                    href={url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={label}
+                    className="w-9 h-9 border border-white/20 flex items-center justify-center hover:border-[#C9A96E] hover:text-[#C9A96E] transition-all duration-300"
+                  >
+                    <Icon size={15} />
+                  </a>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Services */}
@@ -112,7 +129,7 @@ export default function Footer() {
 
         <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-xs tracking-wider">
-            © {new Date().getFullYear()} Design & Supply. All rights reserved.
+            © {new Date().getFullYear()} {settings.businessName}. All rights reserved.
           </p>
           <div className="flex gap-6">
             <Link href="/privacy" className="text-xs hover:text-white transition-colors">Privacy Policy</Link>

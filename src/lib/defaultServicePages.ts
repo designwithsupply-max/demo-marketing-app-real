@@ -19,6 +19,8 @@ export const DEFAULT_SERVICE_PAGES: Record<string, Omit<ServicePage, "id" | "cre
     hero_description:
       "We design live online and supply fully assembled cabinets. Plan your walk-in, reach-in, or wardrobe system from home in a live CAD session, with local installation across Greater Montréal.",
     hero_image_url: "",
+    additional_image_urls: [],
+    video_url: null,
     primary_button_label: "Start Free Design",
     primary_button_link: "/space-planner",
     steps: [
@@ -54,6 +56,8 @@ export const DEFAULT_SERVICE_PAGES: Record<string, Omit<ServicePage, "id" | "cre
     hero_description:
       "Turn a spare room or primary suite into a walk-in closet built around your wardrobe. We design live online and supply fully assembled cabinetry, with local installation across Greater Montréal.",
     hero_image_url: "",
+    additional_image_urls: [],
+    video_url: null,
     primary_button_label: "Start Free Design",
     primary_button_link: "/space-planner",
     steps: [
@@ -89,6 +93,8 @@ export const DEFAULT_SERVICE_PAGES: Record<string, Omit<ServicePage, "id" | "cre
     hero_description:
       "Make the most of a standard bedroom closet with a reach-in system built to fit. We design live online and supply fully assembled cabinetry, with local installation across Greater Montréal.",
     hero_image_url: "",
+    additional_image_urls: [],
+    video_url: null,
     primary_button_label: "Start Free Design",
     primary_button_link: "/space-planner",
     steps: [
@@ -124,6 +130,8 @@ export const DEFAULT_SERVICE_PAGES: Record<string, Omit<ServicePage, "id" | "cre
     hero_description:
       "A freestanding or built-in wardrobe designed for rooms without a closet. We design live online and supply fully assembled cabinetry, with local installation across Greater Montréal.",
     hero_image_url: "",
+    additional_image_urls: [],
+    video_url: null,
     primary_button_label: "Start Free Design",
     primary_button_link: "/space-planner",
     steps: [
@@ -159,6 +167,8 @@ export const DEFAULT_SERVICE_PAGES: Record<string, Omit<ServicePage, "id" | "cre
     hero_description:
       "We design live online and supply fully assembled cabinets, with local installation across Greater Montréal. Organize tools, gear, and seasonal items with a layout built around your space.",
     hero_image_url: "",
+    additional_image_urls: [],
+    video_url: null,
     primary_button_label: "Start Free Design",
     primary_button_link: "/space-planner",
     steps: [
@@ -194,6 +204,8 @@ export const DEFAULT_SERVICE_PAGES: Record<string, Omit<ServicePage, "id" | "cre
     hero_description:
       "We design live online and supply fully assembled cabinets. Build a better kitchen flow with a live CAD design session from home, with local installation across Greater Montréal.",
     hero_image_url: "",
+    additional_image_urls: [],
+    video_url: null,
     primary_button_label: "Start Free Design",
     primary_button_link: "/space-planner",
     steps: [
@@ -229,6 +241,8 @@ export const DEFAULT_SERVICE_PAGES: Record<string, Omit<ServicePage, "id" | "cre
     hero_description:
       "Custom storage for pantries, laundry rooms and mudrooms — designed live online and supplied fully assembled, with local installation across Greater Montréal.",
     hero_image_url: "",
+    additional_image_urls: [],
+    video_url: null,
     primary_button_label: "Start Free Design",
     primary_button_link: "/space-planner",
     steps: [

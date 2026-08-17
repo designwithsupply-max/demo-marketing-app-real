@@ -14,10 +14,13 @@ import {
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import AdminTopBar from "@/components/layout/AdminTopBar";
-import { Loader2, Plus, Trash2, Edit2, Eye, EyeOff } from "lucide-react";
+import { Loader2, Plus, Trash2, Edit2, Eye, EyeOff, Star, Copy } from "lucide-react";
 import type { Session } from "@supabase/supabase-js";
 import { blogService, slugify, type BlogPost } from "@/lib/blogService";
+
+const BLOG_CATEGORIES = ["Closets", "Kitchens", "Garage Cabinets", "Design Tips", "Company News"];
 
 const emptyForm = {
   id: "" as string,
@@ -28,7 +31,12 @@ const emptyForm = {
   content: "",
   cover_image_url: "" as string | null,
   cover_public_id: "" as string | null,
+  image_alt: "",
+  category: "",
+  seo_title: "",
+  seo_description: "",
   is_published: false,
+  is_featured: false,
 };
 
 const AdminBlog = () => {
@@ -84,7 +92,8 @@ const AdminBlog = () => {
     setForm({
       id: p.id, title: p.title, slug: p.slug, author: p.author ?? "", excerpt: p.excerpt ?? "",
       content: p.content ?? "", cover_image_url: p.cover_image_url, cover_public_id: p.cover_public_id,
-      is_published: p.is_published,
+      image_alt: p.image_alt ?? "", category: p.category ?? "", seo_title: p.seo_title ?? "", seo_description: p.seo_description ?? "",
+      is_published: p.is_published, is_featured: p.is_featured ?? false,
     });
     setSlugTouched(true);
     setDialogOpen(true);
@@ -117,7 +126,12 @@ const AdminBlog = () => {
         content: form.content,
         cover_image_url: form.cover_image_url || null,
         cover_public_id: form.cover_public_id || null,
+        image_alt: form.image_alt.trim() || null,
+        category: form.category || null,
+        seo_title: form.seo_title.trim() || null,
+        seo_description: form.seo_description.trim() || null,
         is_published: form.is_published,
+        is_featured: form.is_featured,
       };
       if (form.id) {
         // set published_at when publishing for the first time
@@ -137,6 +151,32 @@ const AdminBlog = () => {
         toast.error("That slug is already used — choose a different one.");
       else toast.error("Save failed");
     } finally { setSaving(false); }
+  };
+
+  const duplicate = async (p: BlogPost) => {
+    try {
+      await blogService.create({
+        title: `${p.title} (copy)`,
+        slug: slugify(`${p.slug}-copy`),
+        author: p.author,
+        excerpt: p.excerpt,
+        content: p.content,
+        cover_image_url: p.cover_image_url,
+        cover_public_id: null,
+        image_alt: p.image_alt,
+        category: p.category,
+        seo_title: p.seo_title,
+        seo_description: p.seo_description,
+        is_published: false,
+        is_featured: false,
+      });
+      toast.success("Duplicated — the copy is a draft until you review it.");
+      await fetchPosts();
+    } catch (e: any) {
+      if (String(e?.message || "").includes("duplicate") || e?.code === "23505")
+        toast.error("A post with that slug already exists — edit the original's slug first, then try again.");
+      else toast.error("Duplicate failed");
+    }
   };
 
   const togglePublish = async (p: BlogPost) => {
@@ -195,6 +235,8 @@ const AdminBlog = () => {
                         {p.is_published
                           ? <Badge variant="outline" className="text-green-700 border-green-200 bg-green-50 text-[10px]">Published</Badge>
                           : <Badge variant="outline" className="text-amber-700 border-amber-200 bg-amber-50 text-[10px]">Draft</Badge>}
+                        {p.category && <Badge variant="outline" className="bg-brand-sand border-brand-border text-brand-muted text-[10px]">{p.category}</Badge>}
+                        {p.is_featured && <Badge variant="outline" className="text-brand-copper border-brand-copper/30 bg-brand-copper/10 text-[10px]"><Star className="w-2.5 h-2.5 mr-1" />Featured</Badge>}
                       </div>
                       <p className="text-xs text-brand-muted truncate">/blog/{p.slug}</p>
                       {p.excerpt && <p className="text-sm text-brand-muted line-clamp-1 mt-0.5">{p.excerpt}</p>}
@@ -205,6 +247,9 @@ const AdminBlog = () => {
                       </Button>
                       <Button size="icon" variant="ghost" className="h-8 w-8 text-brand-muted hover:text-brand-espresso" onClick={() => openEdit(p)}>
                         <Edit2 className="w-4 h-4" />
+                      </Button>
+                      <Button size="icon" variant="ghost" className="h-8 w-8 text-brand-muted hover:text-brand-espresso" onClick={() => duplicate(p)} title="Duplicate">
+                        <Copy className="w-4 h-4" />
                       </Button>
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
@@ -260,8 +305,26 @@ const AdminBlog = () => {
               </div>
             </div>
             {form.cover_image_url && (
-              <img src={form.cover_image_url} alt="cover preview" className="w-full max-h-40 object-cover rounded-md border border-brand-border" />
+              <>
+                <img src={form.cover_image_url} alt="cover preview" className="w-full max-h-40 object-cover rounded-md border border-brand-border" />
+                <div>
+                  <Label className="text-brand-espresso">Cover image alt text (for accessibility & SEO)</Label>
+                  <Input value={form.image_alt} onChange={(e) => setForm((f) => ({ ...f, image_alt: e.target.value }))} className="border-brand-border" placeholder="Describe the image, e.g. Walk-in closet with oak shelving" />
+                </div>
+              </>
             )}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <Label className="text-brand-espresso">Category (optional)</Label>
+                <Select value={form.category || "none"} onValueChange={(v) => setForm((f) => ({ ...f, category: v === "none" ? "" : v }))}>
+                  <SelectTrigger className="border-brand-border"><SelectValue placeholder="No category" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">No category</SelectItem>
+                    {BLOG_CATEGORIES.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
             <div>
               <Label className="text-brand-espresso">Excerpt (optional)</Label>
               <Textarea value={form.excerpt} onChange={(e) => setForm((f) => ({ ...f, excerpt: e.target.value }))} className="border-brand-border min-h-[60px]" placeholder="Short summary shown on the blog list" />
@@ -269,11 +332,25 @@ const AdminBlog = () => {
             <div>
               <Label className="text-brand-espresso">Content</Label>
               <Textarea value={form.content} onChange={(e) => setForm((f) => ({ ...f, content: e.target.value }))} className="border-brand-border min-h-[220px] font-mono text-sm" placeholder={"Write your post here.\n\nSupports Markdown-lite:\n# Heading\n## Subheading\n- bullet point\n**bold**, *italic*, [link](https://…)"} />
-              <p className="text-[11px] text-brand-muted mt-1">Formatting: # / ## / ### headings, - bullets, 1. numbered, &gt; quote, **bold**, *italic*, [text](url).</p>
+              <p className="text-[11px] text-brand-muted mt-1">Formatting: # / ## / ### headings, - bullets, 1. numbered, &gt; quote, **bold**, *italic*, [text](url). Use [link text](/other-post-slug) to link to another page on the site.</p>
             </div>
-            <div className="flex items-center gap-2">
-              <Switch checked={form.is_published} onCheckedChange={(v) => setForm((f) => ({ ...f, is_published: v }))} />
-              <Label className="text-brand-espresso">Published (visible on site)</Label>
+            <div>
+              <Label className="text-brand-espresso">SEO title (optional)</Label>
+              <Input value={form.seo_title} onChange={(e) => setForm((f) => ({ ...f, seo_title: e.target.value }))} className="border-brand-border" placeholder="Falls back to the post title if left blank" />
+            </div>
+            <div>
+              <Label className="text-brand-espresso">SEO meta description (optional)</Label>
+              <Textarea value={form.seo_description} onChange={(e) => setForm((f) => ({ ...f, seo_description: e.target.value }))} className="border-brand-border min-h-[60px]" placeholder="Falls back to the excerpt if left blank" />
+            </div>
+            <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
+              <div className="flex items-center gap-2">
+                <Switch checked={form.is_published} onCheckedChange={(v) => setForm((f) => ({ ...f, is_published: v }))} />
+                <Label className="text-brand-espresso">Published (visible on site)</Label>
+              </div>
+              <div className="flex items-center gap-2">
+                <Switch checked={form.is_featured} onCheckedChange={(v) => setForm((f) => ({ ...f, is_featured: v }))} />
+                <Label className="text-brand-espresso">Featured post</Label>
+              </div>
             </div>
             <div className="flex justify-end gap-2 pt-2">
               <Button variant="outline" className="border-brand-border" onClick={() => setDialogOpen(false)}>Cancel</Button>

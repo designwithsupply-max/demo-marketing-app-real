@@ -1,26 +1,24 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, Award, Users, Home, Star } from "lucide-react";
-import { team } from "@/data/team";
 import CTABanner from "@/components/sections/CTABanner";
 import { Navigation } from "@/components/Navigation";
 import Footer from "@/components/layout/Footer";
 import { SeoHead } from "@/components/seo/SeoHead";
 import { useSiteContent } from "@/hooks/useSiteContent";
-import { SITE_KEYS, DEFAULT_ABOUT } from "@/lib/siteContent";
+import { SITE_KEYS, DEFAULT_ABOUT, DEFAULT_PAGE_SEO } from "@/lib/siteContent";
 
 // Icons stay fixed and pair with the editable value cards by position.
 const valueIcons = [Award, Users, Home, Star];
 
 export default function AboutUs() {
   const { content } = useSiteContent(SITE_KEYS.about, DEFAULT_ABOUT);
+  const { content: pageSeo } = useSiteContent(SITE_KEYS.pageSeo, DEFAULT_PAGE_SEO);
+  const seo = pageSeo.about;
 
   return (
     <div className="min-h-screen flex flex-col justify-between">
-      <SeoHead
-        title="About Design & Supply"
-        description="Learn about Design & Supply and our online design and supply model for custom storage projects."
-      />
+      <SeoHead title={seo.title} description={seo.description} image={seo.ogImage} noindex={seo.noindex} />
       <Navigation />
       <div className="flex-grow">
         {/* Hero */}
@@ -148,39 +146,6 @@ export default function AboutUs() {
           </div>
         </div>
 
-        {/* Team */}
-        {/* <div className="bg-[#FAFAF7] py-24">
-          <div className="max-w-7xl mx-auto px-6 lg:px-10">
-            <div className="text-center mb-16">
-              <span className="text-[#C9A96E] text-xs tracking-[0.3em] uppercase block mb-4">The People</span>
-              <h2
-                className="text-[#1A1A18] font-light"
-                style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: "clamp(2rem, 3vw, 3rem)" }}
-              >
-                Meet Our Team
-              </h2>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-              {team.map(member => (
-                <div key={member.id} className="group">
-                  <div className="relative aspect-[3/4] overflow-hidden mb-5">
-                    <Image
-                      src={member.image}
-                      alt={member.name}
-                      fill
-                      className="object-cover transition-transform duration-700 group-hover:scale-105"
-                      sizes="(max-width: 640px) 100vw, 25vw"
-                    />
-                    <div className="absolute bottom-0 left-0 right-0 h-1 bg-[#C9A96E] scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
-                  </div>
-                  <h3 className="text-[#1A1A18] font-medium text-base">{member.name}</h3>
-                  <p className="text-[#C9A96E] text-xs tracking-[0.15em] uppercase mt-1 mb-3">{member.role}</p>
-                  <p className="text-[#6B6B65] text-sm leading-relaxed line-clamp-3">{member.bio}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div> */}
 
         <CTABanner />
       </div>

@@ -5,6 +5,10 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Loader2, Trash2, Film } from "lucide-react";
 import { toast } from "sonner";
 import { videoService, type ProjectVideo, type ProjectVideoType } from "@/lib/videoService";
@@ -66,7 +70,6 @@ export const VideoManager = () => {
   };
 
   const handleDelete = async (video: ProjectVideo) => {
-    if (!confirm(`Delete "${video.title}"? This cannot be undone.`)) return;
     try {
       await videoService.deleteProjectVideo(video);
       toast.success("Deleted");
@@ -151,9 +154,23 @@ export const VideoManager = () => {
                     <p className="text-sm font-medium text-brand-espresso truncate">{v.title}</p>
                     <p className="text-xs text-brand-muted capitalize">{v.type}</p>
                   </div>
-                  <Button variant="ghost" size="sm" className="text-red-500 hover:text-red-700" onClick={() => handleDelete(v)}>
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button variant="ghost" size="sm" className="text-red-500 hover:text-red-700">
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Delete video</AlertDialogTitle>
+                        <AlertDialogDescription>This permanently deletes "{v.title}". This cannot be undone.</AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction className="bg-destructive text-destructive-foreground hover:bg-destructive/90" onClick={() => handleDelete(v)}>Delete</AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 </div>
               </div>
             ))}

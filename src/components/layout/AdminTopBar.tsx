@@ -23,6 +23,8 @@ import {
     ScrollText,
     FolderOpen,
     LayoutGrid,
+    Search,
+    Settings2,
 } from "lucide-react";
 import Logo from "@/components/layout/Logo";
 
@@ -45,6 +47,8 @@ const navLinks = [
     { to: "/admin/promo", label: "Promo", icon: Gift },
     { to: "/admin/legal", label: "Terms & Privacy", icon: ScrollText },
     { to: "/admin/contact", label: "Contact Info", icon: Mail },
+    { to: "/admin/seo", label: "SEO Settings", icon: Search },
+    { to: "/admin/global-settings", label: "Global Settings", icon: Settings2 },
     { to: "/file-manager", label: "File Manager", icon: FolderOpen },
 ];
 

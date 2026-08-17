@@ -26,7 +26,7 @@ export default function HomeGallery() {
   useEffect(() => {
     imageService.fetchGalleryProjects()
       .then(data => {
-        setItems(data);
+        setItems(data.filter(item => item.isActive));
         setLoading(false);
       })
       .catch(err => {

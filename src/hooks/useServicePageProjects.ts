@@ -11,7 +11,7 @@ export function useServicePageProjects(type: "closet" | "kitchen" | "garage") {
     imageService
       .fetchGalleryProjects()
       .then((data) => {
-        const filtered = data.filter((item) => item.type === type);
+        const filtered = data.filter((item) => item.type === type && item.isActive);
         setProjects(filtered);
         setLoading(false);
       })

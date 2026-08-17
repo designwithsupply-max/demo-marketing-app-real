@@ -38,6 +38,7 @@ import {
   IMAGE_FOLDERS,
   type GalleryViewItem,
 } from "@/lib/imageService";
+import { servicePagesService, type ServicePage } from "@/lib/servicePagesService";
 import AdminTopBar from "@/components/layout/AdminTopBar";
 import FileList from "@/components/fileManager/FileList";
 import UploadDialog from "@/components/fileManager/UploadDialog";
@@ -91,8 +92,13 @@ const FileManager = () => {
   const [uploadClientNeeded, setUploadClientNeeded] = useState("");
   const [uploadWhatWeDesigned, setUploadWhatWeDesigned] = useState("");
   const [uploadMainFeatures, setUploadMainFeatures] = useState("");
+  const [uploadIsFeatured, setUploadIsFeatured] = useState(false);
+  const [uploadIsActive, setUploadIsActive] = useState(true);
+  const [uploadServicePageSlug, setUploadServicePageSlug] = useState("");
+  const [servicePages, setServicePages] = useState<ServicePage[]>([]);
   const [thumbnailIndex, setThumbnailIndex] = useState(0);
   const [perImageSpecs, setPerImageSpecs] = useState<string[]>([]);
+  const [perImageAlts, setPerImageAlts] = useState<string[]>([]);
   const [projects, setProjects] = useState<GalleryViewItem[]>([]);
   const [projectsLoading, setProjectsLoading] = useState(false);
   const [targetProject, setTargetProject] = useState<GalleryViewItem | null>(
@@ -253,6 +259,7 @@ const FileManager = () => {
     if (isAdmin && session) {
       fetchFiles();
       fetchProjects();
+      servicePagesService.fetchAll().then(setServicePages).catch(() => {});
     }
   }, [isAdmin, session, fetchFiles, fetchProjects]);
 
@@ -280,6 +287,10 @@ const FileManager = () => {
       setUploadDescription("");
       if (!dialogMode) {
         setSelectedFolder("service");
+        setUploadIsFeatured(false);
+        setUploadIsActive(true);
+        setUploadServicePageSlug("");
+        setPerImageAlts([]);
       }
       setShowFolderDialog(true);
       setUploadProgress(
@@ -327,6 +338,7 @@ const FileManager = () => {
             file,
             title: perImageSpecs[i] || file.name.replace(/\.[^/.]+$/, ""),
             description: uploadDescription || null,
+            alt: perImageAlts[i] || undefined,
             isThumbnail: i === thumbnailIndex,
           }));
           await imageService.addImagesToProject(
@@ -361,6 +373,7 @@ const FileManager = () => {
             file,
             title: perImageSpecs[i] || file.name.replace(/\.[^/.]+$/, ""),
             description: uploadDescription || null,
+            alt: perImageAlts[i] || undefined,
             isThumbnail: i === thumbnailIndex,
           }));
           await imageService.createGalleryProject(
@@ -375,6 +388,9 @@ const FileManager = () => {
               clientNeeded: uploadClientNeeded.trim() || undefined,
               whatWeDesigned: uploadWhatWeDesigned.trim() || undefined,
               mainFeatures,
+              isFeatured: uploadIsFeatured,
+              isActive: uploadIsActive,
+              servicePageSlug: uploadServicePageSlug || undefined,
             },
             filesForProject,
           );
@@ -507,6 +523,7 @@ const FileManager = () => {
     setUploadMainFeatures(project.mainFeatures.join(", "));
     setThumbnailIndex(0);
     setPerImageSpecs([]);
+    setPerImageAlts([]);
     setPendingFilesArray([]);
     setUploadProgress([]);
     setTimeout(() => document.getElementById("file-upload")?.click(), 50);
@@ -526,8 +543,12 @@ const FileManager = () => {
     setUploadClientNeeded(project.clientNeeded || "");
     setUploadWhatWeDesigned(project.whatWeDesigned || "");
     setUploadMainFeatures(project.mainFeatures.join(", "));
+    setUploadIsFeatured(project.isFeatured);
+    setUploadIsActive(project.isActive);
+    setUploadServicePageSlug(project.servicePageSlug || "");
     setThumbnailIndex(0);
     setPerImageSpecs([]);
+    setPerImageAlts([]);
     setPendingFilesArray([]);
     setUploadProgress([]);
     setShowFolderDialog(true);
@@ -560,6 +581,9 @@ const FileManager = () => {
         clientNeeded: uploadClientNeeded.trim() || undefined,
         whatWeDesigned: uploadWhatWeDesigned.trim() || undefined,
         mainFeatures,
+        isFeatured: uploadIsFeatured,
+        isActive: uploadIsActive,
+        servicePageSlug: uploadServicePageSlug,
       });
       toast.success(`Project "${uploadTitle}" updated`);
       setShowFolderDialog(false);
@@ -582,8 +606,7 @@ const FileManager = () => {
       prev ? { ...prev, images: images.map((img, idx) => ({ ...img })) } : null,
     );
     try {
-      const { data: dbImages } = await supabase
-        .from("gallery")
+      const { data: dbImages } = await (supabase.from("gallery") as any)
         .select("id")
         .eq("project_id", targetProject.id)
         .order("sort_order", { ascending: true });
@@ -912,6 +935,19 @@ const FileManager = () => {
           n[idx] = v;
           setPerImageSpecs(n);
         }}
+        perImageAlts={perImageAlts}
+        onAltChange={(idx, v) => {
+          const n = [...perImageAlts];
+          n[idx] = v;
+          setPerImageAlts(n);
+        }}
+        uploadIsFeatured={uploadIsFeatured}
+        onIsFeaturedChange={setUploadIsFeatured}
+        uploadIsActive={uploadIsActive}
+        onIsActiveChange={setUploadIsActive}
+        uploadServicePageSlug={uploadServicePageSlug}
+        onServicePageSlugChange={setUploadServicePageSlug}
+        servicePages={servicePages}
         targetProject={targetProject}
         dialogMode={dialogMode}
         existingImages={targetProject?.images}

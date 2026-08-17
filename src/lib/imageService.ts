@@ -43,6 +43,7 @@ export interface GalleryViewItem {
     title: string;
     description: string;
     spec?: string;
+    alt?: string;
   }[];
   description: string;
   tags: string[];
@@ -50,6 +51,9 @@ export interface GalleryViewItem {
   clientNeeded: string | null;
   whatWeDesigned: string | null;
   mainFeatures: string[];
+  isFeatured: boolean;
+  isActive: boolean;
+  servicePageSlug: string | null;
 }
 
 function projectToViewItem(
@@ -71,6 +75,7 @@ function projectToViewItem(
         title: i.title,
         description: i.description ?? "",
         spec: i.spec ?? undefined,
+        alt: i.alt_text || i.title,
       })),
     description: project.description ?? "",
     tags: project.tags ?? [],
@@ -78,6 +83,9 @@ function projectToViewItem(
     clientNeeded: project.client_needed ?? null,
     whatWeDesigned: project.what_we_designed ?? null,
     mainFeatures: project.main_features ?? [],
+    isFeatured: project.is_featured ?? false,
+    isActive: project.is_active ?? true,
+    servicePageSlug: project.service_page_slug ?? null,
   };
 }
 
@@ -184,12 +192,16 @@ export const imageService = {
       clientNeeded?: string;
       whatWeDesigned?: string;
       mainFeatures?: string[];
+      isFeatured?: boolean;
+      isActive?: boolean;
+      servicePageSlug?: string;
     },
     files: Array<{
       file: File;
       title: string;
       description?: string;
       spec?: string;
+      alt?: string;
       isThumbnail?: boolean;
     }>,
   ): Promise<GalleryViewItem> {
@@ -206,6 +218,9 @@ export const imageService = {
         client_needed: projectData.clientNeeded || null,
         what_we_designed: projectData.whatWeDesigned || null,
         main_features: projectData.mainFeatures || [],
+        is_featured: projectData.isFeatured ?? false,
+        is_active: projectData.isActive ?? true,
+        service_page_slug: projectData.servicePageSlug || null,
       })
       .select()
       .single();
@@ -216,7 +231,7 @@ export const imageService = {
     const projectId = project.id;
     const uploadedImages: GalleryImage[] = [];
     for (let i = 0; i < files.length; i++) {
-      const { file, title, description, spec, isThumbnail } = files[i];
+      const { file, title, description, spec, alt, isThumbnail } = files[i];
       const { url, path } = await this.uploadImage(file, IMAGE_FOLDERS.GALLERY);
       const { data: img, error: imgError } = await supabase
         .from("gallery")
@@ -227,6 +242,7 @@ export const imageService = {
           title,
           description: description || null,
           spec: spec || null,
+          alt_text: alt || null,
           type: projectData.type,
           is_thumbnail: isThumbnail ?? false,
           sort_order: i,
@@ -251,12 +267,13 @@ export const imageService = {
       title: string;
       description?: string;
       spec?: string;
+      alt?: string;
       isThumbnail?: boolean;
     }>,
   ): Promise<GalleryImage[]> {
     const uploadedImages: GalleryImage[] = [];
     for (let i = 0; i < files.length; i++) {
-      const { file, title, description, spec, isThumbnail } = files[i];
+      const { file, title, description, spec, alt, isThumbnail } = files[i];
       const { url, path } = await this.uploadImage(file, IMAGE_FOLDERS.GALLERY);
       const { data: img, error: imgError } = await supabase
         .from("gallery")
@@ -267,6 +284,7 @@ export const imageService = {
           title,
           description: description || null,
           spec: spec || null,
+          alt_text: alt || null,
           type: projectType,
           is_thumbnail: isThumbnail ?? false,
           sort_order: i,
@@ -297,9 +315,12 @@ export const imageService = {
       clientNeeded?: string;
       whatWeDesigned?: string;
       mainFeatures?: string[];
+      isFeatured?: boolean;
+      isActive?: boolean;
+      servicePageSlug?: string;
     },
   ): Promise<void> {
-    const { clientNeeded, whatWeDesigned, mainFeatures, ...rest } = data;
+    const { clientNeeded, whatWeDesigned, mainFeatures, isFeatured, isActive, servicePageSlug, ...rest } = data;
     const { error } = await supabase
       .from("gallery_projects")
       .update({
@@ -307,8 +328,16 @@ export const imageService = {
         ...(clientNeeded !== undefined ? { client_needed: clientNeeded || null } : {}),
         ...(whatWeDesigned !== undefined ? { what_we_designed: whatWeDesigned || null } : {}),
         ...(mainFeatures !== undefined ? { main_features: mainFeatures } : {}),
+        ...(isFeatured !== undefined ? { is_featured: isFeatured } : {}),
+        ...(isActive !== undefined ? { is_active: isActive } : {}),
+        ...(servicePageSlug !== undefined ? { service_page_slug: servicePageSlug || null } : {}),
       } as any)
       .eq("id", projectId);
+    if (error) throw error;
+  },
+
+  async updateImageAlt(imageId: string, alt: string): Promise<void> {
+    const { error } = await supabase.from("gallery").update({ alt_text: alt || null }).eq("id", imageId);
     if (error) throw error;
   },
 

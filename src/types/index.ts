@@ -8,6 +8,8 @@ export interface Testimonial {
   project: string;
   order_index: number;
   is_active: boolean;
+  is_verified?: boolean;
+  is_featured?: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -21,6 +23,8 @@ export interface TestimonialInsert {
   project: string;
   order_index?: number;
   is_active?: boolean;
+  is_verified?: boolean;
+  is_featured?: boolean;
 }
 
 export interface TestimonialUpdate {
@@ -32,6 +36,8 @@ export interface TestimonialUpdate {
   project?: string;
   order_index?: number;
   is_active?: boolean;
+  is_verified?: boolean;
+  is_featured?: boolean;
 }
 
 export interface GalleryImage {
@@ -39,6 +45,7 @@ export interface GalleryImage {
   title: string;
   description: string;
   spec?: string;
+  alt?: string;
 }
 
 export interface GalleryItem {
@@ -79,6 +86,8 @@ export interface FAQ {
   category: string;
   order_index: number;
   is_active: boolean;
+  service_page_id?: string | null;
+  language?: string;
   created_at: string;
   updated_at: string;
 }
@@ -89,6 +98,7 @@ export interface FAQInsert {
   category: string;
   order_index?: number;
   is_active?: boolean;
+  service_page_id?: string | null;
 }
 
 export interface FAQUpdate {
@@ -97,15 +107,7 @@ export interface FAQUpdate {
   category?: string;
   order_index?: number;
   is_active?: boolean;
-}
-
-export interface TeamMember {
-  id: string;
-  name: string;
-  role: string;
-  bio: string;
-  image: string;
-  linkedin?: string;
+  service_page_id?: string | null;
 }
 
 export interface ProcessStep {

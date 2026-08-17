@@ -15,6 +15,8 @@ export interface ServicePage {
   hero_heading: string;
   hero_description: string;
   hero_image_url: string;
+  additional_image_urls: string[];
+  video_url: string | null;
   primary_button_label: string;
   primary_button_link: string;
   steps: string[];

@@ -16,7 +16,9 @@ export default function GalleryDetailPage() {
     if (!id) return;
     imageService.fetchGalleryProjectBySlug(id)
       .then(data => {
-        setItem(data);
+        // A deactivated project shouldn't 404 outright — send visitors
+        // somewhere useful instead, same as a deactivated service page.
+        setItem(data && data.isActive ? data : null);
         setLoading(false);
       })
       .catch(err => {
@@ -64,6 +66,7 @@ export default function GalleryDetailPage() {
               title: img.title,
               description: img.description,
               spec: img.spec,
+              alt: img.alt,
             })),
             description: item.description,
             tags: item.tags,

@@ -37,6 +37,10 @@ export interface GalleryProject {
     client_needed: string | null;
     what_we_designed: string | null;
     main_features: string[];
+    is_featured?: boolean;
+    is_active?: boolean;
+    /** Slug of the related service_pages row, e.g. "walk-in-closets". Optional. */
+    service_page_slug?: string | null;
     created_at: string;
     updated_at: string;
 }
@@ -50,6 +54,7 @@ export interface GalleryImage {
     title: string;
     description: string | null;
     spec: string | null;
+    alt_text?: string | null;
     is_thumbnail: boolean;
     sort_order: number;
     created_at: string;

@@ -7,11 +7,15 @@ import { ArrowRight, Mail, Phone, Clock, Loader2 } from "lucide-react";
 import { useContactInfo } from "@/hooks/useContactInfo";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useSiteContent } from "@/hooks/useSiteContent";
+import { SITE_KEYS, DEFAULT_PAGE_SEO } from "@/lib/siteContent";
 
 export default function Contact() {
   const [form, setForm] = useState({ name: "", email: "", phone: "", message: "" });
   const [sending, setSending] = useState(false);
   const { contactInfo } = useContactInfo();
+  const { content: pageSeo } = useSiteContent(SITE_KEYS.pageSeo, DEFAULT_PAGE_SEO);
+  const seo = pageSeo.contact;
 
   const email = contactInfo?.email || "saminew3919@gmail.com";
   const phone = contactInfo?.phone || "+1 (800) 555-0192";
@@ -43,17 +47,14 @@ export default function Contact() {
 
   return (
     <div className="min-h-screen bg-brand-cream">
-      <SeoHead
-        title="Contact Design & Supply"
-        description="Contact Design & Supply for custom closet, kitchen, and garage design help."
-      />
+      <SeoHead title={seo.title} description={seo.description} image={seo.ogImage} noindex={seo.noindex} />
       <Navigation />
       <main className="pt-24 lg:pt-28 pb-20">
         <section className="px-6 lg:px-10 mb-12">
           <div className="max-w-7xl mx-auto">
             <span className="text-brand-copper text-xs tracking-[0.3em] uppercase block mb-4">Contact</span>
             <h1 className="text-brand-espresso font-light" style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: "clamp(2.2rem, 5vw, 4rem)" }}>
-              Let's talk about your space
+              {seo.h1 || "Let's talk about your space"}
             </h1>
             <p className="text-brand-muted text-sm leading-relaxed mt-4 max-w-2xl">
               Tell us what you need for your closet, kitchen, or garage. We design live online and supply fully assembled cabinets.

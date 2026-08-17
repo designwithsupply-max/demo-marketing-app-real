@@ -25,7 +25,120 @@ export const SITE_KEYS = {
   features: "site_features",
   terms: "legal_terms",
   privacy: "legal_privacy",
+  pageSeo: "page_seo",
+  globalSettings: "global_settings",
 } as const;
+
+/** One page's editable SEO metadata. `h1` only applies to pages whose H1
+ * isn't already covered by another editable heading (e.g. the homepage hero
+ * heading doubles as its H1, so it's not listed here). */
+export interface PageSeoEntry {
+  title: string;
+  description: string;
+  h1?: string;
+  ogImage?: string;
+  noindex?: boolean;
+}
+
+export type PageSeoMap = Record<string, PageSeoEntry>;
+
+/** Ids match the keys used by DEFAULT_PAGE_SEO / the SEO Settings admin page picker. */
+export const PAGE_SEO_IDS = ["home", "how-it-works", "gallery", "blog", "faq", "contact", "about"] as const;
+export type PageSeoId = (typeof PAGE_SEO_IDS)[number];
+
+export const PAGE_SEO_LABELS: Record<PageSeoId, string> = {
+  home: "Homepage",
+  "how-it-works": "How It Works",
+  gallery: "Gallery",
+  blog: "Blog",
+  faq: "FAQ",
+  contact: "Contact",
+  about: "About Us",
+};
+
+/** Mirrors the SEO copy each page currently has hardcoded, so nothing changes
+ * on the live site until an admin actually overrides an entry. */
+export const DEFAULT_PAGE_SEO: PageSeoMap = {
+  home: {
+    title: "Custom Closets, Kitchens & Garage Cabinets in Greater Montréal | Design & Supply",
+    description:
+      "Custom closets, kitchen cabinets and garage cabinets designed live online. Local installation in Greater Montréal, with same-day quotes when possible.",
+  },
+  "how-it-works": {
+    title: "How It Works | Design & Supply",
+    description:
+      "See how our online process works: measure your space, meet a designer live, and get a same-day quote for fully assembled cabinets.",
+  },
+  gallery: {
+    title: "Project Gallery | Design & Supply",
+    description: "Browse real Design & Supply project photos for closets, kitchens, and garages.",
+  },
+  blog: {
+    title: "Blog — Design & Supply",
+    description: "Design ideas, guides, and inspiration for custom closets, kitchens, and garages.",
+  },
+  faq: {
+    title: "FAQ | Design & Supply",
+    description: "Answers about the online design process, measurements, CAD sessions, quotes, delivery, and installation.",
+  },
+  contact: {
+    title: "Contact Design & Supply",
+    description: "Contact Design & Supply for custom closet, kitchen, and garage design help.",
+  },
+  about: {
+    title: "About Design & Supply",
+    description: "Learn about Design & Supply and our online design and supply model for custom storage projects.",
+  },
+};
+
+/** One place for business-wide details that show up across many pages —
+ * footer, nav labels, social links, and third-party integration IDs. */
+export interface GlobalSettingsContent {
+  businessName: string;
+  /** Optional logo image URL. Leave blank to keep the built-in logo mark. */
+  logoUrl: string;
+  footerText: string;
+  serviceAreas: string[];
+  facebookUrl: string;
+  instagramUrl: string;
+  googleBusinessUrl: string;
+  /** e.g. "G-XXXXXXX". Leave blank to not load Google Analytics at all. */
+  googleAnalyticsId: string;
+  /** Free-text notes — e.g. Search Console verification status, since there's
+   * no way to check that automatically from here. */
+  googleSearchConsoleNotes: string;
+  navLabels: {
+    home: string;
+    howItWorks: string;
+    services: string;
+    gallery: string;
+    blog: string;
+    faq: string;
+    contact: string;
+  };
+}
+
+export const DEFAULT_GLOBAL_SETTINGS: GlobalSettingsContent = {
+  businessName: "Design & Supply",
+  logoUrl: "",
+  footerText:
+    "Custom closets, kitchen cabinets and garage cabinets — designed live online, with local installation across Greater Montréal.",
+  serviceAreas: ["Montréal", "Laval", "West Island", "South Shore", "North Shore"],
+  facebookUrl: "",
+  instagramUrl: "",
+  googleBusinessUrl: "",
+  googleAnalyticsId: "",
+  googleSearchConsoleNotes: "",
+  navLabels: {
+    home: "Home",
+    howItWorks: "How It Works",
+    services: "Services",
+    gallery: "Gallery",
+    blog: "Blog",
+    faq: "FAQ",
+    contact: "Contact",
+  },
+};
 
 /** An editable legal page (Terms of Service / Privacy Policy). Body is Markdown. */
 export interface LegalContent {

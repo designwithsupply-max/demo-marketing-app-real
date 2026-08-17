@@ -119,7 +119,7 @@ export default function GalleryAlbumViewer({ item, related }: GalleryAlbumViewer
                 >
                   <Image
                     src={currentImage.src}
-                    alt={currentImage.title}
+                    alt={currentImage.alt || currentImage.title}
                     fill
                     priority
                     className="object-cover"

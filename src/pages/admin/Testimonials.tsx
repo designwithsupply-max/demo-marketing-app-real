@@ -48,6 +48,8 @@ const AdminTestimonials = () => {
     review: "",
     project: "",
     is_active: true,
+    is_verified: false,
+    is_featured: false,
   });
   const [editingId, setEditingId] = useState<string | null>(null);
 
@@ -142,6 +144,8 @@ const AdminTestimonials = () => {
       review: "",
       project: "",
       is_active: true,
+      is_verified: false,
+      is_featured: false,
     });
     setDialogOpen(true);
   };
@@ -156,6 +160,8 @@ const AdminTestimonials = () => {
       review: t.review,
       project: t.project,
       is_active: t.is_active,
+      is_verified: t.is_verified ?? false,
+      is_featured: t.is_featured ?? false,
     });
     setDialogOpen(true);
   };
@@ -178,8 +184,10 @@ const AdminTestimonials = () => {
             review: formData.review,
             project: formData.project,
             is_active: formData.is_active,
+            is_verified: formData.is_verified,
+            is_featured: formData.is_featured,
             updated_at: new Date().toISOString(),
-          })
+          } as any)
           .eq("id", editingId);
 
         if (error) throw error;
@@ -196,8 +204,10 @@ const AdminTestimonials = () => {
             review: formData.review,
             project: formData.project,
             is_active: formData.is_active,
+            is_verified: formData.is_verified,
+            is_featured: formData.is_featured,
             order_index: maxOrder + 1,
-          });
+          } as any);
 
         if (error) throw error;
         toast.success("Testimonial added");
@@ -335,7 +345,7 @@ const AdminTestimonials = () => {
                       value={formData.location}
                       onChange={(e) => setFormData({ ...formData, location: e.target.value })}
                       className="border-brand-border"
-                      placeholder="Beverly Hills, CA"
+                      placeholder="Laval, QC"
                     />
                   </div>
                   <div>
@@ -390,12 +400,28 @@ const AdminTestimonials = () => {
                       placeholder="Luxury Dressing Room"
                     />
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Switch
-                      checked={formData.is_active}
-                      onCheckedChange={(checked) => setFormData({ ...formData, is_active: checked })}
-                    />
-                    <Label className="text-brand-espresso">Active (visible on site)</Label>
+                  <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
+                    <div className="flex items-center gap-2">
+                      <Switch
+                        checked={formData.is_active}
+                        onCheckedChange={(checked) => setFormData({ ...formData, is_active: checked })}
+                      />
+                      <Label className="text-brand-espresso">Active (visible on site)</Label>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Switch
+                        checked={formData.is_featured}
+                        onCheckedChange={(checked) => setFormData({ ...formData, is_featured: checked })}
+                      />
+                      <Label className="text-brand-espresso">Featured</Label>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Switch
+                        checked={formData.is_verified}
+                        onCheckedChange={(checked) => setFormData({ ...formData, is_verified: checked })}
+                      />
+                      <Label className="text-brand-espresso">Verified review</Label>
+                    </div>
                   </div>
                   <div className="flex justify-end gap-2 pt-2">
                     <Button variant="outline" className="border-brand-border" onClick={() => setDialogOpen(false)}>
@@ -443,6 +469,16 @@ const AdminTestimonials = () => {
                           >
                             {t.is_active ? "Active" : "Inactive"}
                           </Badge>
+                          {t.is_featured && (
+                            <Badge variant="outline" className="text-[10px] shrink-0 text-brand-copper border-brand-copper/30 bg-brand-copper/10">
+                              Featured
+                            </Badge>
+                          )}
+                          {t.is_verified && (
+                            <Badge variant="outline" className="text-[10px] shrink-0 text-blue-700 border-blue-200 bg-blue-50">
+                              Verified
+                            </Badge>
+                          )}
                         </div>
                         <p className="text-sm text-brand-muted truncate">{t.location}</p>
                       </div>

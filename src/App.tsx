@@ -11,6 +11,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import { PromoPopup } from "@/components/PromoPopup";
 import { SubmissionSuccessPopup } from "@/components/SubmissionSuccessPopup";
 import { SalesCaptain } from "@/components/SalesCaptain";
+import { GoogleAnalytics } from "@/components/GoogleAnalytics";
 
 // Everything but the homepage is code-split so a visit to any one route
 // (e.g. /admin on a mobile connection) only downloads that route's chunk
@@ -43,6 +44,8 @@ const AdminPromo = lazy(() => import("./pages/admin/Promo"));
 const AdminMessages = lazy(() => import("./pages/admin/Messages"));
 const AdminSettings = lazy(() => import("./pages/admin/Settings"));
 const AdminLegal = lazy(() => import("./pages/admin/Legal"));
+const AdminSeoSettings = lazy(() => import("./pages/admin/SeoSettings"));
+const AdminGlobalSettings = lazy(() => import("./pages/admin/GlobalSettings"));
 const LegalPage = lazy(() => import("./pages/LegalPage"));
 
 const queryClient = new QueryClient();
@@ -72,6 +75,7 @@ const App = () => (
       <Toaster />
       <Sonner />
       <SubmissionSuccessPopup />
+      <GoogleAnalytics />
       <BrowserRouter>
         <ScrollToTop />
         <PromoPopup />
@@ -126,6 +130,12 @@ const App = () => (
           </ProtectedRoute>} />
           <Route path="/admin/services" element={<ProtectedRoute>
             <AdminServicePages />
+          </ProtectedRoute>} />
+          <Route path="/admin/seo" element={<ProtectedRoute>
+            <AdminSeoSettings />
+          </ProtectedRoute>} />
+          <Route path="/admin/global-settings" element={<ProtectedRoute>
+            <AdminGlobalSettings />
           </ProtectedRoute>} />
 
           <Route path="/how-it-works" element={<HowItWorks />} />
