@@ -317,9 +317,9 @@ export const StepTwo = ({ spaces, setSpaces, files, setFiles, additionalNotes, s
 
         <div className="space-y-4 mt-3">
           {spaces.map((space) => (
-            <div key={space.id} className="flex items-center gap-2 sm:gap-3 p-3 sm:p-4 bg-brand-sand/50 rounded-lg border border-brand-border">
-              <Pencil size={16} className="shrink-0 text-brand-copper/70" aria-hidden="true" />
-              <div className="flex-grow min-w-0">
+            <div key={space.id} className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 p-3 sm:p-4 bg-brand-sand/50 rounded-lg border border-brand-border">
+              <div className="flex items-center gap-2 min-w-0 flex-1">
+                <Pencil size={16} className="shrink-0 text-brand-copper/70" aria-hidden="true" />
                 <input
                   type="text"
                   value={space.name}
@@ -330,27 +330,29 @@ export const StepTwo = ({ spaces, setSpaces, files, setFiles, additionalNotes, s
                     }`}
                 />
               </div>
-              <label className="flex-shrink-0 flex items-center gap-1.5">
-                <span className="hidden sm:inline text-xs text-brand-muted">{t("s2.spaceType")}</span>
-                <select
-                  value={space.type}
-                  onChange={(e) => updateSpace(space.id, "type", e.target.value as Space["type"])}
-                  aria-label={t("s2.spaceType")}
-                  className="bg-white border border-brand-border rounded-md pl-2 pr-1 py-2 text-sm text-brand-espresso focus:outline-none focus:ring-2 focus:ring-brand-copper/30 focus:border-brand-copper"
+              <div className="flex items-center justify-between sm:justify-start gap-2 sm:gap-3 flex-shrink-0 pl-6 sm:pl-0">
+                <label className="flex-shrink-0 flex items-center gap-1.5">
+                  <span className="hidden sm:inline text-xs text-brand-muted">{t("s2.spaceType")}</span>
+                  <select
+                    value={space.type}
+                    onChange={(e) => updateSpace(space.id, "type", e.target.value as Space["type"])}
+                    aria-label={t("s2.spaceType")}
+                    className="bg-white border border-brand-border rounded-md pl-2 pr-1 py-2 text-sm text-brand-espresso focus:outline-none focus:ring-2 focus:ring-brand-copper/30 focus:border-brand-copper"
+                  >
+                    <option value="Closet">{t("s2.closet")}</option>
+                    <option value="Kitchen">{t("s2.kitchen")}</option>
+                    <option value="Garage">{t("s2.garage")}</option>
+                  </select>
+                </label>
+                <button
+                  type="button"
+                  onClick={() => removeSpace(space.id)}
+                  aria-label="Remove space"
+                  className="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-md text-red-500 hover:text-red-700 hover:bg-red-100/60 transition-colors"
                 >
-                  <option value="Closet">{t("s2.closet")}</option>
-                  <option value="Kitchen">{t("s2.kitchen")}</option>
-                  <option value="Garage">{t("s2.garage")}</option>
-                </select>
-              </label>
-              <button
-                type="button"
-                onClick={() => removeSpace(space.id)}
-                aria-label="Remove space"
-                className="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-md text-red-500 hover:text-red-700 hover:bg-red-100/60 transition-colors"
-              >
-                <X size={18} />
-              </button>
+                  <X size={18} />
+                </button>
+              </div>
             </div>
           ))}
         </div>
@@ -636,7 +638,7 @@ export const StepTwo = ({ spaces, setSpaces, files, setFiles, additionalNotes, s
           value={additionalNotes}
           onChange={e => setAdditionalNotes(e.target.value)}
           rows={4}
-          className="w-full p-2 border border-brand-border rounded-md focus:ring-brand-copper focus:border-brand-copper"
+          className="w-full p-2 border border-brand-border rounded-md focus:ring-brand-copper focus:border-brand-copper scroll-mb-28"
           placeholder={t("s2.notesPh")}
         />
       </div>

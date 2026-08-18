@@ -25,6 +25,13 @@ declare global {
 
 export const StepThree = ({ formData, spaces, files, additionalNotes, onBack, onComplete }: StepThreeProps) => {
   const { t } = useLanguage();
+
+  const spaceTypeLabel = (type: string) => {
+    if (type === "Closet") return t("s2.closet");
+    if (type === "Kitchen") return t("s2.kitchen");
+    if (type === "Garage") return t("s2.garage");
+    return type;
+  };
   const { contactInfo } = useContactInfo();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [hasSubmitted, setHasSubmitted] = useState(false);
@@ -266,7 +273,7 @@ export const StepThree = ({ formData, spaces, files, additionalNotes, onBack, on
           <h3 className="font-semibold text-brand-espresso">{t("s3.spaces")}</h3>
           {spaces.map(space => (
             <div key={space.id} className="mt-4 space-y-2">
-              <p><strong>{space.name}</strong> ({space.type})</p>
+              <p><strong>{space.name}</strong> ({spaceTypeLabel(space.type)})</p>
               <p>{t("s3.ceiling")} {space.ceilingHeight} {space.unit || 'in'}</p>
               {space.drawingData && <img src={space.drawingData} alt={`Drawing for ${space.name}`} className="w-full h-auto max-h-48 object-contain rounded-md border border-brand-border mt-2"/>}
 

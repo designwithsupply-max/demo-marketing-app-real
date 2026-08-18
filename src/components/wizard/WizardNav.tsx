@@ -15,8 +15,10 @@ interface WizardNavProps {
  */
 export const WizardNav = ({ left, right }: WizardNavProps) => (
   <>
-    {/* Spacer so page content is never hidden behind the fixed bar */}
-    <div aria-hidden className="h-24" />
+    {/* Spacer so page content is never hidden behind the fixed bar. Taller than
+        the bar's own rendered height (~66px) so there's real breathing room,
+        not just an exact match. */}
+    <div aria-hidden className="h-32" />
 
     <div
       className="fixed bottom-0 inset-x-0 z-40 bg-white border-t border-brand-border shadow-[0_-8px_24px_-10px_rgba(45,36,30,0.25)]"

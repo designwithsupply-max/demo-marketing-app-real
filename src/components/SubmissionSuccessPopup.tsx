@@ -6,14 +6,32 @@ import { CheckCircle2, X } from "lucide-react";
  * after the Space Planner is submitted. The wizard sets the `planner_submitted`
  * localStorage flag before redirecting to "/"; this reads and clears it, slides
  * in a toast, and removes itself after ~6s (with a countdown bar).
+ *
+ * This mounts globally (outside the wizard's route), so it can't use the
+ * wizard's LanguageProvider/useLanguage() — it reads the same "wizardLanguage"
+ * localStorage key directly instead, so the toast still matches whichever
+ * language the visitor used in the planner.
  */
 const DURATION_MS = 6000; // visible time before auto-dismiss (5–7s range)
 const SLIDE_MS = 500; // in/out transition duration
+
+const COPY = {
+  en: {
+    title: "Successfully submitted",
+    body: "Your Space Planner is in — our design team will be in touch shortly.",
+  },
+  fr: {
+    title: "Envoi réussi",
+    body: "Votre planificateur d'espace a été reçu — notre équipe de conception vous contactera sous peu.",
+  },
+};
 
 export const SubmissionSuccessPopup = () => {
   const [mounted, setMounted] = useState(false);
   const [visible, setVisible] = useState(false);
   const [barWidth, setBarWidth] = useState("100%");
+  const lang = localStorage.getItem("wizardLanguage") === "fr" ? "fr" : "en";
+  const copy = COPY[lang];
 
   useEffect(() => {
     if (localStorage.getItem("planner_submitted") !== "true") return;
@@ -60,10 +78,10 @@ export const SubmissionSuccessPopup = () => {
               className="text-lg leading-tight text-brand-espresso"
               style={{ fontFamily: "'Cormorant Garamond', Georgia, serif" }}
             >
-              Successfully submitted
+              {copy.title}
             </p>
             <p className="mt-0.5 text-sm text-brand-muted">
-              Your Space Planner is in — our design team will be in touch shortly.
+              {copy.body}
             </p>
           </div>
           <button

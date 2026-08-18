@@ -242,7 +242,7 @@ export const StepOne = ({ formData, setFormData, onNext }: StepOneProps) => {
             type="text"
             value={formData.fullName}
             onChange={(e) => handleInputChange("fullName", e.target.value)}
-            className={`w-full p-3 border rounded-md text-brand-espresso focus:ring-2 focus:ring-brand-copper/30 focus:border-brand-copper outline-none transition-all ${errors.fullName ? "border-red-500" : "border-brand-border"}`}
+            className={`w-full p-3 border rounded-md text-brand-espresso focus:ring-2 focus:ring-brand-copper/30 focus:border-brand-copper outline-none transition-all scroll-mb-28 ${errors.fullName ? "border-red-500" : "border-brand-border"}`}
             placeholder={t("s1.namePh")}
           />
           {errors.fullName && <p className="text-xs text-red-500">{errors.fullName}</p>}
@@ -263,7 +263,7 @@ export const StepOne = ({ formData, setFormData, onNext }: StepOneProps) => {
               type="email"
               value={formData.email}
               onChange={(e) => handleInputChange("email", e.target.value)}
-              className={`w-full p-3 ${isEmailVerified ? "pr-10" : ""} border rounded-md text-brand-espresso focus:ring-2 focus:ring-brand-copper/30 focus:border-brand-copper outline-none transition-all ${
+              className={`w-full p-3 ${isEmailVerified ? "pr-10" : ""} border rounded-md text-brand-espresso focus:ring-2 focus:ring-brand-copper/30 focus:border-brand-copper outline-none transition-all scroll-mb-28 ${
                 errors.email
                   ? "border-red-500"
                   : isEmailVerified
@@ -292,7 +292,7 @@ export const StepOne = ({ formData, setFormData, onNext }: StepOneProps) => {
             type="text"
             value={formData.postalCode}
             onChange={(e) => handleInputChange("postalCode", e.target.value)}
-            className={`w-full p-3 border rounded-md text-brand-espresso focus:ring-2 focus:ring-brand-copper/30 focus:border-brand-copper outline-none transition-all ${errors.postalCode ? "border-red-500" : "border-brand-border"}`}
+            className={`w-full p-3 border rounded-md text-brand-espresso focus:ring-2 focus:ring-brand-copper/30 focus:border-brand-copper outline-none transition-all scroll-mb-28 ${errors.postalCode ? "border-red-500" : "border-brand-border"}`}
             placeholder={t("s1.postalPh")}
             maxLength={6}
           />
@@ -306,7 +306,7 @@ export const StepOne = ({ formData, setFormData, onNext }: StepOneProps) => {
             type="tel"
             value={formData.phone}
             onChange={(e) => handleInputChange("phone", e.target.value)}
-            className={`w-full p-3 border rounded-md text-brand-espresso focus:ring-2 focus:ring-brand-copper/30 focus:border-brand-copper outline-none transition-all ${errors.phone ? "border-red-500" : "border-brand-border"}`}
+            className={`w-full p-3 border rounded-md text-brand-espresso focus:ring-2 focus:ring-brand-copper/30 focus:border-brand-copper outline-none transition-all scroll-mb-28 ${errors.phone ? "border-red-500" : "border-brand-border"}`}
             placeholder={t("s1.phonePh")}
           />
           {errors.phone && <p className="text-xs text-red-500">{errors.phone}</p>}
