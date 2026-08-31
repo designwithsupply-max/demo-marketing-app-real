@@ -15,9 +15,22 @@ const Faq = () => {
   const { content: pageSeo } = useSiteContent(SITE_KEYS.pageSeo, DEFAULT_PAGE_SEO);
   const seo = pageSeo.faq;
 
+  const faqSchema =
+    !isLoading && faqs.length > 0
+      ? {
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          mainEntity: faqs.map((faq) => ({
+            "@type": "Question",
+            name: faq.question,
+            acceptedAnswer: { "@type": "Answer", text: faq.answer },
+          })),
+        }
+      : undefined;
+
   return (
     <div className="min-h-screen bg-brand-cream">
-      <SeoHead title={seo.title} description={seo.description} image={seo.ogImage} noindex={seo.noindex} />
+      <SeoHead title={seo.title} description={seo.description} image={seo.ogImage} noindex={seo.noindex} jsonLd={faqSchema} />
       <Navigation />
       <div className="pt-32 lg:pt-40 pb-10 text-center px-6">
         <span className="text-brand-copper text-xs tracking-[0.3em] uppercase block mb-4">Questions & Answers</span>

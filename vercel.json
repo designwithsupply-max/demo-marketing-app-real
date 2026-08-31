@@ -1,4 +1,17 @@
 {
+  "redirects": [
+    {
+      "source": "/(.*)",
+      "has": [{ "type": "host", "value": "www.designandsupply.ca" }],
+      "destination": "https://designandsupply.ca/$1",
+      "permanent": true
+    },
+    {
+      "source": "/garages",
+      "destination": "/garage-cabinets",
+      "permanent": true
+    }
+  ],
   "rewrites": [
     {
       "source": "/(.*)",

@@ -46,6 +46,8 @@ const AdminSettings = lazy(() => import("./pages/admin/Settings"));
 const AdminLegal = lazy(() => import("./pages/admin/Legal"));
 const AdminSeoSettings = lazy(() => import("./pages/admin/SeoSettings"));
 const AdminGlobalSettings = lazy(() => import("./pages/admin/GlobalSettings"));
+const AdminLocationPages = lazy(() => import("./pages/admin/LocationPages"));
+const LocationPage = lazy(() => import("./pages/LocationPage"));
 const LegalPage = lazy(() => import("./pages/LegalPage"));
 
 const queryClient = new QueryClient();
@@ -137,6 +139,9 @@ const App = () => (
           <Route path="/admin/global-settings" element={<ProtectedRoute>
             <AdminGlobalSettings />
           </ProtectedRoute>} />
+          <Route path="/admin/locations" element={<ProtectedRoute>
+            <AdminLocationPages />
+          </ProtectedRoute>} />
 
           <Route path="/how-it-works" element={<HowItWorks />} />
           <Route path="/terms" element={<LegalPage kind="terms" />} />
@@ -155,6 +160,12 @@ const App = () => (
           <Route path="/gallery/:id" element={<GalleryDetailPage />} />
           <Route path="/blog" element={<Blog />} />
           <Route path="/blog/:slug" element={<BlogPost />} />
+          {/* Local SEO pages (e.g. /laval, /west-island) — content comes from
+              location_pages (edit at /admin/locations), so a new city page
+              doesn't need a route added here. Placed last among named routes
+              so it never shadows a more specific path above it; LocationPage
+              itself renders NotFound for any slug that doesn't match. */}
+          <Route path="/:locationSlug" element={<LocationPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
         </Suspense>

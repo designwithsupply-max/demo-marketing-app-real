@@ -13,6 +13,12 @@ interface SeoHeadProps {
 }
 
 const SITE_NAME = "Design & Supply";
+// Canonical/OG URLs always point at the real production host, regardless of
+// which host actually served the page (www vs non-www, a Vercel preview
+// deployment, etc.) — a canonical tag should never self-reference a
+// non-canonical or non-public domain. Vercel also 301s www -> this host
+// (see vercel.json), so this is defense-in-depth, not the only fix.
+const CANONICAL_ORIGIN = "https://designandsupply.ca";
 
 function upsertMeta(attr: "name" | "property", key: string, content: string) {
   let el = document.head.querySelector<HTMLMetaElement>(`meta[${attr}="${key}"]`);
@@ -36,13 +42,12 @@ function upsertLink(rel: string, href: string) {
 
 export function SeoHead({ title, description, jsonLd, path, image, noindex }: SeoHeadProps) {
   useEffect(() => {
-    const origin = window.location.origin;
-    const url = origin + (path ?? window.location.pathname);
+    const url = CANONICAL_ORIGIN + (path ?? window.location.pathname);
     const img = image
       ? image.startsWith("http")
         ? image
-        : origin + image
-      : origin + "/og-image.jpg";
+        : CANONICAL_ORIGIN + image
+      : CANONICAL_ORIGIN + "/og-image.jpg";
 
     document.title = title;
     upsertMeta("name", "description", description);

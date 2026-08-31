@@ -25,6 +25,7 @@ import {
     LayoutGrid,
     Search,
     Settings2,
+    MapPin,
 } from "lucide-react";
 import Logo from "@/components/layout/Logo";
 
@@ -38,6 +39,7 @@ const navLinks = [
     { to: "/admin/settings", label: "Settings", icon: SlidersHorizontal },
     { to: "/admin/content", label: "Homepage", icon: Home },
     { to: "/admin/services", label: "Service Pages", icon: LayoutGrid },
+    { to: "/admin/locations", label: "Location Pages", icon: MapPin },
     { to: "/admin/faqs", label: "FAQs", icon: HelpCircle },
     { to: "/admin/how-it-works", label: "How It Works", icon: ListChecks },
     { to: "/admin/about-us", label: "About Us", icon: Info },

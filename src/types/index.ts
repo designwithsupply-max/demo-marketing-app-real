@@ -87,6 +87,7 @@ export interface FAQ {
   order_index: number;
   is_active: boolean;
   service_page_id?: string | null;
+  location_page_id?: string | null;
   language?: string;
   created_at: string;
   updated_at: string;
@@ -99,6 +100,7 @@ export interface FAQInsert {
   order_index?: number;
   is_active?: boolean;
   service_page_id?: string | null;
+  location_page_id?: string | null;
 }
 
 export interface FAQUpdate {

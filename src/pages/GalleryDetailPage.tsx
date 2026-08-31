@@ -4,6 +4,7 @@ import { Loader2 } from "lucide-react";
 import GalleryAlbumViewer from "@/components/sections/GalleryAlbumViewer";
 import { Navigation } from "@/components/Navigation";
 import Footer from "@/components/layout/Footer";
+import { SeoHead } from "@/components/seo/SeoHead";
 import { imageService, type GalleryViewItem } from "@/lib/imageService";
 
 export default function GalleryDetailPage() {
@@ -49,8 +50,19 @@ export default function GalleryDetailPage() {
   // GalleryViewItem is compatible with it (same shape)
   const relatedItems: GalleryViewItem[] = [];
 
+  const seoTitle = `${item.title} — ${item.category} Project${item.city ? ` in ${item.city}` : ""} | Design & Supply`;
+  const seoDescription =
+    item.description ||
+    `${item.title}: a custom ${item.category.toLowerCase()} project${item.city ? ` in ${item.city}` : ""} by Design & Supply. See photos and details from this real installation.`;
+
   return (
     <div className="min-h-screen flex flex-col justify-between">
+      <SeoHead
+        title={seoTitle}
+        description={seoDescription}
+        image={item.thumbnail}
+        path={`/gallery/${item.slug}`}
+      />
       <Navigation />
       <div className="flex-1">
         <GalleryAlbumViewer

@@ -45,8 +45,8 @@ export default function HeroSection() {
             <span className="text-brand-copper-light text-xs tracking-[0.3em] uppercase">{c.eyebrow}</span>
           </div>
 
-          {/* Headline */}
-          <h2
+          {/* Headline — this is the homepage's H1 */}
+          <h1
             className={`text-white font-light leading-[1.05] mb-8 transition-all duration-700 ${loaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
             style={{
               fontFamily: "'Cormorant Garamond', Georgia, serif",
@@ -57,7 +57,7 @@ export default function HeroSection() {
             {c.headingLine1}<br />
             <em className="text-brand-copper-light not-italic">{c.headingEmphasis}</em><br />
             {c.headingLine3}
-          </h2>
+          </h1>
 
           {/* Subheadline */}
           <p

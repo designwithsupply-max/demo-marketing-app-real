@@ -39,23 +39,26 @@ import { Loader2, Plus, Trash2, ChevronUp, ChevronDown, Edit2, X, Check, Search 
 import type { Session } from "@supabase/supabase-js";
 import type { FAQ } from "@/types";
 import { servicePagesService, type ServicePage } from "@/lib/servicePagesService";
+import { locationPagesService, type LocationPage } from "@/lib/locationPagesService";
 
 const NO_SERVICE_PAGE = "none";
+const NO_LOCATION_PAGE = "none";
 
 const AdminFaqs = () => {
   const navigate = useNavigate();
   const [faqs, setFaqs] = useState<FAQ[]>([]);
   const [servicePages, setServicePages] = useState<ServicePage[]>([]);
+  const [locationPages, setLocationPages] = useState<LocationPage[]>([]);
   const [loading, setLoading] = useState(true);
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [searchTerm, setSearchTerm] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [editData, setEditData] = useState<{ question: string; answer: string; category: string; service_page_id: string }>({ question: "", answer: "", category: "", service_page_id: NO_SERVICE_PAGE });
+  const [editData, setEditData] = useState<{ question: string; answer: string; category: string; service_page_id: string; location_page_id: string }>({ question: "", answer: "", category: "", service_page_id: NO_SERVICE_PAGE, location_page_id: NO_LOCATION_PAGE });
   const [session, setSession] = useState<Session | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [checkingAuth, setCheckingAuth] = useState(true);
   const [addDialogOpen, setAddDialogOpen] = useState(false);
-  const [addFormData, setAddFormData] = useState({ question: "", answer: "", category: "", is_active: true, service_page_id: NO_SERVICE_PAGE });
+  const [addFormData, setAddFormData] = useState({ question: "", answer: "", category: "", is_active: true, service_page_id: NO_SERVICE_PAGE, location_page_id: NO_LOCATION_PAGE });
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -113,6 +116,7 @@ const AdminFaqs = () => {
     if (isAdmin && session) {
       fetchFaqs();
       servicePagesService.fetchAll().then(setServicePages).catch(() => {});
+      locationPagesService.fetchAll().then(setLocationPages).catch(() => {});
     }
   }, [isAdmin, session]);
 
@@ -141,12 +145,12 @@ const AdminFaqs = () => {
 
   const startEdit = (faq: FAQ) => {
     setEditingId(faq.id);
-    setEditData({ question: faq.question, answer: faq.answer, category: faq.category, service_page_id: faq.service_page_id ?? NO_SERVICE_PAGE });
+    setEditData({ question: faq.question, answer: faq.answer, category: faq.category, service_page_id: faq.service_page_id ?? NO_SERVICE_PAGE, location_page_id: faq.location_page_id ?? NO_LOCATION_PAGE });
   };
 
   const cancelEdit = () => {
     setEditingId(null);
-    setEditData({ question: "", answer: "", category: "", service_page_id: NO_SERVICE_PAGE });
+    setEditData({ question: "", answer: "", category: "", service_page_id: NO_SERVICE_PAGE, location_page_id: NO_LOCATION_PAGE });
   };
 
   const saveEdit = async (id: string) => {
@@ -158,6 +162,7 @@ const AdminFaqs = () => {
           answer: editData.answer,
           category: editData.category,
           service_page_id: editData.service_page_id === NO_SERVICE_PAGE ? null : editData.service_page_id,
+          location_page_id: editData.location_page_id === NO_LOCATION_PAGE ? null : editData.location_page_id,
           updated_at: new Date().toISOString(),
         } as any)
         .eq("id", id);
@@ -190,12 +195,13 @@ const AdminFaqs = () => {
           order_index: nextIndex,
           is_active: addFormData.is_active,
           service_page_id: addFormData.service_page_id === NO_SERVICE_PAGE ? null : addFormData.service_page_id,
+          location_page_id: addFormData.location_page_id === NO_LOCATION_PAGE ? null : addFormData.location_page_id,
         } as any);
 
       if (error) throw error;
       toast.success("FAQ added");
       setAddDialogOpen(false);
-      setAddFormData({ question: "", answer: "", category: "", is_active: true, service_page_id: NO_SERVICE_PAGE });
+      setAddFormData({ question: "", answer: "", category: "", is_active: true, service_page_id: NO_SERVICE_PAGE, location_page_id: NO_LOCATION_PAGE });
       fetchFaqs();
     } catch (error) {
       console.error("Error adding FAQ:", error);
@@ -204,7 +210,7 @@ const AdminFaqs = () => {
   };
 
   const openAddDialog = () => {
-    setAddFormData({ question: "", answer: "", category: "", is_active: true, service_page_id: NO_SERVICE_PAGE });
+    setAddFormData({ question: "", answer: "", category: "", is_active: true, service_page_id: NO_SERVICE_PAGE, location_page_id: NO_LOCATION_PAGE });
     setAddDialogOpen(true);
   };
 
@@ -260,6 +266,7 @@ const AdminFaqs = () => {
     });
 
   const servicePageLabel = (id?: string | null) => servicePages.find((p) => p.id === id)?.nav_label;
+  const locationPageLabel = (id?: string | null) => locationPages.find((p) => p.id === id)?.city_name;
 
   if (checkingAuth || !session) {
     return (
@@ -367,6 +374,18 @@ const AdminFaqs = () => {
                       </SelectContent>
                     </Select>
                   </div>
+                  <div>
+                    <Label className="text-brand-espresso">Show on location page (optional)</Label>
+                    <Select value={addFormData.location_page_id} onValueChange={(v) => setAddFormData({ ...addFormData, location_page_id: v })}>
+                      <SelectTrigger className="border-brand-border"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value={NO_LOCATION_PAGE}>Not tied to a location page</SelectItem>
+                        {locationPages.map((p) => (
+                          <SelectItem key={p.id} value={p.id}>{p.city_name}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                   <div className="flex items-center gap-2">
                     <Switch
                       checked={addFormData.is_active}
@@ -444,6 +463,15 @@ const AdminFaqs = () => {
                           ))}
                         </SelectContent>
                       </Select>
+                      <Select value={editData.location_page_id} onValueChange={(v) => setEditData({ ...editData, location_page_id: v })}>
+                        <SelectTrigger className="w-[240px] border-brand-border"><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value={NO_LOCATION_PAGE}>Not tied to a location page</SelectItem>
+                          {locationPages.map((p) => (
+                            <SelectItem key={p.id} value={p.id}>{p.city_name}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
                     <div className="flex gap-2">
                       <Button
@@ -478,6 +506,11 @@ const AdminFaqs = () => {
                           {servicePageLabel(faq.service_page_id) && (
                             <Badge variant="outline" className="text-brand-copper border-brand-copper/30 bg-brand-copper/10 text-[10px]">
                               {servicePageLabel(faq.service_page_id)}
+                            </Badge>
+                          )}
+                          {locationPageLabel(faq.location_page_id) && (
+                            <Badge variant="outline" className="text-brand-copper border-brand-copper/30 bg-brand-copper/10 text-[10px]">
+                              {locationPageLabel(faq.location_page_id)}
                             </Badge>
                           )}
                           <span className="text-[10px] text-brand-muted">Order: {faq.order_index}</span>

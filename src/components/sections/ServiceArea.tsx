@@ -1,11 +1,24 @@
+import { useEffect, useState } from "react";
+import Link from "next/link";
 import SectionWrapper from "@/components/ui/SectionWrapper";
 import { MapPin } from "lucide-react";
 import { useSiteContent } from "@/hooks/useSiteContent";
 import { SITE_KEYS, DEFAULT_GLOBAL_SETTINGS } from "@/lib/siteContent";
+import { locationPagesService, type LocationPage } from "@/lib/locationPagesService";
 
 export default function ServiceArea() {
   const { content: settings } = useSiteContent(SITE_KEYS.globalSettings, DEFAULT_GLOBAL_SETTINGS);
   const areas = settings.serviceAreas;
+  const [locationPages, setLocationPages] = useState<LocationPage[]>([]);
+
+  useEffect(() => {
+    locationPagesService.fetchActive().then(setLocationPages).catch(() => {});
+  }, []);
+
+  // Link a badge to its dedicated local SEO page when one exists for that
+  // area name — badges for areas without a page yet stay plain text.
+  const pageFor = (area: string) =>
+    locationPages.find((p) => p.city_name.toLowerCase() === area.toLowerCase());
 
   return (
     <SectionWrapper className="bg-white py-24 lg:py-32">
@@ -22,15 +35,25 @@ export default function ServiceArea() {
         </p>
 
         <div className="flex flex-wrap items-center justify-center gap-3 mb-4">
-          {areas.map((area) => (
-            <span
-              key={area}
-              className="inline-flex items-center gap-2 rounded-full border border-brand-border bg-brand-cream px-5 py-2.5 text-sm text-brand-espresso"
-            >
-              <MapPin size={14} className="text-brand-copper flex-shrink-0" />
-              {area}
-            </span>
-          ))}
+          {areas.map((area) => {
+            const page = pageFor(area);
+            const className = "inline-flex items-center gap-2 rounded-full border border-brand-border bg-brand-cream px-5 py-2.5 text-sm text-brand-espresso transition-colors";
+            const inner = (
+              <>
+                <MapPin size={14} className="text-brand-copper flex-shrink-0" />
+                {area}
+              </>
+            );
+            return page ? (
+              <Link key={area} href={`/${page.slug}`} className={`${className} hover:border-brand-copper hover:text-brand-copper`}>
+                {inner}
+              </Link>
+            ) : (
+              <span key={area} className={className}>
+                {inner}
+              </span>
+            );
+          })}
           <span className="inline-flex items-center gap-2 rounded-full border border-brand-copper/40 bg-brand-espresso px-5 py-2.5 text-sm text-white">
             <MapPin size={14} className="text-brand-copper-light flex-shrink-0" />
             ~100 km around Montréal

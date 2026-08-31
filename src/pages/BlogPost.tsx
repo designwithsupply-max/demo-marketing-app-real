@@ -32,11 +32,29 @@ const BlogPost = () => {
       .finally(() => setLoading(false));
   }, [slug]);
 
+  const articleSchema = post
+    ? {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        headline: post.title,
+        description: post.seo_description || post.excerpt || undefined,
+        image: post.cover_image_url || undefined,
+        author: { "@type": "Organization", name: post.author || "Design & Supply" },
+        publisher: { "@type": "Organization", name: "Design & Supply" },
+        datePublished: post.published_at || undefined,
+        dateModified: post.updated_at || post.published_at || undefined,
+        mainEntityOfPage: `https://designandsupply.ca/blog/${post.slug}`,
+      }
+    : undefined;
+
   return (
     <>
       <SeoHead
         title={post ? (post.seo_title || `${post.title} — Design & Supply`) : "Blog — Design & Supply"}
         description={(post?.seo_description || post?.excerpt) ?? undefined}
+        image={post?.cover_image_url ?? undefined}
+        path={post ? `/blog/${post.slug}` : undefined}
+        jsonLd={articleSchema}
       />
       <Navigation />
       <main className="min-h-screen bg-brand-cream">
